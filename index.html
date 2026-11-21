@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="description" content="Ein Übungsspiel zum Erkennen von Noten im Violinschlüssel.">
+  <meta name="theme-color" content="#fff7ea">
+  <title>Welche Note ist das?</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <main id="app">
+
+    <!-- Startseite -->
+    <section id="ansicht-start" class="ansicht ansicht-start" aria-labelledby="titel-start">
+      <div class="start-tier" id="start-tier"></div>
+      <h1 id="titel-start" class="spieltitel" tabindex="-1">Welche Note ist das?</h1>
+      <button type="button" class="knopf knopf-haupt knopf-start" id="knopf-start">Start</button>
+      <div class="start-menue">
+        <button type="button" class="knopf knopf-neben" id="knopf-tiere">
+          <span aria-hidden="true">🐾</span> Meine Tiere
+        </button>
+        <button type="button" class="knopf knopf-neben" id="knopf-rekorde">
+          <span aria-hidden="true">🏆</span> Meine Rekorde
+        </button>
+      </div>
+      <p class="hinweis-speicher" id="hinweis-speicher" hidden>
+        Dieser Browser kann den Spielstand nicht speichern. Du kannst trotzdem spielen.
+      </p>
+    </section>
+
+    <!-- Spielrunde -->
+    <section id="ansicht-runde" class="ansicht ansicht-runde" aria-labelledby="titel-runde" hidden>
+      <header class="runde-kopf">
+        <button type="button" class="knopf knopf-klein" id="knopf-runde-zurueck" aria-label="Zurück zur Startseite">
+          <span aria-hidden="true">←</span><span class="knopf-text"> Startseite</span>
+        </button>
+        <div class="runde-status">
+          <span class="sterne-anzeige" id="sterne-anzeige" role="img" aria-label="3 von 3 Sternen"></span>
+          <span class="punkte-anzeige" id="punkte-anzeige">0 Punkte</span>
+        </div>
+      </header>
+
+      <div class="runde-inhalt">
+        <div class="runde-noten">
+          <p class="aufgabe-nr" id="aufgabe-nr">Aufgabe 1 von 10</p>
+          <h1 id="titel-runde" class="frage" tabindex="-1">Welche Note ist das?</h1>
+          <div class="notensystem" id="notensystem"></div>
+        </div>
+
+        <div class="runde-antworten">
+          <div class="tier-zeile">
+            <div class="tier-klein" id="runde-tier"></div>
+            <div class="sprechblase" id="sprechblase">
+              <p id="sprechblase-text" aria-live="polite"></p>
+              <button type="button" class="knopf knopf-haupt knopf-weiter" id="knopf-weiter" hidden>Weiter</button>
+            </div>
+          </div>
+          <div class="antworten" id="antworten" role="group" aria-label="Antworten"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Ergebnis -->
+    <section id="ansicht-ergebnis" class="ansicht ansicht-ergebnis" aria-labelledby="titel-ergebnis" hidden>
+      <h1 id="titel-ergebnis" class="titel" tabindex="-1">Geschafft!</h1>
+      <div class="tier-zeile tier-zeile-gross">
+        <div class="tier-mittel" id="ergebnis-tier"></div>
+        <div class="sprechblase"><p id="ergebnis-spruch"></p></div>
+      </div>
+      <dl class="ergebnis-liste">
+        <div><dt>Richtige Antworten</dt><dd id="ergebnis-richtige"></dd></div>
+        <div><dt>Punkte dafür</dt><dd id="ergebnis-punkte"></dd></div>
+        <div><dt>Bonus</dt><dd id="ergebnis-bonus"></dd></div>
+        <div class="ergebnis-gesamt"><dt>Gesamtpunktzahl</dt><dd id="ergebnis-gesamt"></dd></div>
+        <div><dt>Neue Sterne</dt><dd id="ergebnis-sterne"></dd></div>
+      </dl>
+      <div class="neues-tier" id="neues-tier" hidden></div>
+      <div class="knopf-reihe">
+        <button type="button" class="knopf knopf-haupt" id="knopf-nochmal">Noch eine Runde</button>
+        <button type="button" class="knopf knopf-neben" id="knopf-ergebnis-start">Zur Startseite</button>
+      </div>
+    </section>
+
+    <!-- Meine Tiere -->
+    <section id="ansicht-tiere" class="ansicht ansicht-tiere" aria-labelledby="titel-tiere" hidden>
+      <header class="seiten-kopf">
+        <button type="button" class="knopf knopf-klein knopf-zurueck" aria-label="Zurück zur Startseite">
+          <span aria-hidden="true">←</span> Zurück
+        </button>
+        <h1 id="titel-tiere" class="titel" tabindex="-1">Meine Tiere</h1>
+      </header>
+      <p class="sterne-gesamt" id="tiere-sterne"></p>
+      <p class="naechstes-tier" id="tiere-naechstes"></p>
+      <ul class="tier-liste" id="tier-liste"></ul>
+    </section>
+
+    <!-- Meine Rekorde -->
+    <section id="ansicht-rekorde" class="ansicht ansicht-rekorde" aria-labelledby="titel-rekorde" hidden>
+      <header class="seiten-kopf">
+        <button type="button" class="knopf knopf-klein knopf-zurueck" aria-label="Zurück zur Startseite">
+          <span aria-hidden="true">←</span> Zurück
+        </button>
+        <h1 id="titel-rekorde" class="titel" tabindex="-1">Meine Rekorde</h1>
+      </header>
+      <ol class="rekord-liste" id="rekord-liste"></ol>
+      <p class="leer-hinweis" id="rekorde-leer" hidden>Noch keine Rekorde. Spiel eine Runde, dann steht dein Ergebnis hier.</p>
+    </section>
+
+  </main>
+
+  <script src="js/noten-konfiguration.js"></script>
+  <script src="js/spiel-logik.js"></script>
+  <script src="js/notensystem.js"></script>
+  <script src="js/tiere.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
