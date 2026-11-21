@@ -21,7 +21,7 @@
   function starte(u) {
     stoppe();
     umgebung = u;
-    runde = L.neueRunde(u.noten, { vorrang: u.schwierig });
+    runde = L.neueRunde(u.noten, { vorrang: u.schwierig, aufgaben: u.aufgaben });
     letzterAntwortKnopf = -1;
     knoepfe = H.antwortKnoepfe($("antworten"), u.antworten, beantworte);
     u.zeigeTier($("runde-tier"), "normal");
@@ -40,7 +40,7 @@
   }
 
   function zeigeStatus() {
-    $("aufgabe-nr").textContent = "Aufgabe " + (runde.aufgabe + 1) + " von " + L.REGELN.aufgabenProRunde;
+    $("aufgabe-nr").textContent = "Aufgabe " + (runde.aufgabe + 1) + " von " + runde.anzahl;
     H.zeigeSterne($("sterne-anzeige"), $("punkte-anzeige"), runde.sterne, L.REGELN.startSterne, runde.punkte);
   }
 
@@ -145,6 +145,7 @@
     symbol: "🎵",
     hauptspiel: true,
     ansicht: "runde",
+    reise: true,
     starte: starte,
     stoppe: stoppe
   });

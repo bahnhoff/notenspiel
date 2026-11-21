@@ -11,7 +11,11 @@
  *     hauptspiel: false,      // true nur beim klassischen Spiel (großer Start-Knopf)
  *     ansicht: "notenflug",   // zeigt <section id="ansicht-notenflug" class="ansicht"> in index.html
  *     starte: function (umgebung) { … },  // neue Runde beginnen
- *     stoppe: function () { … }           // optional: Runde verwerfen (Timer, Animation)
+ *     stoppe: function () { … },          // optional: Runde verwerfen (Timer, Animation, Ton)
+ *     reise: true,            // optional: taugt als Etappe der Täglichen Notenreise,
+ *                             // beachtet dann umgebung.aufgaben
+ *     kachelInfo: function (status) { … } // optional: kurzer Text unter dem Namen
+ *                             // auf der Startseite; status = { tagesreise }
  *   });
  *
  * Die Datei wird in index.html vor js/app.js eingebunden. Die App zeigt den
@@ -24,7 +28,13 @@
  *   bereich        [tiefste, höchste Position] für Notensystem.zeichne(…, { bereich })
  *   einstellungen  { schluessel, bereich, merktiere }
  *   schwierig      Notenkennungen, die zuletzt Mühe gemacht haben
- *   zeigeAnsicht()            blendet die Ansicht des Modus ein
+ *   aufgaben       optional: Zahl der Aufgaben, zum Beispiel 5 in der Notenreise.
+ *                  Fehlt sie, gilt die normale Rundenlänge (10). Modi mit
+ *                  `reise: true` geben sie an SpielLogik.neueRunde weiter.
+ *   tagesreise     { heute, serie }: Notenreise heute schon geschafft?
+ *                  Tage in Folge (siehe SpielLogik.tagesreiseStatus)
+ *   zeigeAnsicht(name)        blendet die Ansicht des Modus ein, mit `name`
+ *                             eine andere Ansicht (für die Notenreise)
  *   zeigeTier(el, stimmung)   zeichnet das gewählte Begleittier ("normal", "froh", "oje")
  *   merkhilfe(note)           { tier, name, text } oder null, wenn Merktiere aus sind
  *   laeuft()                  false, sobald die Runde verworfen oder beendet ist
@@ -42,6 +52,13 @@
  *   stimmung      "froh" oder "normal"
  *   zeilen        [[Bezeichnung, Wert], …] Details vor der Gesamtpunktzahl
  *   schwierig     optional { gefragt: [Kennungen], neu: [Kennungen] }
+ *   tagesreise    optional true: Die Tägliche Notenreise ist geschafft. Die App
+ *                 vergibt dann den Extrastern (höchstens einmal pro Kalendertag)
+ *                 und zählt die Tagesserie weiter.
+ *
+ * `klassischesEnde` (unten) liefert zusätzlich `geschafft` (Runde ohne dritten
+ * Fehler beendet), `richtige` und `aufgaben`. Die Notenreise wertet damit
+ * ihre Etappen aus; die App ignoriert diese Felder.
  *
  * Zurück-Knöpfe mit der Klasse `knopf-zurueck` führen zur Startseite. Die App
  * ruft dabei `stoppe()` auf und verwirft die Runde ohne Ergebnis.
@@ -144,7 +161,7 @@
   }
 
   /**
-   * Schließt eine Runde mit 10 Aufgaben nach den klassischen Regeln ab
+   * Schließt eine Runde (10 Aufgaben oder umgebung.aufgaben) nach den klassischen Regeln ab
    * (js/spiel-logik.js) und übergibt das Ergebnis an die App.
    */
   function klassischesEnde(umgebung, runde) {
@@ -152,7 +169,7 @@
     var e = L.klassischesErgebnis(runde);
     var spruch;
     if (e.vorzeitig) spruch = "Versuchen wir’s noch mal?";
-    else if (e.richtige === L.REGELN.aufgabenProRunde) spruch = "Alles richtig. Du bist ein Notenprofi!";
+    else if (e.richtige === e.aufgaben) spruch = "Alles richtig. Du bist ein Notenprofi!";
     else spruch = "Toll gemacht!";
     umgebung.beende({
       gesamt: e.gesamt,
@@ -161,11 +178,14 @@
       spruch: spruch,
       stimmung: e.vorzeitig ? "normal" : "froh",
       zeilen: [
-        ["Richtige Antworten", e.richtige + " von " + L.REGELN.aufgabenProRunde],
+        ["Richtige Antworten", e.richtige + " von " + e.aufgaben],
         ["Punkte dafür", String(e.punkte)],
         ["Bonus", e.bonus + (e.bonus > 0 ? " (" + sterneText(e.verbleibendeSterne) + " × " + L.REGELN.bonusProStern + ")" : "")]
       ],
-      schwierig: e.schwierig
+      schwierig: e.schwierig,
+      geschafft: !e.vorzeitig,
+      richtige: e.richtige,
+      aufgaben: e.aufgaben
     });
   }
 

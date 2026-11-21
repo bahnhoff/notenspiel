@@ -146,3 +146,29 @@ test("Noten-Memory: Sterne nach Zügen und Punkte", () => {
   assert.deepEqual([6, 9, 10, 13, 14].map((z) => L.memorySterne(z)), [3, 3, 2, 2, 1]);
   assert.equal(L.memoryPunkte(6, 3), 90);
 });
+
+test("Notenreise: Extrastern höchstens einmal pro Kalendertag", () => {
+  const morgens = new Date(2026, 10, 21, 8).getTime();
+  const abends = new Date(2026, 10, 21, 19).getTime();
+  const erste = L.verbucheErgebnis(L.leererSpielstand(), "notenreise", { gesamt: 200, neueSterne: 3, tagesreise: true }, morgens);
+  assert.deepEqual(erste.tagesreise, { extrastern: true, serie: 1 });
+  assert.equal(erste.stand.sterne, 4);
+  const zweite = L.verbucheErgebnis(erste.stand, "notenreise", { gesamt: 200, neueSterne: 3, tagesreise: true }, abends);
+  assert.deepEqual(zweite.tagesreise, { extrastern: false, serie: 1 });
+  assert.equal(zweite.stand.sterne, 7);
+});
+
+test("Notenreise: Tagesserie zählt aufeinanderfolgende Tage, auch über den Monatswechsel", () => {
+  let stand = L.leererSpielstand();
+  const reise = (j, m, t) => {
+    const v = L.verbucheErgebnis(stand, "notenreise", { gesamt: 0, neueSterne: 0, tagesreise: true }, new Date(j, m, t, 12).getTime());
+    stand = v.stand;
+    return v.tagesreise.serie;
+  };
+  assert.equal(reise(2026, 10, 29), 1);
+  assert.equal(reise(2026, 10, 30), 2);
+  assert.equal(reise(2026, 11, 1), 3);
+  assert.deepEqual(L.tagesreiseStatus(stand, new Date(2026, 11, 2, 9).getTime()), { heute: false, serie: 3 });
+  assert.equal(reise(2026, 11, 3), 1); // ein Tag Pause: Serie beginnt neu
+  assert.equal(L.bereinigeSpielstand(JSON.parse(JSON.stringify(stand))).reise.serie, 1);
+});

@@ -125,6 +125,7 @@
     var a = auswahl();
     $("knopf-start").disabled = a.noten.length === 0;
     $("start-auswahl").textContent = a.noten.length ? auswahlText() : "Der gewählte Bereich enthält keine Noten. Prüfe js/noten-konfiguration.js.";
+    aktualisiereKacheln();
     zeigeAnsicht("start");
   }
 
@@ -145,7 +146,8 @@
       bereich: a.bereich,
       einstellungen: JSON.parse(JSON.stringify(stand.einstellungen)),
       schwierig: stand.schwierig.slice(),
-      zeigeAnsicht: function () { zeigeAnsicht(modus.ansicht || modus.id); },
+      tagesreise: L.tagesreiseStatus(stand, Date.now()),
+      zeigeAnsicht: function (name) { zeigeAnsicht(name || modus.ansicht || modus.id); },
       zeigeTier: zeigeTier,
       merkhilfe: merkhilfe,
       laeuft: function () { return laufendeNr === nr; },
@@ -190,9 +192,14 @@
       liste.appendChild(div);
     }
     (e.zeilen || []).forEach(function (z) { zeile(z[0], String(z[1])); });
+    var reise = v.tagesreise;
+    if (reise) {
+      zeile("Extrastern für heute", reise.extrastern ? "★ 1" : "Heute schon bekommen");
+      zeile("Tagesserie", reise.serie === 1 ? "1 Tag" : reise.serie + " Tage in Folge");
+    }
     zeile("Gesamtpunktzahl", (e.gesamt || 0) + " Punkte", "ergebnis-gesamt");
     var sterne = element("span");
-    var anzahl = e.neueSterne || 0;
+    var anzahl = (e.neueSterne || 0) + (reise && reise.extrastern ? 1 : 0);
     if (anzahl > 0) sterne.innerHTML = '<span class="sterne-reihe" aria-hidden="true">' + H.sternSymbole(anzahl, anzahl) + "</span> ";
     sterne.appendChild(document.createTextNode(String(anzahl)));
     zeile("Neue Sterne", sterne);
@@ -417,11 +424,25 @@
       b.dataset.modus = modus.id;
       if (modus.symbol) b.appendChild(element("span", "modus-symbol", modus.symbol)).setAttribute("aria-hidden", "true");
       b.appendChild(element("span", "modus-name", modus.name));
+      if (modus.kachelInfo) {
+        b.classList.add("knopf-modus-info");
+        b.appendChild(element("span", "modus-info"));
+      }
       b.addEventListener("click", function () { starteModus(modus); });
       box.appendChild(b);
     });
     box.hidden = box.children.length === 0;
     $("titel-modi").hidden = box.hidden;
+  }
+
+  /** Kurze Zusatztexte auf den Kacheln, zum Beispiel „Heute geschafft ✓“. */
+  function aktualisiereKacheln() {
+    var status = { tagesreise: L.tagesreiseStatus(stand, Date.now()) };
+    window.Modi.liste().forEach(function (modus) {
+      if (!modus.kachelInfo) return;
+      var info = document.querySelector('#start-modi [data-modus="' + modus.id + '"] .modus-info');
+      if (info) info.textContent = modus.kachelInfo(status) || "";
+    });
   }
 
   var hauptspiel = window.Modi.liste().filter(function (m) { return m.hauptspiel; })[0] || window.Modi.liste()[0];

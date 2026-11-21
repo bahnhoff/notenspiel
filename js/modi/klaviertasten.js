@@ -31,7 +31,7 @@
   function starte(u) {
     stoppe();
     umgebung = u;
-    runde = L.neueRunde(u.noten, { vorrang: u.schwierig });
+    runde = L.neueRunde(u.noten, { vorrang: u.schwierig, aufgaben: u.aufgaben });
     letzteTaste = -1;
     baueTasten(u.antworten);
     u.zeigeTier($("klavier-tier"), "normal");
@@ -118,7 +118,7 @@
   /* ---------- Ablauf ---------- */
 
   function zeigeStatus() {
-    $("klavier-aufgabe").textContent = "Aufgabe " + (runde.aufgabe + 1) + " von " + L.REGELN.aufgabenProRunde;
+    $("klavier-aufgabe").textContent = "Aufgabe " + (runde.aufgabe + 1) + " von " + runde.anzahl;
     H.zeigeSterne($("klavier-sterne"), $("klavier-punkte"), runde.sterne, L.REGELN.startSterne, runde.punkte);
   }
 
@@ -215,6 +215,7 @@
     name: "Klaviertasten",
     symbol: "🎹",
     ansicht: "klavier",
+    reise: true,
     starte: starte,
     stoppe: stoppe
   });

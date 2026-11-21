@@ -32,7 +32,7 @@
   function starte(u) {
     stoppe();
     umgebung = u;
-    runde = L.neueRunde(u.noten, { vorrang: u.schwierig });
+    runde = L.neueRunde(u.noten, { vorrang: u.schwierig, aufgaben: u.aufgaben });
     // Etwas Platz über und unter dem Bereich, damit auch falsche Stellen antippbar sind.
     erlaubt = [Math.min(u.bereich[0], 0) - 2, Math.max(u.bereich[1], 8) + 2];
     u.zeigeTier($("setzen-tier"), "normal");
@@ -60,7 +60,7 @@
   }
 
   function zeigeStatus() {
-    $("setzen-aufgabe").textContent = "Aufgabe " + (runde.aufgabe + 1) + " von " + L.REGELN.aufgabenProRunde;
+    $("setzen-aufgabe").textContent = "Aufgabe " + (runde.aufgabe + 1) + " von " + runde.anzahl;
     H.zeigeSterne($("setzen-sterne"), $("setzen-punkte"), runde.sterne, L.REGELN.startSterne, runde.punkte);
   }
 
@@ -179,6 +179,7 @@
     name: "Note setzen",
     symbol: "✏️",
     ansicht: "setzen",
+    reise: true,
     starte: starte,
     stoppe: stoppe
   });

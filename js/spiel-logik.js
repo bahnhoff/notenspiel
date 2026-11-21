@@ -59,6 +59,13 @@
 
   /* ---------- Runde ---------- */
 
+  /**
+   * Neue Runde nach den klassischen Regeln. `optionen`:
+   *   vorrang  Notenkennungen, die früh drankommen sollen
+   *   aufgaben Zahl der Aufgaben (Standard REGELN.aufgabenProRunde),
+   *            zum Beispiel 5 für eine Etappe der Notenreise
+   *   zufall   Zufallsquelle für Tests
+   */
   function neueRunde(noten, optionen) {
     optionen = optionen || {};
     if (!noten || noten.length === 0) throw new Error("Der gewählte Bereich enthält keine Noten.");
@@ -72,7 +79,8 @@
       noten: noten,
       nachId: ids,
       zufall: optionen.zufall || Math.random,
-      aufgabe: 0,              // Index der aktuellen Aufgabe, 0 bis 9
+      anzahl: optionen.aufgaben >= 1 ? Math.floor(optionen.aufgaben) : REGELN.aufgabenProRunde,
+      aufgabe: 0,              // Index der aktuellen Aufgabe, 0 bis anzahl − 1
       punkte: 0,
       sterne: REGELN.startSterne,
       richtige: 0,
@@ -139,7 +147,7 @@
   }
 
   function planeWiederholung(runde, id) {
-    var letzte = REGELN.aufgabenProRunde - 1;
+    var letzte = runde.anzahl - 1;
     var abstand = runde.zufall() < 0.5 ? 2 : 3;        // zwei bis drei andere Noten
     var faellig = runde.aufgabe + abstand + 1;
     if (faellig > letzte) faellig = runde.aufgabe + 3; // mindestens zwei andere Noten
@@ -193,7 +201,7 @@
       else planeWiederholung(runde, note.id);
     }
 
-    var rundeVorbei = runde.fehler >= REGELN.startSterne || runde.aufgabe >= REGELN.aufgabenProRunde - 1;
+    var rundeVorbei = runde.fehler >= REGELN.startSterne || runde.aufgabe >= runde.anzahl - 1;
     runde.letzteAntwort = {
       richtig: richtig,
       note: note,
@@ -259,6 +267,7 @@
       punkte: e.punkte,
       bonus: e.bonus,
       verbleibendeSterne: e.verbleibendeSterne,
+      aufgaben: runde.anzahl,
       schwierig: { gefragt: gefragt, neu: e.uebertrag }
     };
   }
@@ -349,7 +358,8 @@
       schwierig: [],
       zaehler: 0,
       namen: [],
-      einstellungen: null
+      einstellungen: null,
+      reise: { tag: "", serie: 0 }   // Tägliche Notenreise: letzter geschaffter Tag, Tagesserie
     };
   }
 
@@ -480,6 +490,10 @@
       });
     }
     stand.einstellungen = bereinigeEinstellungen(roh.einstellungen);
+    // Ältere Spielstände haben kein Feld `reise` und beginnen ohne Tagesserie.
+    if (roh.reise && typeof roh.reise.tag === "string" && /^\d{4}-\d{2}-\d{2}$/.test(roh.reise.tag) && istZahl(roh.reise.serie)) {
+      stand.reise = { tag: roh.reise.tag, serie: Math.floor(roh.reise.serie) };
+    }
     return stand;
   }
 
@@ -489,11 +503,51 @@
     });
   }
 
+  /* ---------- Tägliche Notenreise ---------- */
+
+  function zweistellig(n) { return (n < 10 ? "0" : "") + n; }
+
+  /** Lokales Kalenderdatum als "JJJJ-MM-TT". */
+  function lokalesDatum(zeit) {
+    var d = new Date(zeit);
+    return d.getFullYear() + "-" + zweistellig(d.getMonth() + 1) + "-" + zweistellig(d.getDate());
+  }
+
+  function vortag(tag) {
+    var t = tag.split("-").map(Number);
+    return lokalesDatum(new Date(t[0], t[1] - 1, t[2] - 1, 12).getTime());
+  }
+
+  /** { heute: schon geschafft?, serie: Tage in Folge, die noch zählen } */
+  function tagesreiseStatus(stand, zeit) {
+    var heute = lokalesDatum(zeit);
+    var r = (stand && stand.reise) || { tag: "", serie: 0 };
+    if (r.tag === heute) return { heute: true, serie: r.serie };
+    if (r.tag && r.tag === vortag(heute)) return { heute: false, serie: r.serie };
+    return { heute: false, serie: 0 };
+  }
+
+  /**
+   * Verbucht eine geschaffte Reise: Extrastern höchstens einmal pro
+   * Kalendertag, Serie +1 nach dem Vortag, sonst neu bei 1. Ändert `stand`.
+   */
+  function verbucheTagesreise(stand, zeit) {
+    var heute = lokalesDatum(zeit);
+    var r = stand.reise || { tag: "", serie: 0 };
+    if (r.tag === heute) return { extrastern: false, serie: r.serie };
+    var serie = r.tag && r.tag === vortag(heute) ? r.serie + 1 : 1;
+    stand.reise = { tag: heute, serie: serie };
+    stand.sterne += 1;
+    return { extrastern: true, serie: serie };
+  }
+
   /**
    * Verbucht das Ergebnis eines beliebigen Modus im Spielstand:
    * Sterne in die gemeinsame Sammlung, Rekord in die Liste des Modus,
    * neue Tiere, schwierige Noten. Ändert `stand` nicht, sondern liefert
-   * { stand, neueTiere, rekord } mit rekord = { modus, nr, platz } oder null.
+   * { stand, neueTiere, rekord, tagesreise } mit rekord = { modus, nr, platz }
+   * oder null. Bei e.tagesreise = true kommt der Extrastern der Notenreise
+   * dazu (höchstens einmal pro Tag), tagesreise = { extrastern, serie }.
    */
   function verbucheErgebnis(stand, modus, e, zeit, zufall) {
     var neu = bereinigeSpielstand(stand, zufall);
@@ -519,10 +573,12 @@
       neu.schwierig = schwierig.slice(0, 20);
     }
 
+    var tagesreise = e.tagesreise ? verbucheTagesreise(neu, zeit) : null;
     var neueTiere = ergaenzeTiere(neu, zufall);
     return {
       stand: neu,
       neueTiere: neueTiere,
+      tagesreise: tagesreise,
       rekord: platz < REGELN.maxRekorde ? { modus: modus, nr: eintrag.nr, platz: platz } : null
     };
   }
@@ -566,6 +622,8 @@
     ergaenzeTiere: ergaenzeTiere,
     naechstesTier: naechstesTier,
     verbucheErgebnis: verbucheErgebnis,
+    lokalesDatum: lokalesDatum,
+    tagesreiseStatus: tagesreiseStatus,
     setzeRekordName: setzeRekordName
   };
 

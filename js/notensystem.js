@@ -53,6 +53,8 @@
    *           falsch       Position einer zusätzlichen, falsch gesetzten Note (mit ✗)
    *           falschX      x-Mitte dieser Note (Standard noteX − 24)
    *           klasse       zusätzliche CSS-Klasse für das SVG
+ *           weitere      [{ position, x }]: weitere Noten im selben System,
+ *                        je in <g class="note-weitere"> (Höher oder tiefer)
    * Die Note samt Hilfslinien liegt in <g class="note-gruppe">, damit ein Modus
    * sie verschieben kann (Notenflug).
    */
@@ -93,20 +95,31 @@
         '<text x="' + (fx + 8) + '" y="' + (fy - 3) + '" font-size="11" font-weight="700" fill="currentColor">✗</text></g>');
     }
 
+    // Viertelnote samt Hilfslinien an Position p und x-Mitte x
+    function viertelnote(p, x) {
+      var ny = yVon(p);
+      var t = hilfslinien(p, x);
+      // Notenhals: unterhalb der Mittellinie nach oben rechts, sonst nach unten links
+      var halsLaenge = 35;
+      if (p < 4) {
+        t += '<line x1="' + (x + 5.9) + '" x2="' + (x + 5.9) + '" y1="' + (ny - 1) + '" y2="' + (ny - halsLaenge) + '" stroke="currentColor" stroke-width="1.5"/>';
+      } else {
+        t += '<line x1="' + (x - 5.9) + '" x2="' + (x - 5.9) + '" y1="' + (ny + 1) + '" y2="' + (ny + halsLaenge) + '" stroke="currentColor" stroke-width="1.5"/>';
+      }
+      // Notenkopf (schwarze Viertelnote)
+      t += '<ellipse class="notenkopf" cx="' + x + '" cy="' + ny + '" rx="6.6" ry="4.6" transform="rotate(-20 ' + x + " " + ny + ')" fill="currentColor"/>';
+      return t;
+    }
+
+    (optionen.weitere || []).forEach(function (w) {
+      teile.push('<g class="note-weitere">' + viertelnote(w.position, w.x) + "</g>");
+    });
+
     if (note) {
       var p = note.position;
       var ny = yVon(p);
       teile.push('<g class="note-gruppe">');
-      teile.push(hilfslinien(p, NOTE_X));
-      // Notenhals: unterhalb der Mittellinie nach oben rechts, sonst nach unten links
-      var halsLaenge = 35;
-      if (p < 4) {
-        teile.push('<line x1="' + (NOTE_X + 5.9) + '" x2="' + (NOTE_X + 5.9) + '" y1="' + (ny - 1) + '" y2="' + (ny - halsLaenge) + '" stroke="currentColor" stroke-width="1.5"/>');
-      } else {
-        teile.push('<line x1="' + (NOTE_X - 5.9) + '" x2="' + (NOTE_X - 5.9) + '" y1="' + (ny + 1) + '" y2="' + (ny + halsLaenge) + '" stroke="currentColor" stroke-width="1.5"/>');
-      }
-      // Notenkopf (schwarze Viertelnote)
-      teile.push('<ellipse class="notenkopf" cx="' + NOTE_X + '" cy="' + ny + '" rx="6.6" ry="4.6" transform="rotate(-20 ' + NOTE_X + " " + ny + ')" fill="currentColor"/>');
+      teile.push(viertelnote(p, NOTE_X));
 
       if (optionen.beschriftung) {
         teile.push('<text class="notenname" x="' + (NOTE_X + 22) + '" y="' + (ny + 5.5) + '" font-size="16" font-weight="700" fill="currentColor">' + optionen.beschriftung + "</text>");
