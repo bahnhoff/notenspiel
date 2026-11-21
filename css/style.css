@@ -130,11 +130,29 @@ h1:focus { outline: none; }
 }
 
 .start-menue .knopf {
-  font-size: 1.15rem;
-  flex: 1 1 160px;
+  font-size: 1.1rem;
+  padding: 10px 12px;
+  white-space: nowrap;
+  flex: 1 1 150px;
   max-width: 260px;
   min-height: 56px;
 }
+
+.start-auswahl {
+  margin: -6px 0 0;
+  color: var(--text-leise);
+  font-size: 0.95rem;
+}
+
+.start-modi {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px;
+  width: 100%;
+  max-width: 560px;
+}
+
+.knopf-modus { font-size: 1.1rem; min-height: 56px; }
 
 .hinweis-speicher {
   max-width: 32em;
@@ -152,7 +170,8 @@ h1:focus { outline: none; }
 .stimmung-froh { animation: huepfen 0.5s ease-out; }
 .stimmung-oje { animation: kopfschief 0.6s ease-out; }
 
-.tier-schatten .tier-svg { filter: grayscale(1) brightness(0.35); opacity: 0.35; }
+/* Noch nicht entdecktes Tier: dunkle Silhouette */
+.tier-silhouette { filter: brightness(0); opacity: 0.72; }
 
 @keyframes wippen {
   0%, 100% { transform: translateY(0); }
@@ -313,10 +332,37 @@ h1:focus { outline: none; }
   margin-top: 14px;
 }
 
+/* Antworten: eine Reihe pro Oktave, tief unten, hoch oben */
 .antworten {
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 8px;
+}
+
+.antwort-reihe {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(56px, 1fr));
   gap: 8px;
+}
+
+.antworten-oktaven { gap: 6px; }
+
+.antworten-oktaven .antwort-reihe {
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 5px;
+}
+
+.antworten-oktaven .knopf-antwort {
+  min-height: 56px;
+  font-size: 1.35rem;
+  padding: 4px 0;
+}
+
+/* Schmale Handys: Antworten etwas breiter, damit 7 Knöpfe je 48 px passen */
+@media (max-width: 400px) {
+  .antworten-oktaven { margin: 0 -6px; }
+  .antworten-oktaven .antwort-reihe { gap: 2px; }
+  .antworten-oktaven .knopf-antwort { border-radius: 12px; }
 }
 
 .knopf-antwort {
@@ -350,7 +396,7 @@ h1:focus { outline: none; }
   background: var(--rot-hell);
   border-color: var(--rot);
   color: var(--rot);
-  text-decoration: line-through;
+  border-style: dashed;
 }
 
 .antworten.gesperrt .knopf-antwort:not(.ist-richtig):not(.ist-falsch):not(.ist-loesung) {
@@ -423,8 +469,115 @@ h1:focus { outline: none; }
 
 .knopf-reihe .knopf { font-size: 1.3rem; min-height: 60px; }
 
-/* ---------- Meine Tiere, Meine Rekorde ---------- */
+/* ---------- Namensabfrage bei Rekorden ---------- */
 
+.rekord-name {
+  background: var(--karte);
+  border: 3px solid var(--akzent);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  box-shadow: var(--schatten);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.rekord-name h2 { margin: 0; font-size: 1.5rem; text-align: center; }
+.rekord-name h2:focus { outline: none; }
+.rekord-name-info { margin: 0; text-align: center; color: var(--text-leise); }
+
+.namen-schnellwahl {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+}
+
+.knopf-name { font-size: 1.2rem; min-height: 56px; max-width: 100%; overflow-wrap: anywhere; }
+
+.name-formular label { display: block; font-weight: 700; margin-bottom: 4px; }
+
+.name-zeile { display: flex; gap: 8px; }
+
+.name-zeile input {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 52px;
+  font: inherit;
+  font-size: 1.2rem;
+  padding: 8px 12px;
+  border: 2px solid var(--rand);
+  border-radius: 12px;
+  background: #fffdf9;
+  color: var(--text);
+}
+
+.name-zeile input:focus-visible { outline: 4px solid var(--fokus); outline-offset: 2px; }
+.name-zeile .knopf { flex: 0 0 auto; }
+
+.rekord-name-fertig { margin: 0; text-align: center; font-weight: 700; color: var(--gruen); }
+.rekord-name-fertig:empty { display: none; }
+
+/* ---------- Einstellungen ---------- */
+
+.einstellungen {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.einstellung {
+  margin: 0;
+  background: var(--karte);
+  border: 2px solid var(--rand);
+  border-radius: var(--radius);
+  padding: 10px 14px 14px;
+  box-shadow: var(--schatten);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.einstellung legend {
+  font-weight: 800;
+  font-size: 1.2rem;
+  padding: 0 6px;
+}
+
+.wahl {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 52px;
+  padding: 8px 12px;
+  border: 2px solid var(--rand);
+  border-radius: 14px;
+  cursor: pointer;
+  font-size: 1.1rem;
+}
+
+.wahl input {
+  width: 24px;
+  height: 24px;
+  margin: 0;
+  flex: 0 0 auto;
+  accent-color: var(--akzent);
+}
+
+.wahl:has(input:checked) {
+  border-color: var(--akzent);
+  background: #fff1e6;
+  font-weight: 700;
+}
+
+.wahl:has(input:focus-visible) { outline: 4px solid var(--fokus); outline-offset: 2px; }
+
+.einstellungen-info { margin: 0; color: var(--text-leise); text-align: center; }
+
+/* ---------- Meine Tiere, Rekorde, Einstellungen ---------- */
+
+.ansicht-einstellungen,
 .ansicht-tiere,
 .ansicht-rekorde {
   max-width: 760px;
@@ -461,9 +614,11 @@ h1:focus { outline: none; }
   margin: 0;
   padding: 0;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 14px;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 12px;
 }
+
+.tier-liste .tier-mittel { width: 100px; }
 
 .tier-karte {
   background: var(--karte);
@@ -482,10 +637,19 @@ h1:focus { outline: none; }
 .tier-name { margin: 0; font-weight: 700; font-size: 1.2rem; }
 .tier-info { margin: 0; color: var(--text-leise); }
 .tier-karte.gesperrt { background: #f6efe5; }
+.tier-karte.selten { border-color: #c9a6f2; }
+.tier-karte.selten:not(.gesperrt) { background: linear-gradient(180deg, #faf4ff, #fff); }
+
+.rekord-abschnitt + .rekord-abschnitt { margin-top: 26px; }
+
+.rekord-modus {
+  margin: 18px 0 0;
+  font-size: 1.3rem;
+}
 
 .rekord-liste {
   list-style: none;
-  margin: 18px 0 0;
+  margin: 10px 0 0;
   padding: 0;
   display: flex;
   flex-direction: column;
@@ -495,7 +659,7 @@ h1:focus { outline: none; }
 .rekord {
   display: grid;
   grid-template-columns: 2.2em 1fr auto;
-  grid-template-areas: "platz punkte sterne" "platz datum datum";
+  grid-template-areas: "platz punkte sterne" "platz name datum";
   align-items: center;
   gap: 2px 10px;
   background: var(--karte);
@@ -509,13 +673,15 @@ h1:focus { outline: none; }
 .rekord-platz { grid-area: platz; font-weight: 800; font-size: 1.5rem; color: var(--akzent-dunkel); }
 .rekord-punkte { grid-area: punkte; font-weight: 700; }
 .rekord-sterne { grid-area: sterne; white-space: nowrap; }
-.rekord-datum { grid-area: datum; color: var(--text-leise); font-size: 0.95rem; }
+.rekord-datum { grid-area: datum; color: var(--text-leise); font-size: 0.95rem; text-align: right; white-space: nowrap; }
+.rekord-name-text { grid-area: name; font-weight: 700; overflow-wrap: anywhere; min-width: 0; }
+.rekord-name-text.ohne-name { font-weight: 400; font-style: italic; color: var(--text-leise); }
 
 .leer-hinweis {
   text-align: center;
   color: var(--text-leise);
-  font-size: 1.15rem;
-  margin-top: 30px;
+  font-size: 1.1rem;
+  margin: 10px 0 0;
 }
 
 /* ---------- Tablet und Querformat ---------- */

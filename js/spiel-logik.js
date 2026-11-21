@@ -14,45 +14,44 @@
     maxRekorde: 5
   };
 
+  /*
+   * Sammeltiere für „Meine Tiere“. Füchschen ist von Anfang an da.
+   * Alle 5 gesammelten Sterne kommt ein zufälliges neues Tier dazu,
+   * seltene Tiere erst ab 50 gesammelten Sternen.
+   */
   var TIERE = [
-    { id: "fuchs", name: "Füchschen", sterne: 0 },
-    { id: "hase", name: "Häschen", sterne: 5 },
-    { id: "katze", name: "Kätzchen", sterne: 10 }
+    { id: "fuchs", name: "Füchschen" },
+    { id: "hase", name: "Häschen" },
+    { id: "katze", name: "Kätzchen" },
+    { id: "hund", name: "Hündchen" },
+    { id: "baer", name: "Bärchen" },
+    { id: "panda", name: "Panda" },
+    { id: "pinguin", name: "Pinguin" },
+    { id: "eule", name: "Eule" },
+    { id: "igel", name: "Igel" },
+    { id: "eichhoernchen", name: "Eichhörnchen" },
+    { id: "schildkroete", name: "Schildkröte" },
+    { id: "koala", name: "Koala" },
+    { id: "loewe", name: "Löwe" },
+    { id: "tiger", name: "Tiger" },
+    { id: "waschbaer", name: "Waschbär" },
+    { id: "schaf", name: "Schäfchen" },
+    { id: "schwein", name: "Schweinchen" },
+    { id: "kueken", name: "Küken" },
+    { id: "otter", name: "Otter" },
+    { id: "faultier", name: "Faultier" },
+    { id: "maus", name: "Maus" },
+    { id: "kuh", name: "Kuh" },
+    { id: "einhorn", name: "Einhorn", selten: true },
+    { id: "drache", name: "Drache", selten: true },
+    { id: "phoenix", name: "Phönix", selten: true }
   ];
+  var STERNE_PRO_TIER = 5;
+  var SELTEN_AB_STERNEN = 50;
+  var MAX_NAMEN = 6;
+  var NAME_LAENGE = 20;
 
   var ZAHLWORTE = { 3: "Drei", 6: "Sechs", 9: "Neun" };
-
-  /* ---------- Konfiguration ---------- */
-
-  function istGueltigeNote(n) {
-    return n && typeof n.id === "string" && n.id &&
-      typeof n.schluessel === "string" &&
-      typeof n.position === "number" && isFinite(n.position) &&
-      Math.round(n.position) === n.position &&
-      typeof n.name === "string" && n.name &&
-      typeof n.hinweis === "string";
-  }
-
-  /** Liefert die Noten des aktiven Übungssatzes in der konfigurierten Reihenfolge. */
-  function aktiveNoten(konfiguration) {
-    if (!konfiguration || !Array.isArray(konfiguration.noten)) return [];
-    var nachId = {};
-    konfiguration.noten.forEach(function (n) {
-      if (istGueltigeNote(n) && !nachId[n.id]) nachId[n.id] = n;
-    });
-    var saetze = konfiguration.uebungssaetze || {};
-    var satz = saetze[konfiguration.aktiverUebungssatz];
-    if (!satz || !Array.isArray(satz.noten)) return [];
-    var gesehen = {};
-    var ergebnis = [];
-    satz.noten.forEach(function (id) {
-      if (nachId[id] && !gesehen[id]) {
-        gesehen[id] = true;
-        ergebnis.push(nachId[id]);
-      }
-    });
-    return ergebnis;
-  }
 
   function positionsSchluessel(note) {
     return note.schluessel + ":" + note.position;
@@ -62,7 +61,7 @@
 
   function neueRunde(noten, optionen) {
     optionen = optionen || {};
-    if (!noten || noten.length === 0) throw new Error("Der Übungssatz enthält keine Noten.");
+    if (!noten || noten.length === 0) throw new Error("Der gewählte Bereich enthält keine Noten.");
     var ids = {};
     noten.forEach(function (n) { ids[n.id] = n; });
     var vorrang = [];
@@ -171,15 +170,16 @@
   }
 
   /**
-   * Nimmt genau eine Antwort pro Aufgabe an. Weitere Antworten liefern null,
+   * Nimmt genau eine Antwort pro Aufgabe an. `name` ist der getippte
+   * Notenname, zum Beispiel "c1". Weitere Antworten liefern null,
    * bis `weiter()` die nächste Aufgabe öffnet.
    */
-  function antworte(runde, id) {
+  function antworte(runde, name) {
     if (runde.beendet || runde.gesperrt || !runde.aktuell) return null;
     runde.gesperrt = true;
     var note = runde.aktuell.note;
-    var richtig = id === note.id;
-    runde.verlauf.push({ note: note, antwort: id, richtig: richtig, wiederholung: runde.aktuell.wiederholung });
+    var richtig = name === note.name;
+    runde.verlauf.push({ note: note, antwort: name, richtig: richtig, wiederholung: runde.aktuell.wiederholung });
 
     if (richtig) {
       runde.punkte += REGELN.punkteProRichtig;
@@ -197,7 +197,7 @@
     runde.letzteAntwort = {
       richtig: richtig,
       note: note,
-      antwort: id,
+      antwort: name,
       serie: runde.serie,
       nachricht: rueckmeldung(richtig, note, runde.serie, runde.zufall),
       rundeVorbei: rundeVorbei,
@@ -242,34 +242,174 @@
     };
   }
 
+  /**
+   * Ergebnis der klassischen Runde im gemeinsamen Format für alle Modi
+   * (siehe js/modi.js). Liefert null, solange die Runde läuft.
+   */
+  function klassischesErgebnis(runde) {
+    if (!runde.beendet) return null;
+    var e = ergebnis(runde);
+    var gefragt = [];
+    runde.verlauf.forEach(function (v) { if (gefragt.indexOf(v.note.id) === -1) gefragt.push(v.note.id); });
+    return {
+      gesamt: e.gesamt,
+      neueSterne: e.neueSterne,
+      vorzeitig: e.vorzeitig,
+      richtige: e.richtige,
+      punkte: e.punkte,
+      bonus: e.bonus,
+      verbleibendeSterne: e.verbleibendeSterne,
+      schwierig: { gefragt: gefragt, neu: e.uebertrag }
+    };
+  }
+
   /* ---------- Spielstand ---------- */
 
+  function standardEinstellungen() {
+    return { schluessel: "violin", bereich: { violin: "erste", bass: "erste" }, merktiere: true };
+  }
+
   function leererSpielstand() {
-    return { version: 1, sterne: 0, tier: "fuchs", rekorde: [], schwierig: [], zaehler: 0 };
+    return {
+      version: 2,
+      sterne: 0,
+      tier: "fuchs",
+      entdeckt: ["fuchs"],
+      rekorde: {},
+      schwierig: [],
+      zaehler: 0,
+      namen: [],
+      einstellungen: null
+    };
   }
 
   function istZahl(x) { return typeof x === "number" && isFinite(x) && x >= 0; }
 
-  /** Übernimmt nur gültige Werte aus gespeicherten Daten. */
-  function bereinigeSpielstand(roh) {
+  /** Kürzt und säubert einen eingegebenen Namen. Leer bedeutet „Ohne Namen“. */
+  function bereinigeName(name) {
+    if (typeof name !== "string") return "";
+    return name.replace(/[\u0000-\u001f\u007f<>]/g, "").replace(/\s+/g, " ").trim().slice(0, NAME_LAENGE).trim();
+  }
+
+  function bereinigeRekorde(liste) {
+    if (!Array.isArray(liste)) return [];
+    var ergebnis = liste.filter(function (r) {
+      return r && istZahl(r.gesamt) && istZahl(r.sterne) && istZahl(r.zeit);
+    }).map(function (r) {
+      var e = { gesamt: r.gesamt, sterne: r.sterne, zeit: r.zeit, nr: istZahl(r.nr) ? r.nr : 0 };
+      // Alte Rekorde haben kein Feld `name` und zeigen keinen Namen.
+      if (typeof r.name === "string") e.name = bereinigeName(r.name);
+      return e;
+    });
+    return sortiereRekorde(ergebnis).slice(0, REGELN.maxRekorde);
+  }
+
+  // Alte Notenkennungen wie "violin-C4" → "violin-c1".
+  function neueNotenId(id) {
+    var m = /^(violin|bass)-([A-H])(\d)$/.exec(id);
+    if (!m) return id;
+    var oktave = Number(m[3]);
+    var b = m[2].toLowerCase();
+    if (oktave <= 2) return m[1] + "-" + m[2];
+    return m[1] + "-" + b + (oktave === 3 ? "" : oktave - 3);
+  }
+
+  function bereinigeEinstellungen(roh) {
+    if (!roh || typeof roh !== "object") return null;
+    var e = standardEinstellungen();
+    if (["violin", "bass", "beide"].indexOf(roh.schluessel) !== -1) e.schluessel = roh.schluessel;
+    if (roh.bereich && typeof roh.bereich === "object") {
+      if (typeof roh.bereich.violin === "string") e.bereich.violin = roh.bereich.violin;
+      if (typeof roh.bereich.bass === "string") e.bereich.bass = roh.bereich.bass;
+    }
+    if (typeof roh.merktiere === "boolean") e.merktiere = roh.merktiere;
+    return e;
+  }
+
+  function tierVon(id) {
+    for (var i = 0; i < TIERE.length; i++) if (TIERE[i].id === id) return TIERE[i];
+    return null;
+  }
+
+  /** So viele Tiere stehen bei dieser Sternzahl zu: Füchschen plus eins je 5 Sterne. */
+  function sollTiere(sterne) {
+    return 1 + Math.floor(sterne / STERNE_PRO_TIER);
+  }
+
+  /**
+   * Ergänzt zufällig noch nicht entdeckte Tiere, bis die Anzahl zur
+   * Sternzahl passt. Seltene Tiere kommen erst ab 50 Sternen in den Topf.
+   * Liefert die neu entdeckten Tiere.
+   */
+  function ergaenzeTiere(stand, zufall) {
+    zufall = zufall || Math.random;
+    var neu = [];
+    while (stand.entdeckt.length < sollTiere(stand.sterne)) {
+      var topf = TIERE.filter(function (t) {
+        return stand.entdeckt.indexOf(t.id) === -1 && (!t.selten || stand.sterne >= SELTEN_AB_STERNEN);
+      });
+      if (topf.length === 0) break;
+      var tier = topf[Math.floor(zufall() * topf.length) % topf.length];
+      stand.entdeckt.push(tier.id);
+      neu.push(tier);
+    }
+    return neu;
+  }
+
+  /** Sterne bis zum nächsten Tier, oder null, wenn alle entdeckt sind. */
+  function naechstesTier(stand) {
+    if (stand.entdeckt.length >= TIERE.length) return null;
+    var schwelle = stand.entdeckt.length * STERNE_PRO_TIER;
+    return { fehlend: Math.max(1, schwelle - stand.sterne) };
+  }
+
+  /**
+   * Übernimmt nur gültige Werte aus gespeicherten Daten und migriert alte
+   * Spielstände (Version 1): Rekorde gehören dann zum klassischen Modus,
+   * Häschen und Kätzchen bleiben, fehlende Tiere werden zufällig ergänzt.
+   */
+  function bereinigeSpielstand(roh, zufall) {
     var stand = leererSpielstand();
     if (!roh || typeof roh !== "object") return stand;
     if (istZahl(roh.sterne)) stand.sterne = Math.floor(roh.sterne);
     if (istZahl(roh.zaehler)) stand.zaehler = Math.floor(roh.zaehler);
+
     if (Array.isArray(roh.rekorde)) {
-      stand.rekorde = roh.rekorde.filter(function (r) {
-        return r && istZahl(r.gesamt) && istZahl(r.sterne) && istZahl(r.zeit);
-      }).map(function (r) {
-        return { gesamt: r.gesamt, sterne: r.sterne, zeit: r.zeit, nr: istZahl(r.nr) ? r.nr : 0 };
+      stand.rekorde.klassisch = bereinigeRekorde(roh.rekorde);
+    } else if (roh.rekorde && typeof roh.rekorde === "object") {
+      Object.keys(roh.rekorde).forEach(function (modus) {
+        if (/^[a-z0-9-]{1,30}$/.test(modus)) {
+          var liste = bereinigeRekorde(roh.rekorde[modus]);
+          if (liste.length) stand.rekorde[modus] = liste;
+        }
       });
-      stand.rekorde = sortiereRekorde(stand.rekorde).slice(0, REGELN.maxRekorde);
     }
+
     if (Array.isArray(roh.schwierig)) {
-      stand.schwierig = roh.schwierig.filter(function (id) { return typeof id === "string"; }).slice(0, 20);
+      stand.schwierig = roh.schwierig.filter(function (id) { return typeof id === "string"; })
+        .map(neueNotenId).slice(0, 20);
     }
-    if (typeof roh.tier === "string" && freigeschalteteTiere(stand.sterne).some(function (t) { return t.id === roh.tier; })) {
-      stand.tier = roh.tier;
+
+    if (Array.isArray(roh.entdeckt)) {
+      roh.entdeckt.forEach(function (id) {
+        if (tierVon(id) && stand.entdeckt.indexOf(id) === -1) stand.entdeckt.push(id);
+      });
+    } else {
+      // Version 1: Häschen ab 5, Kätzchen ab 10 Sternen.
+      if (stand.sterne >= 5) stand.entdeckt.push("hase");
+      if (stand.sterne >= 10) stand.entdeckt.push("katze");
     }
+    ergaenzeTiere(stand, zufall);
+
+    if (typeof roh.tier === "string" && stand.entdeckt.indexOf(roh.tier) !== -1) stand.tier = roh.tier;
+
+    if (Array.isArray(roh.namen)) {
+      roh.namen.forEach(function (n) {
+        n = bereinigeName(n);
+        if (n && stand.namen.indexOf(n) === -1 && stand.namen.length < MAX_NAMEN) stand.namen.push(n);
+      });
+    }
+    stand.einstellungen = bereinigeEinstellungen(roh.einstellungen);
     return stand;
   }
 
@@ -279,58 +419,76 @@
     });
   }
 
-  function freigeschalteteTiere(sterne) {
-    return TIERE.filter(function (t) { return sterne >= t.sterne; });
-  }
-
-  function naechstesTier(sterne) {
-    for (var i = 0; i < TIERE.length; i++) {
-      if (TIERE[i].sterne > sterne) return { tier: TIERE[i], fehlend: TIERE[i].sterne - sterne };
-    }
-    return null;
-  }
-
   /**
-   * Verbucht eine beendete Runde genau einmal im Spielstand.
-   * Liefert den neuen Spielstand und neu freigeschaltete Tiere,
-   * oder null, wenn die Runde schon verbucht oder nicht beendet ist.
+   * Verbucht das Ergebnis eines beliebigen Modus im Spielstand:
+   * Sterne in die gemeinsame Sammlung, Rekord in die Liste des Modus,
+   * neue Tiere, schwierige Noten. Ändert `stand` nicht, sondern liefert
+   * { stand, neueTiere, rekord } mit rekord = { modus, nr, platz } oder null.
    */
-  function verbucheRunde(stand, runde, zeit) {
-    if (!runde.beendet || runde.verbucht) return null;
-    runde.verbucht = true;
-    var e = ergebnis(runde);
-    var neu = bereinigeSpielstand(stand);
-    var vorher = freigeschalteteTiere(neu.sterne).map(function (t) { return t.id; });
-    neu.sterne += e.neueSterne;
+  function verbucheErgebnis(stand, modus, e, zeit, zufall) {
+    var neu = bereinigeSpielstand(stand, zufall);
+    var neueSterne = istZahl(e.neueSterne) ? Math.floor(e.neueSterne) : 0;
+    neu.sterne += neueSterne;
     neu.zaehler += 1;
-    neu.rekorde = sortiereRekorde(neu.rekorde.concat([{ gesamt: e.gesamt, sterne: e.neueSterne, zeit: zeit, nr: neu.zaehler }]))
-      .slice(0, REGELN.maxRekorde);
-    // Schwierige Noten: in dieser Runde abgefragte Vorrang-Noten sind erledigt,
-    // neue Überträge kommen hinzu.
-    var gefragt = {};
-    runde.verlauf.forEach(function (v) { gefragt[v.note.id] = true; });
-    var schwierig = neu.schwierig.filter(function (id) { return !gefragt[id]; });
-    e.uebertrag.forEach(function (id) { if (schwierig.indexOf(id) === -1) schwierig.push(id); });
-    neu.schwierig = schwierig.slice(0, 20);
-    var neueTiere = freigeschalteteTiere(neu.sterne).filter(function (t) { return vorher.indexOf(t.id) === -1; });
-    return { stand: neu, ergebnis: e, neueTiere: neueTiere };
+    var eintrag = {
+      gesamt: istZahl(e.gesamt) ? e.gesamt : 0,
+      sterne: istZahl(e.rekordSterne) ? e.rekordSterne : neueSterne,
+      zeit: zeit,
+      nr: neu.zaehler,
+      name: ""
+    };
+    var liste = sortiereRekorde((neu.rekorde[modus] || []).concat([eintrag]));
+    var platz = liste.indexOf(eintrag);
+    neu.rekorde[modus] = liste.slice(0, REGELN.maxRekorde);
+
+    if (e.schwierig) {
+      var gefragt = {};
+      (e.schwierig.gefragt || []).forEach(function (id) { gefragt[id] = true; });
+      var schwierig = neu.schwierig.filter(function (id) { return !gefragt[id]; });
+      (e.schwierig.neu || []).forEach(function (id) { if (schwierig.indexOf(id) === -1) schwierig.push(id); });
+      neu.schwierig = schwierig.slice(0, 20);
+    }
+
+    var neueTiere = ergaenzeTiere(neu, zufall);
+    return {
+      stand: neu,
+      neueTiere: neueTiere,
+      rekord: platz < REGELN.maxRekorde ? { modus: modus, nr: eintrag.nr, platz: platz } : null
+    };
+  }
+
+  /** Trägt einen Namen in einen Rekord ein und merkt ihn als zuletzt benutzt. */
+  function setzeRekordName(stand, modus, nr, name) {
+    name = bereinigeName(name);
+    (stand.rekorde[modus] || []).forEach(function (r) { if (r.nr === nr) r.name = name; });
+    if (name) {
+      stand.namen = [name].concat(stand.namen.filter(function (n) { return n !== name; })).slice(0, MAX_NAMEN);
+    }
+    return name;
   }
 
   var api = {
     REGELN: REGELN,
     TIERE: TIERE,
-    aktiveNoten: aktiveNoten,
+    STERNE_PRO_TIER: STERNE_PRO_TIER,
+    SELTEN_AB_STERNEN: SELTEN_AB_STERNEN,
+    NAME_LAENGE: NAME_LAENGE,
     positionsSchluessel: positionsSchluessel,
     neueRunde: neueRunde,
     antworte: antworte,
     weiter: weiter,
     ergebnis: ergebnis,
+    klassischesErgebnis: klassischesErgebnis,
     leererSpielstand: leererSpielstand,
     bereinigeSpielstand: bereinigeSpielstand,
+    bereinigeEinstellungen: bereinigeEinstellungen,
+    bereinigeName: bereinigeName,
     sortiereRekorde: sortiereRekorde,
-    freigeschalteteTiere: freigeschalteteTiere,
+    tierVon: tierVon,
+    ergaenzeTiere: ergaenzeTiere,
     naechstesTier: naechstesTier,
-    verbucheRunde: verbucheRunde
+    verbucheErgebnis: verbucheErgebnis,
+    setzeRekordName: setzeRekordName
   };
 
   if (typeof module !== "undefined" && module.exports) module.exports = api;

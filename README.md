@@ -1,6 +1,6 @@
 # Welche Note ist das?
 
-Ein Browserspiel zum Üben von Noten im Violinschlüssel. Das Spiel zeigt eine Note im Notensystem, und das Kind tippt den passenden deutschen Notennamen an. Für richtige Antworten gibt es Punkte und Sterne, mit gesammelten Sternen kommen neue Tiere dazu.
+Ein Browserspiel zum Üben von Noten im Violin- und Bassschlüssel. Das Spiel zeigt eine Note im Notensystem, und das Kind tippt den passenden deutschen Notennamen an, zum Beispiel `c1`, `g` oder `F`. Für richtige Antworten gibt es Punkte und Sterne, mit gesammelten Sternen kommen neue Tiere dazu.
 
 Das Spiel ist eine statische Website aus HTML, CSS und JavaScript. Es braucht keinen Server, keinen Build-Schritt, keine Anmeldung und lädt nichts von fremden Diensten. Den Spielstand speichert der Browser lokal im `localStorage`.
 
@@ -25,37 +25,47 @@ Danach öffnest du `http://localhost:8000/` im Browser.
 
 Nach ein bis zwei Minuten ist das Spiel unter `https://<owner>.github.io/<repo>/` erreichbar. Alle Pfade sind relativ, deshalb funktioniert das Spiel auch in diesem Unterverzeichnis. Weitere Informationen findest du in der [Dokumentation zu GitHub Pages](https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site).
 
-## Übungssatz ändern
+## Einstellungen
 
-Die Noten stehen in der Datei `js/noten-konfiguration.js`.
+Unter **Einstellungen** auf der Startseite wählst du:
 
-- Den aktiven Übungssatz wählst du mit `aktiverUebungssatz`. Voreingestellt ist `"violin-c4-g4"` mit C, D, E, F und G. Als zweiter Satz ist `"violin-c4-h4"` mit C bis H vorbereitet.
-- Unter `uebungssaetze` legst du fest, welche Noten zu einem Satz gehören. Die Reihenfolge der Liste ist auch die Reihenfolge der Antwortschaltflächen.
-- Unter `noten` steht jede Note mit Kennung (`id`), Schlüssel (`schluessel`), Position im Notensystem (`position`), deutschem Namen (`name`), Hinweis (`hinweis`) und Merktier (`tier`). Die Position zählt in Schritten von der untersten Linie aus: `0` ist die unterste Linie, `1` der erste Zwischenraum, `-1` direkt unter dem System und `-2` die erste Hilfslinie unten.
+- den Schlüssel: Violinschlüssel, Bassschlüssel oder beide gemischt
+- den Tonumfang je Schlüssel, zum Beispiel „Erste Noten: c1 bis g1“, „1 Oktave: c1 bis c2“ oder „2 Oktaven: C bis c1“
+- ob nach der Antwort ein Merktier erscheint
 
-Ein Beispiel: Für einen Satz mit E, F und G trägst du einen neuen Eintrag unter `uebungssaetze` ein und setzt `aktiverUebungssatz` auf dessen Kennung.
+Die Einstellungen gelten für alle Spiele und bleiben auf dem Gerät gespeichert. Bei gemischten Schlüsseln enthalten die Antwortschaltflächen die Noten beider Bereiche. Umfasst die Auswahl mehrere Oktaven, steht jede Oktave in einer eigenen Reihe: tiefe Noten unten, hohe oben.
 
-```js
-aktiverUebungssatz: "nur-e-f-g",
-uebungssaetze: {
-  "nur-e-f-g": { name: "E, F und G", noten: ["violin-E4", "violin-F4", "violin-G4"] },
-  // …
-}
-```
+Die Notennamen folgen der deutschen Schreibweise: `C D E F G A H` (große Oktave), `c d e f g a h` (kleine Oktave), `c1` bis `h1` (c1 ist das mittlere C), danach `c2` und `c3`.
 
-Nach dem Speichern lädst du die Seite neu. Nimm pro Übungssatz jeden Notennamen nur einmal auf, sonst entstehen zwei gleich beschriftete Schaltflächen. In dieser Version zeichnet das Spiel nur den Violinschlüssel.
+## Bereiche und Merktiere anpassen
+
+Alle Anpassungen stehen in der Datei `js/noten-konfiguration.js`. Die Noten selbst musst du nicht pflegen: Das Spiel erzeugt Name, Lage im Notensystem, Hinweis und Merktier aus Schlüssel und Bereich.
+
+- Unter `bereiche` stehen die Tonumfänge je Schlüssel mit Kennung (`id`), Anzeigetext (`name`) und tiefster und höchster Note (`von`, `bis`). Neue Einträge erscheinen automatisch in den Einstellungen.
+- Unter `merktiere` steht das Tier zu jedem Buchstaben. Mit `merktierAb` bekommt ein Buchstabe ab einer bestimmten Note ein anderes Tier.
+- Unter `standardEinstellungen` legst du fest, womit das Spiel beim ersten Start beginnt.
+
+Nach dem Speichern lädst du die Seite neu.
 
 ## Merktiere
 
-Nach jeder Antwort zeigt das Spiel das Tier zur Note, zum Beispiel „D wie Delfin“. Vor der Antwort ist das Tier nicht zu sehen. Die Zuordnung steht im Feld `tier` jeder Note:
+Nach jeder Antwort zeigt das Spiel das Tier zum Buchstaben der Note, zum Beispiel „d1 wie Delfin“. Vor der Antwort ist das Tier nicht zu sehen. In den Einstellungen lassen sich die Merktiere ausschalten.
 
-- C: Zebra
-- D: Delfin
-- E: Elefant
-- F: Frosch für das tiefe F (erster Zwischenraum), Fuchs für das hohe F (oberste Linie)
-- G: Giraffe
-- A: Affe
-- H: Hase
+- c: Chamäleon
+- d: Delfin
+- e: Elefant
+- f: Frosch, ab f2 Fuchs
+- g: Giraffe
+- a: Affe
+- h: Hase
+
+## Meine Tiere
+
+Das Füchschen ist von Anfang an da. Alle 5 gesammelten Sterne kommt ein zufälliges neues Tier dazu, insgesamt gibt es 25. Die seltenen Tiere Einhorn, Drache und Phönix kommen erst ab 50 gesammelten Sternen in den Zufallstopf. Noch nicht entdeckte Tiere erscheinen als dunkle Silhouette. Jedes entdeckte Tier lässt sich als Begleiter auswählen.
+
+## Rekorde und Namen
+
+Das Spiel führt für jedes Spiel die fünf besten Ergebnisse. Schafft ein Ergebnis die Top 5, fragt der Ergebnisbildschirm „Wer hat gespielt?“. Zuletzt benutzte Namen stehen als Schnellwahl bereit, der zuletzt gewählte ist vorausgewählt. Wer keinen Namen eintragen möchte, tippt auf „Ohne Namen“. Die Namen liegen nur im Browser des Geräts. Sterne und Tiere gehören allen Kindern auf dem Gerät gemeinsam.
 
 ## Spielregeln
 
@@ -64,17 +74,24 @@ Nach jeder Antwort zeigt das Spiel das Tier zur Note, zum Beispiel „D wie Delf
 - Eine falsch beantwortete Note kommt nach zwei bis drei anderen Noten noch einmal. Fehlt dafür der Platz, kommt sie in der nächsten Runde früh dran.
 - Nach 10 Aufgaben gibt es 10 Bonuspunkte pro verbliebenem Stern, und die Sterne kommen in die Sammlung.
 - Der dritte Fehler beendet die Runde ohne Bonus und ohne neue Sterne. Die Punkte zählen für die Rekorde.
-- Ab 5 gesammelten Sternen kommt das Häschen dazu, ab 10 das Kätzchen.
+- Alle 5 gesammelten Sterne kommt ein neues Tier dazu.
+
+Ältere Spielstände bleiben erhalten: Sterne und Rekorde zählen weiter, Häschen und Kätzchen bleiben, fehlende Tiere ergänzt das Spiel einmalig nach Sternzahl.
 
 ## Dateien
 
 - `index.html`: die Seite mit allen Ansichten
 - `css/style.css`: die Gestaltung
-- `js/noten-konfiguration.js`: die Noten und Übungssätze
-- `js/spiel-logik.js`: Regeln, Wertung, Wiederholungen, Rekorde und Tiere
-- `js/notensystem.js`: das Notensystem mit Violinschlüssel
+- `js/noten-konfiguration.js`: Bereiche, Merktiere und Standard-Einstellungen
+- `js/noten.js`: erzeugt Noten, Namen, Positionen und Hinweise
+- `js/spiel-logik.js`: Regeln, Wertung, Wiederholungen, Rekorde, Tiersammlung und Spielstand
+- `js/notensystem.js`: das Notensystem mit Violin- und Bassschlüssel
 - `js/tiere.js`: die Tierzeichnungen
-- `js/app.js`: die Bedienung und das Speichern
+- `js/modi.js`: die gemeinsame Schnittstelle für Spielmodi
+- `js/modi/klassisch.js`: das Spiel „Welche Note ist das?“
+- `js/app.js`: Startseite, Ergebnis, Einstellungen, Tiere, Rekorde und Speichern
 - `tests/spiel-logik.test.js`: automatische Tests der Spiellogik
+
+Ein weiterer Spielmodus kommt als eigene Datei unter `js/modi/` dazu und meldet sich mit `Modi.registriere(…)` an. Die Beschreibung der Schnittstelle steht am Anfang von `js/modi.js`. Die Datei wird in `index.html` vor `js/app.js` eingebunden.
 
 Die Tests brauchen Node.js ab Version 18 und laufen mit `node --test tests/spiel-logik.test.js`. Für den Betrieb des Spiels sind sie nicht nötig.

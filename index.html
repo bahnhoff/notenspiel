@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="description" content="Ein Übungsspiel zum Erkennen von Noten im Violinschlüssel.">
+  <meta name="description" content="Ein Übungsspiel zum Erkennen von Noten im Violin- und Bassschlüssel.">
   <meta name="theme-color" content="#fff7ea">
   <meta name="robots" content="noindex, nofollow, noimageindex">
   <title>Welche Note ist das?</title>
@@ -18,12 +18,18 @@
       <div class="start-tier" id="start-tier"></div>
       <h1 id="titel-start" class="spieltitel" tabindex="-1">Welche Note ist das?</h1>
       <button type="button" class="knopf knopf-haupt knopf-start" id="knopf-start">Start</button>
+      <p class="start-auswahl" id="start-auswahl"></p>
+      <!-- Weitere Spielmodi aus js/modi/ erscheinen hier automatisch. -->
+      <div class="start-modi" id="start-modi" role="group" aria-label="Mini-Spiele" hidden></div>
       <div class="start-menue">
         <button type="button" class="knopf knopf-neben" id="knopf-tiere">
           <span aria-hidden="true">🐾</span> Meine Tiere
         </button>
         <button type="button" class="knopf knopf-neben" id="knopf-rekorde">
-          <span aria-hidden="true">🏆</span> Meine Rekorde
+          <span aria-hidden="true">🏆</span> Rekorde
+        </button>
+        <button type="button" class="knopf knopf-neben" id="knopf-einstellungen">
+          <span aria-hidden="true">⚙️</span> Einstellungen
         </button>
       </div>
       <p class="hinweis-speicher" id="hinweis-speicher" hidden>
@@ -34,7 +40,7 @@
     <!-- Spielrunde -->
     <section id="ansicht-runde" class="ansicht ansicht-runde" aria-labelledby="titel-runde" hidden>
       <header class="runde-kopf">
-        <button type="button" class="knopf knopf-klein" id="knopf-runde-zurueck" aria-label="Zurück zur Startseite">
+        <button type="button" class="knopf knopf-klein knopf-zurueck" aria-label="Zurück zur Startseite">
           <span aria-hidden="true">←</span><span class="knopf-text"> Startseite</span>
         </button>
         <div class="runde-status">
@@ -76,14 +82,22 @@
         <div class="tier-mittel" id="ergebnis-tier"></div>
         <div class="sprechblase"><p id="ergebnis-spruch"></p></div>
       </div>
-      <dl class="ergebnis-liste">
-        <div><dt>Richtige Antworten</dt><dd id="ergebnis-richtige"></dd></div>
-        <div><dt>Punkte dafür</dt><dd id="ergebnis-punkte"></dd></div>
-        <div><dt>Bonus</dt><dd id="ergebnis-bonus"></dd></div>
-        <div class="ergebnis-gesamt"><dt>Gesamtpunktzahl</dt><dd id="ergebnis-gesamt"></dd></div>
-        <div><dt>Neue Sterne</dt><dd id="ergebnis-sterne"></dd></div>
-      </dl>
+      <dl class="ergebnis-liste" id="ergebnis-liste"></dl>
       <div class="neues-tier" id="neues-tier" hidden></div>
+      <section class="rekord-name" id="rekord-name" aria-labelledby="titel-rekord-name" hidden>
+        <h2 id="titel-rekord-name" tabindex="-1">Wer hat gespielt?</h2>
+        <p class="rekord-name-info" id="rekord-name-info"></p>
+        <div class="namen-schnellwahl" id="namen-schnellwahl" role="group" aria-label="Zuletzt benutzte Namen"></div>
+        <form class="name-formular" id="name-formular">
+          <label for="name-eingabe">Name</label>
+          <div class="name-zeile">
+            <input type="text" id="name-eingabe" maxlength="20" autocomplete="off" autocapitalize="words" spellcheck="false" enterkeyhint="done">
+            <button type="submit" class="knopf knopf-haupt">Eintragen</button>
+          </div>
+        </form>
+        <button type="button" class="knopf knopf-neben knopf-ohne-name" id="knopf-ohne-name">Ohne Namen</button>
+        <p class="rekord-name-fertig" id="rekord-name-fertig" role="status"></p>
+      </section>
       <div class="knopf-reihe">
         <button type="button" class="knopf knopf-haupt" id="knopf-nochmal">Noch eine Runde</button>
         <button type="button" class="knopf knopf-neben" id="knopf-ergebnis-start">Zur Startseite</button>
@@ -103,24 +117,38 @@
       <ul class="tier-liste" id="tier-liste"></ul>
     </section>
 
-    <!-- Meine Rekorde -->
+    <!-- Einstellungen -->
+    <section id="ansicht-einstellungen" class="ansicht ansicht-einstellungen" aria-labelledby="titel-einstellungen" hidden>
+      <header class="seiten-kopf">
+        <button type="button" class="knopf knopf-klein knopf-zurueck" aria-label="Zurück zur Startseite">
+          <span aria-hidden="true">←</span> Zurück
+        </button>
+        <h1 id="titel-einstellungen" class="titel" tabindex="-1">Einstellungen</h1>
+      </header>
+      <form class="einstellungen" id="einstellungen-formular"></form>
+    </section>
+
+    <!-- Rekorde -->
     <section id="ansicht-rekorde" class="ansicht ansicht-rekorde" aria-labelledby="titel-rekorde" hidden>
       <header class="seiten-kopf">
         <button type="button" class="knopf knopf-klein knopf-zurueck" aria-label="Zurück zur Startseite">
           <span aria-hidden="true">←</span> Zurück
         </button>
-        <h1 id="titel-rekorde" class="titel" tabindex="-1">Meine Rekorde</h1>
+        <h1 id="titel-rekorde" class="titel" tabindex="-1">Rekorde</h1>
       </header>
-      <ol class="rekord-liste" id="rekord-liste"></ol>
-      <p class="leer-hinweis" id="rekorde-leer" hidden>Noch keine Rekorde. Spiel eine Runde, dann steht dein Ergebnis hier.</p>
+      <div id="rekorde-inhalt"></div>
     </section>
 
   </main>
 
   <script src="js/noten-konfiguration.js"></script>
+  <script src="js/noten.js"></script>
   <script src="js/spiel-logik.js"></script>
   <script src="js/notensystem.js"></script>
   <script src="js/tiere.js"></script>
+  <script src="js/modi.js"></script>
+  <!-- Spielmodi: je Modus eine Datei, vor js/app.js -->
+  <script src="js/modi/klassisch.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>

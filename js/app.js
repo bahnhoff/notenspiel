@@ -1,23 +1,23 @@
 /*
- * Oberfläche: Ansichten wechseln, Runde anzeigen, Spielstand speichern.
+ * Oberfläche: Ansichten wechseln, Modi starten und verbuchen, Einstellungen,
+ * Tiersammlung, Rekorde mit Namen, Spielstand speichern.
+ * Die Spielmodi selbst stehen in js/modi/ (Schnittstelle: js/modi.js).
  */
 (function () {
   "use strict";
 
   var L = window.SpielLogik;
+  var N = window.Noten;
+  var K = window.NOTEN_KONFIGURATION || {};
+  var H = window.Modi.hilfen;
   var SPEICHER_SCHLUESSEL = "welche-note-ist-das.spielstand.v1";
-  var PAUSE_NACH_RICHTIG = 1200; // Millisekunden
 
   var speicherVerfuegbar = true;
-  var noten = L.aktiveNoten(window.NOTEN_KONFIGURATION);
   var stand = ladeSpielstand();
-  var runde = null;
-  var weiterTimer = null;
-  var letzterAntwortKnopf = -1;
-  var bereich = [
-    Math.min.apply(null, noten.map(function (n) { return n.position; })),
-    Math.max.apply(null, noten.map(function (n) { return n.position; }))
-  ];
+  var aktiverModus = null;   // laufender oder zuletzt gespielter Modus
+  var startNr = 0;           // jede gestartete Runde bekommt eine neue Nummer
+  var laufendeNr = -1;       // Nummer der Runde, die noch verbucht werden darf
+  var offenerRekord = null;  // { modus, nr } für die Namensabfrage
 
   function $(id) { return document.getElementById(id); }
 
@@ -37,16 +37,20 @@
 
   function ladeSpielstand() {
     var s = speicher();
+    var geladen;
     if (!s) {
       speicherVerfuegbar = false;
-      return L.leererSpielstand();
+      geladen = L.leererSpielstand();
+    } else {
+      try {
+        var roh = s.getItem(SPEICHER_SCHLUESSEL);
+        geladen = L.bereinigeSpielstand(roh ? JSON.parse(roh) : null);
+      } catch (e) {
+        geladen = L.leererSpielstand();
+      }
     }
-    try {
-      var roh = s.getItem(SPEICHER_SCHLUESSEL);
-      return L.bereinigeSpielstand(roh ? JSON.parse(roh) : null);
-    } catch (e) {
-      return L.leererSpielstand();
-    }
+    if (!geladen.einstellungen) geladen.einstellungen = L.bereinigeEinstellungen(K.standardEinstellungen) || L.bereinigeEinstellungen({});
+    return geladen;
   }
 
   function speichereSpielstand() {
@@ -62,8 +66,8 @@
   /* ---------- Hilfen ---------- */
 
   function tierName(id) {
-    for (var i = 0; i < L.TIERE.length; i++) if (L.TIERE[i].id === id) return L.TIERE[i].name;
-    return "";
+    var t = L.tierVon(id);
+    return t ? t.name : "";
   }
 
   function zeigeTier(element, stimmung) {
@@ -75,304 +79,362 @@
     return anzahl === 1 ? "1 Stern" : anzahl + " Sterne";
   }
 
-  function sternSymbole(voll, gesamt) {
-    var html = "";
-    for (var i = 0; i < gesamt; i++) {
-      html += i < voll
-        ? '<span class="stern stern-voll" aria-hidden="true">★</span>'
-        : '<span class="stern stern-leer" aria-hidden="true">☆</span>';
-    }
-    return html;
+  function element(tag, klasse, text) {
+    var el = document.createElement(tag);
+    if (klasse) el.className = klasse;
+    if (text !== undefined) el.textContent = text;
+    return el;
+  }
+
+  function auswahl() {
+    return N.fuerEinstellungen(K, stand.einstellungen);
+  }
+
+  function auswahlText() {
+    var e = stand.einstellungen;
+    return ["violin", "bass"].filter(function (s) {
+      return e.schluessel === s || e.schluessel === "beide";
+    }).map(function (s) {
+      var b = N.bereichVon(K, s, e.bereich[s]);
+      return N.SCHLUESSEL[s].name + ": " + (b ? b.von + " bis " + b.bis : "?");
+    }).join(" · ");
   }
 
   /* ---------- Ansichten ---------- */
 
-  var ANSICHTEN = ["start", "runde", "ergebnis", "tiere", "rekorde"];
-
   function zeigeAnsicht(name) {
-    ANSICHTEN.forEach(function (n) { $("ansicht-" + n).hidden = n !== name; });
+    Array.prototype.forEach.call(document.querySelectorAll("section.ansicht"), function (s) {
+      s.hidden = s.id !== "ansicht-" + name;
+    });
     window.scrollTo(0, 0);
-    var titel = $("titel-" + name);
+    var titel = $("titel-" + name) || document.querySelector("#ansicht-" + name + " h1");
     if (titel) titel.focus({ preventScroll: true });
+  }
+
+  function stoppeModus() {
+    laufendeNr = -1;
+    if (aktiverModus && aktiverModus.stoppe) aktiverModus.stoppe();
   }
 
   function zurStartseite() {
     // Eine laufende Runde wird ohne Ergebniseintrag verworfen.
-    clearTimeout(weiterTimer);
-    runde = null;
+    stoppeModus();
+    offenerRekord = null;
     zeigeTier($("start-tier"), "normal");
     $("hinweis-speicher").hidden = speicherVerfuegbar;
+    var a = auswahl();
+    $("knopf-start").disabled = a.noten.length === 0;
+    $("start-auswahl").textContent = a.noten.length ? auswahlText() : "Der gewählte Bereich enthält keine Noten. Prüfe js/noten-konfiguration.js.";
     zeigeAnsicht("start");
   }
 
-  /* ---------- Spielrunde ---------- */
+  /* ---------- Modi starten und verbuchen ---------- */
 
-  function baueAntwortKnoepfe() {
-    var box = $("antworten");
-    box.innerHTML = "";
-    noten.forEach(function (note, index) {
-      var b = document.createElement("button");
-      b.type = "button";
-      b.className = "knopf knopf-antwort";
-      b.dataset.id = note.id;
-      b.dataset.index = String(index);
-      b.innerHTML = '<span class="antwort-name">' + note.name + '</span><span class="antwort-marke" aria-hidden="true"></span>';
-      b.setAttribute("aria-label", note.name);
-      b.addEventListener("click", function () { beantworte(note.id, index); });
-      box.appendChild(b);
-    });
-  }
-
-  function starteRunde() {
-    clearTimeout(weiterTimer);
-    runde = L.neueRunde(noten, { vorrang: stand.schwierig });
-    letzterAntwortKnopf = -1;
-    baueAntwortKnoepfe();
-    zeigeTier($("runde-tier"), "normal");
-    zeigeAnsicht("runde");
-    zeigeAufgabe();
-    $("sprechblase-text").textContent = "Schau genau hin. Welche Note ist das?";
-  }
-
-  function zeigeStatus() {
-    $("aufgabe-nr").textContent = "Aufgabe " + (runde.aufgabe + 1) + " von " + L.REGELN.aufgabenProRunde;
-    var sterne = $("sterne-anzeige");
-    sterne.innerHTML = sternSymbole(runde.sterne, L.REGELN.startSterne);
-    sterne.setAttribute("aria-label", runde.sterne + " von " + L.REGELN.startSterne + " Sternen");
-    $("punkte-anzeige").textContent = runde.punkte + " Punkte";
-  }
-
-  function zeigeAufgabe() {
-    zeigeStatus();
-    $("notensystem").innerHTML = window.Notensystem.zeichne(runde.aktuell.note, { bereich: bereich });
-    $("notensystem").classList.remove("ist-falsch", "ist-richtig");
-    $("knopf-weiter").hidden = true;
-    $("merkhilfe").hidden = true;
-    var knoepfe = document.querySelectorAll(".knopf-antwort");
-    Array.prototype.forEach.call(knoepfe, function (b) {
-      b.classList.remove("ist-richtig", "ist-falsch", "ist-loesung");
-      b.setAttribute("aria-disabled", "false");
-      b.querySelector(".antwort-marke").textContent = "";
-    });
-    $("antworten").classList.remove("gesperrt");
-    // Tastaturfokus auf derselben Schaltfläche lassen wie bei der letzten Antwort.
-    if (letzterAntwortKnopf >= 0 && knoepfe[letzterAntwortKnopf] &&
-        (document.activeElement === document.body || document.activeElement === $("knopf-weiter") ||
-         (document.activeElement && document.activeElement.classList.contains("knopf-antwort")))) {
-      knoepfe[letzterAntwortKnopf].focus({ preventScroll: true });
-    }
-  }
-
-  function beantworte(id, index) {
-    if (!runde) return;
-    var a = L.antworte(runde, id);
-    if (!a) return; // schon beantwortet: weitere Tipps zählen nicht
-    letzterAntwortKnopf = index;
-    $("antworten").classList.add("gesperrt");
-
-    var knoepfe = document.querySelectorAll(".knopf-antwort");
-    Array.prototype.forEach.call(knoepfe, function (b) {
-      b.setAttribute("aria-disabled", "true");
-      if (b.dataset.id === a.note.id) {
-        b.classList.add(a.richtig ? "ist-richtig" : "ist-loesung");
-        b.querySelector(".antwort-marke").textContent = "✓";
-        b.setAttribute("aria-label", b.querySelector(".antwort-name").textContent + ", richtig");
-      } else if (b.dataset.id === id) {
-        b.classList.add("ist-falsch");
-        b.querySelector(".antwort-marke").textContent = "✗";
-        b.setAttribute("aria-label", b.querySelector(".antwort-name").textContent + ", falsch");
+  function starteModus(modus) {
+    if (!modus) return;
+    stoppeModus();
+    offenerRekord = null;
+    aktiverModus = modus;
+    var a = auswahl();
+    if (a.noten.length === 0) return;
+    var nr = ++startNr;
+    laufendeNr = nr;
+    modus.starte({
+      noten: a.noten,
+      antworten: a.antworten,
+      bereich: a.bereich,
+      einstellungen: JSON.parse(JSON.stringify(stand.einstellungen)),
+      schwierig: stand.schwierig.slice(),
+      zeigeAnsicht: function () { zeigeAnsicht(modus.ansicht || modus.id); },
+      zeigeTier: zeigeTier,
+      merkhilfe: merkhilfe,
+      laeuft: function () { return laufendeNr === nr; },
+      beende: function (ergebnis) {
+        if (laufendeNr !== nr) return false; // jede Runde nur einmal verbuchen
+        laufendeNr = -1;
+        verbuche(modus, ergebnis || {});
+        return true;
       }
     });
-
-    zeigeStatus();
-    $("notensystem").innerHTML = window.Notensystem.zeichne(a.note, { beschriftung: a.note.name, bereich: bereich });
-    $("notensystem").classList.add(a.richtig ? "ist-richtig" : "ist-falsch");
-
-    zeigeMerkhilfe(a.note);
-    var praefix = a.richtig ? "✓ " : "✗ ";
-    $("sprechblase-text").textContent = praefix + a.nachricht;
-    zeigeTier($("runde-tier"), a.richtig ? "froh" : "oje");
-
-    if (a.richtig) {
-      weiterTimer = setTimeout(naechsteAufgabe, PAUSE_NACH_RICHTIG);
-    } else {
-      var weiterKnopf = $("knopf-weiter");
-      weiterKnopf.hidden = false;
-      weiterKnopf.focus({ preventScroll: true });
-      // Auf kleinen Bildschirmen den Hinweis und die Schaltfläche sichtbar machen.
-      if (weiterKnopf.scrollIntoView) weiterKnopf.scrollIntoView({ block: "nearest" });
-    }
   }
 
-  /** Zeigt nach der Antwort das Merktier der Note, zum Beispiel „D wie Delfin“. */
-  function zeigeMerkhilfe(note) {
-    var box = $("merkhilfe");
-    if (!note.tier || !window.Tiere.hat(note.tier)) {
-      box.hidden = true;
-      return;
-    }
-    var name = window.Tiere.NAMEN[note.tier];
-    $("merkhilfe-bild").innerHTML = window.Tiere.zeichne(note.tier, "froh", name);
-    $("merkhilfe-text").textContent = note.name + " wie " + name;
-    box.hidden = false;
+  /** Merktier zur Note, zum Beispiel „d1 wie Delfin“, oder null, wenn ausgeschaltet. */
+  function merkhilfe(note) {
+    if (!stand.einstellungen.merktiere || !note || !note.tier || !window.Tiere.hat(note.tier)) return null;
+    var name = window.Tiere.NAMEN[note.tier] || note.tier;
+    return { tier: note.tier, name: name, text: note.name + " wie " + name };
   }
 
-  function naechsteAufgabe() {
-    clearTimeout(weiterTimer);
-    if (!runde) return;
-    var w = L.weiter(runde);
-    if (!w) return; // doppelter Aufruf
-    if (w.beendet) {
-      zeigeErgebnis();
-      return;
-    }
-    $("sprechblase-text").textContent = "Und diese hier?";
-    zeigeTier($("runde-tier"), "normal");
-    zeigeAufgabe();
+  function verbuche(modus, e) {
+    var v = L.verbucheErgebnis(stand, modus.id, e, Date.now());
+    stand = v.stand;
+    speichereSpielstand();
+    zeigeErgebnis(modus, e, v);
   }
 
   /* ---------- Ergebnis ---------- */
 
-  function zeigeErgebnis() {
-    var verbucht = L.verbucheRunde(stand, runde, Date.now());
-    if (!verbucht) return;
-    stand = verbucht.stand;
-    speichereSpielstand();
-    var e = verbucht.ergebnis;
+  function zeigeErgebnis(modus, e, v) {
+    $("titel-ergebnis").textContent = e.titel || "Geschafft!";
+    zeigeTier($("ergebnis-tier"), e.stimmung || "froh");
+    $("ergebnis-spruch").textContent = e.spruch || "Toll gemacht!";
 
-    $("titel-ergebnis").textContent = e.vorzeitig ? "Runde vorbei" : "Geschafft!";
-    var spruch;
-    if (e.vorzeitig) spruch = "Versuchen wir’s noch mal?";
-    else if (e.richtige === L.REGELN.aufgabenProRunde) spruch = "Alles richtig. Du bist ein Notenprofi!";
-    else spruch = "Toll gemacht!";
-
-    var neuesTier = verbucht.neueTiere.length ? verbucht.neueTiere[verbucht.neueTiere.length - 1] : null;
-    zeigeTier($("ergebnis-tier"), e.vorzeitig ? "normal" : "froh");
-    $("ergebnis-spruch").textContent = spruch;
-
-    $("ergebnis-richtige").textContent = e.richtige + " von " + L.REGELN.aufgabenProRunde;
-    $("ergebnis-punkte").textContent = e.punkte;
-    $("ergebnis-bonus").textContent = e.bonus +
-      (e.bonus > 0 ? " (" + sterneText(e.verbleibendeSterne) + " × " + L.REGELN.bonusProStern + ")" : "");
-    $("ergebnis-gesamt").textContent = e.gesamt + " Punkte";
-    $("ergebnis-sterne").innerHTML = e.neueSterne > 0
-      ? '<span class="sterne-reihe" aria-hidden="true">' + sternSymbole(e.neueSterne, e.neueSterne) + "</span> " + e.neueSterne
-      : "0";
+    var liste = $("ergebnis-liste");
+    liste.innerHTML = "";
+    function zeile(bezeichnung, wert, klasse) {
+      var div = element("div", klasse);
+      div.appendChild(element("dt", "", bezeichnung));
+      var dd = element("dd");
+      if (typeof wert === "string") dd.textContent = wert; else dd.appendChild(wert);
+      div.appendChild(dd);
+      liste.appendChild(div);
+    }
+    (e.zeilen || []).forEach(function (z) { zeile(z[0], String(z[1])); });
+    zeile("Gesamtpunktzahl", (e.gesamt || 0) + " Punkte", "ergebnis-gesamt");
+    var sterne = element("span");
+    var anzahl = e.neueSterne || 0;
+    if (anzahl > 0) sterne.innerHTML = '<span class="sterne-reihe" aria-hidden="true">' + H.sternSymbole(anzahl, anzahl) + "</span> ";
+    sterne.appendChild(document.createTextNode(String(anzahl)));
+    zeile("Neue Sterne", sterne);
 
     var box = $("neues-tier");
+    var neuesTier = v.neueTiere.length ? v.neueTiere[v.neueTiere.length - 1] : null;
     if (neuesTier) {
       box.innerHTML = '<div class="tier-mittel">' + window.Tiere.zeichne(neuesTier.id, "froh", neuesTier.name) + "</div>" +
-        '<p><strong>Neues Tier: ' + neuesTier.name + "!</strong><br>Du kannst es unter „Meine Tiere“ auswählen.</p>";
+        "<p><strong>Neues Tier: " + neuesTier.name + "!</strong><br>Du kannst es unter „Meine Tiere“ auswählen.</p>";
       box.hidden = false;
     } else {
       box.hidden = true;
       box.innerHTML = "";
     }
-    runde = null;
+
     zeigeAnsicht("ergebnis");
+    if (v.rekord) zeigeNamensabfrage(modus, v.rekord);
+    else $("rekord-name").hidden = true;
   }
+
+  /* ---------- Namen in den Rekorden ---------- */
+
+  function zeigeNamensabfrage(modus, rekord) {
+    offenerRekord = rekord;
+    $("rekord-name").hidden = false;
+    $("rekord-name-info").textContent = "Neuer Rekord: Platz " + (rekord.platz + 1) + " bei „" + modus.name + "“.";
+    $("rekord-name-fertig").textContent = "";
+    $("name-formular").hidden = false;
+    $("knopf-ohne-name").hidden = false;
+    var eingabe = $("name-eingabe");
+    eingabe.value = stand.namen[0] || "";
+
+    var schnell = $("namen-schnellwahl");
+    schnell.innerHTML = "";
+    stand.namen.forEach(function (name, i) {
+      var b = element("button", "knopf " + (i === 0 ? "knopf-haupt" : "knopf-neben") + " knopf-name", name);
+      b.type = "button";
+      b.addEventListener("click", function () { speichereName(name); });
+      schnell.appendChild(b);
+    });
+    schnell.hidden = stand.namen.length === 0;
+  }
+
+  function speichereName(name) {
+    if (!offenerRekord) return;
+    var gesetzt = L.setzeRekordName(stand, offenerRekord.modus, offenerRekord.nr, name);
+    speichereSpielstand();
+    offenerRekord = null;
+    $("namen-schnellwahl").hidden = true;
+    $("name-formular").hidden = true;
+    $("knopf-ohne-name").hidden = true;
+    $("rekord-name-fertig").textContent = gesetzt ? "✓ Rekord für " + gesetzt + " gespeichert." : "✓ Rekord ohne Namen gespeichert.";
+    $("knopf-nochmal").focus({ preventScroll: true });
+  }
+
+  $("name-formular").addEventListener("submit", function (ev) {
+    ev.preventDefault();
+    speichereName($("name-eingabe").value);
+  });
+  $("knopf-ohne-name").addEventListener("click", function () { speichereName(""); });
 
   /* ---------- Meine Tiere ---------- */
 
-  function zeigeTiere() {
+  function zeigeTiere(fokusTier) {
     $("tiere-sterne").innerHTML = '<span class="stern stern-voll" aria-hidden="true">★</span> Gesammelte Sterne: <strong>' + stand.sterne + "</strong>";
-    var naechstes = L.naechstesTier(stand.sterne);
-    $("tiere-naechstes").textContent = naechstes
-      ? "Noch " + sterneText(naechstes.fehlend) + " bis zum " + naechstes.tier.name + "."
-      : "Du hast alle Tiere gefunden.";
+    var naechstes = L.naechstesTier(stand);
+    $("tiere-naechstes").textContent = (naechstes
+      ? "Noch " + sterneText(naechstes.fehlend) + " bis zum nächsten Tier."
+      : "Du hast alle Tiere entdeckt!") + " Entdeckt: " + stand.entdeckt.length + " von " + L.TIERE.length + ".";
 
     var liste = $("tier-liste");
     liste.innerHTML = "";
     L.TIERE.forEach(function (tier) {
-      var frei = stand.sterne >= tier.sterne;
-      var li = document.createElement("li");
-      li.className = "tier-karte" + (frei ? "" : " gesperrt");
+      var frei = stand.entdeckt.indexOf(tier.id) !== -1;
+      var li = element("li", "tier-karte" + (frei ? "" : " gesperrt") + (tier.selten ? " selten" : ""));
+      li.dataset.tier = tier.id;
       if (frei) {
         var gewaehlt = stand.tier === tier.id;
-        li.innerHTML = '<div class="tier-mittel">' + window.Tiere.zeichne(tier.id, gewaehlt ? "froh" : "normal", tier.name) + "</div>" +
-          '<p class="tier-name">' + tier.name + "</p>";
-        var b = document.createElement("button");
+        li.innerHTML = '<div class="tier-mittel">' + window.Tiere.zeichne(tier.id, gewaehlt ? "froh" : "normal", tier.name) + "</div>";
+        li.appendChild(element("p", "tier-name", tier.name));
+        if (tier.selten) li.appendChild(element("p", "tier-info", "✨ Selten"));
+        var b = element("button", "knopf " + (gewaehlt ? "knopf-gewaehlt" : "knopf-neben"), gewaehlt ? "✓ Begleiter" : "Auswählen");
         b.type = "button";
-        b.className = "knopf " + (gewaehlt ? "knopf-gewaehlt" : "knopf-neben");
         b.setAttribute("aria-pressed", gewaehlt ? "true" : "false");
-        b.textContent = gewaehlt ? "✓ Ausgewählt" : "Auswählen";
+        b.setAttribute("aria-label", tier.name + (gewaehlt ? " ist dein Begleiter" : " als Begleiter auswählen"));
         b.addEventListener("click", function () {
           stand.tier = tier.id;
           speichereSpielstand();
-          zeigeTiere();
-          var neu = liste.querySelector('[data-tier="' + tier.id + '"] button');
-          if (neu) neu.focus();
+          zeigeTiere(tier.id);
         });
         li.appendChild(b);
       } else {
-        li.innerHTML = '<div class="tier-mittel tier-schatten">' + window.Tiere.zeichne(tier.id, "normal", "Noch nicht freigeschaltet") + "</div>" +
-          '<p class="tier-name">???</p><p class="tier-info">Ab ' + tier.sterne + " Sternen</p>";
+        li.innerHTML = '<div class="tier-mittel">' + window.Tiere.zeichne(tier.id, "normal", "Noch nicht entdeckt", true) + "</div>";
+        li.appendChild(element("p", "tier-name", "???"));
+        if (tier.selten) li.appendChild(element("p", "tier-info", "✨ Selten, ab " + L.SELTEN_AB_STERNEN + " Sternen"));
       }
-      li.dataset.tier = tier.id;
       liste.appendChild(li);
     });
+    if (fokusTier) {
+      var knopf = liste.querySelector('[data-tier="' + fokusTier + '"] button');
+      if (knopf) knopf.focus({ preventScroll: true });
+      return;
+    }
     zeigeAnsicht("tiere");
   }
 
-  /* ---------- Meine Rekorde ---------- */
+  /* ---------- Rekorde ---------- */
 
   function zeigeRekorde() {
-    var liste = $("rekord-liste");
-    liste.innerHTML = "";
-    var rekorde = L.sortiereRekorde(stand.rekorde).slice(0, L.REGELN.maxRekorde);
-    rekorde.forEach(function (r, i) {
-      var li = document.createElement("li");
-      li.className = "rekord";
-      var datum = "";
-      try { datum = new Date(r.zeit).toLocaleDateString("de-DE"); } catch (e) { datum = ""; }
-      li.innerHTML = '<span class="rekord-platz">' + (i + 1) + ".</span>" +
-        '<span class="rekord-punkte">' + r.gesamt + " Punkte</span>" +
-        '<span class="rekord-sterne"><span class="stern stern-voll" aria-hidden="true">★</span> ' + sterneText(r.sterne) + "</span>" +
-        '<span class="rekord-datum">' + datum + "</span>";
-      liste.appendChild(li);
+    var inhalt = $("rekorde-inhalt");
+    inhalt.innerHTML = "";
+    window.Modi.liste().forEach(function (modus) {
+      var abschnitt = element("section", "rekord-abschnitt");
+      var titelId = "rekorde-" + modus.id;
+      var h2 = element("h2", "rekord-modus", modus.name);
+      h2.id = titelId;
+      abschnitt.setAttribute("aria-labelledby", titelId);
+      abschnitt.appendChild(h2);
+      var rekorde = L.sortiereRekorde(stand.rekorde[modus.id] || []).slice(0, L.REGELN.maxRekorde);
+      if (rekorde.length === 0) {
+        abschnitt.appendChild(element("p", "leer-hinweis", "Noch keine Rekorde. Spiel eine Runde, dann steht dein Ergebnis hier."));
+      } else {
+        var ol = element("ol", "rekord-liste");
+        rekorde.forEach(function (r, i) {
+          var li = element("li", "rekord");
+          var datum = "";
+          try { datum = new Date(r.zeit).toLocaleDateString("de-DE"); } catch (e) { datum = ""; }
+          li.appendChild(element("span", "rekord-platz", (i + 1) + "."));
+          li.appendChild(element("span", "rekord-punkte", r.gesamt + " Punkte"));
+          var st = element("span", "rekord-sterne");
+          st.innerHTML = '<span class="stern stern-voll" aria-hidden="true">★</span> ';
+          st.appendChild(document.createTextNode(sterneText(r.sterne)));
+          li.appendChild(st);
+          // Alte Rekorde haben kein Namensfeld und zeigen keinen Namen.
+          if (typeof r.name === "string") {
+            li.appendChild(element("span", "rekord-name-text" + (r.name ? "" : " ohne-name"), r.name || "Ohne Namen"));
+          }
+          li.appendChild(element("span", "rekord-datum", datum));
+          ol.appendChild(li);
+        });
+        abschnitt.appendChild(ol);
+      }
+      inhalt.appendChild(abschnitt);
     });
-    $("rekorde-leer").hidden = rekorde.length > 0;
-    liste.hidden = rekorde.length === 0;
     zeigeAnsicht("rekorde");
   }
 
-  /* ---------- Tastatur ---------- */
+  /* ---------- Einstellungen ---------- */
 
-  document.addEventListener("keydown", function (ev) {
-    if ($("ansicht-runde").hidden || !runde || ev.altKey || ev.ctrlKey || ev.metaKey) return;
-    var taste = (ev.key || "").toUpperCase();
-    if (!runde.gesperrt) {
-      for (var i = 0; i < noten.length; i++) {
-        if (noten[i].name.toUpperCase() === taste) {
-          ev.preventDefault();
-          beantworte(noten[i].id, i);
-          return;
-        }
-      }
-    }
-  });
+  function gruppe(formular, titel, name, optionen, wert, beiWahl) {
+    var fs = element("fieldset", "einstellung");
+    fs.appendChild(element("legend", "", titel));
+    optionen.forEach(function (o) {
+      var label = element("label", "wahl");
+      var input = document.createElement("input");
+      input.type = "radio";
+      input.name = name;
+      input.value = o.wert;
+      input.checked = o.wert === wert;
+      input.addEventListener("change", function () { if (input.checked) beiWahl(o.wert); });
+      label.appendChild(input);
+      label.appendChild(element("span", "wahl-text", o.text));
+      fs.appendChild(label);
+    });
+    formular.appendChild(fs);
+    return fs;
+  }
 
-  /* ---------- Start ---------- */
+  function aendereEinstellung(aenderung, fokusName) {
+    aenderung(stand.einstellungen);
+    speichereSpielstand();
+    baueEinstellungen();
+    var feld = document.querySelector('#einstellungen-formular input[name="' + fokusName + '"]:checked');
+    if (feld) feld.focus({ preventScroll: true });
+  }
 
-  $("knopf-start").addEventListener("click", starteRunde);
-  $("knopf-nochmal").addEventListener("click", starteRunde);
-  $("knopf-tiere").addEventListener("click", zeigeTiere);
+  function baueEinstellungen() {
+    var f = $("einstellungen-formular");
+    var e = stand.einstellungen;
+    f.innerHTML = "";
+    gruppe(f, "Schlüssel", "schluessel", [
+      { wert: "violin", text: "Violinschlüssel" },
+      { wert: "bass", text: "Bassschlüssel" },
+      { wert: "beide", text: "Beide gemischt" }
+    ], e.schluessel, function (w) {
+      aendereEinstellung(function (x) { x.schluessel = w; }, "schluessel");
+    });
+    ["violin", "bass"].forEach(function (s) {
+      if (e.schluessel !== s && e.schluessel !== "beide") return;
+      var aktuell = N.bereichVon(K, s, e.bereich[s]);
+      gruppe(f, "Tonumfang im " + N.SCHLUESSEL[s].name, "bereich-" + s, N.bereichsListe(K, s).map(function (b) {
+        return { wert: b.id, text: b.name };
+      }), aktuell ? aktuell.id : "", function (w) {
+        aendereEinstellung(function (x) { x.bereich[s] = w; }, "bereich-" + s);
+      });
+    });
+    gruppe(f, "Merktiere nach der Antwort", "merktiere", [
+      { wert: "an", text: "An, zum Beispiel „d1 wie Delfin“" },
+      { wert: "aus", text: "Aus" }
+    ], e.merktiere ? "an" : "aus", function (w) {
+      aendereEinstellung(function (x) { x.merktiere = w === "an"; }, "merktiere");
+    });
+    var info = element("p", "einstellungen-info", "Die Einstellungen gelten für alle Spiele und werden auf diesem Gerät gespeichert.");
+    f.appendChild(info);
+  }
+
+  function zeigeEinstellungen() {
+    baueEinstellungen();
+    zeigeAnsicht("einstellungen");
+  }
+
+  /* ---------- Startseite ---------- */
+
+  function baueStartseite() {
+    var box = $("start-modi");
+    box.innerHTML = "";
+    window.Modi.liste().forEach(function (modus) {
+      if (modus.hauptspiel) return;
+      var b = element("button", "knopf knopf-neben knopf-modus");
+      b.type = "button";
+      if (modus.symbol) b.appendChild(element("span", "modus-symbol", modus.symbol)).setAttribute("aria-hidden", "true");
+      b.appendChild(document.createTextNode(" " + modus.name));
+      b.addEventListener("click", function () { starteModus(modus); });
+      box.appendChild(b);
+    });
+    box.hidden = box.children.length === 0;
+  }
+
+  var hauptspiel = window.Modi.liste().filter(function (m) { return m.hauptspiel; })[0] || window.Modi.liste()[0];
+
+  $("knopf-start").addEventListener("click", function () { starteModus(hauptspiel); });
+  $("knopf-nochmal").addEventListener("click", function () { starteModus(aktiverModus || hauptspiel); });
+  $("knopf-tiere").addEventListener("click", function () { zeigeTiere(); });
   $("knopf-rekorde").addEventListener("click", zeigeRekorde);
-  $("knopf-runde-zurueck").addEventListener("click", zurStartseite);
+  $("knopf-einstellungen").addEventListener("click", zeigeEinstellungen);
   $("knopf-ergebnis-start").addEventListener("click", zurStartseite);
-  $("knopf-weiter").addEventListener("click", naechsteAufgabe);
   Array.prototype.forEach.call(document.querySelectorAll(".knopf-zurueck"), function (b) {
     b.addEventListener("click", zurStartseite);
   });
 
-  if (noten.length === 0) {
-    $("knopf-start").disabled = true;
-    $("hinweis-speicher").hidden = false;
-    $("hinweis-speicher").textContent = "Der aktive Übungssatz enthält keine Noten. Prüfe die Datei js/noten-konfiguration.js.";
-    zeigeTier($("start-tier"), "normal");
-    return;
-  }
-
+  baueStartseite();
+  speichereSpielstand(); // übernimmt eine Migration alter Spielstände sofort
   zurStartseite();
   // Beim ersten Laden nicht den Titel fokussieren, damit kein Fokusrahmen erscheint.
   if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
