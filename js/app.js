@@ -147,6 +147,7 @@
     $("notensystem").innerHTML = window.Notensystem.zeichne(runde.aktuell.note, { bereich: bereich });
     $("notensystem").classList.remove("ist-falsch", "ist-richtig");
     $("knopf-weiter").hidden = true;
+    $("merkhilfe").hidden = true;
     var knoepfe = document.querySelectorAll(".knopf-antwort");
     Array.prototype.forEach.call(knoepfe, function (b) {
       b.classList.remove("ist-richtig", "ist-falsch", "ist-loesung");
@@ -187,6 +188,7 @@
     $("notensystem").innerHTML = window.Notensystem.zeichne(a.note, { beschriftung: a.note.name, bereich: bereich });
     $("notensystem").classList.add(a.richtig ? "ist-richtig" : "ist-falsch");
 
+    zeigeMerkhilfe(a.note);
     var praefix = a.richtig ? "✓ " : "✗ ";
     $("sprechblase-text").textContent = praefix + a.nachricht;
     zeigeTier($("runde-tier"), a.richtig ? "froh" : "oje");
@@ -200,6 +202,19 @@
       // Auf kleinen Bildschirmen den Hinweis und die Schaltfläche sichtbar machen.
       if (weiterKnopf.scrollIntoView) weiterKnopf.scrollIntoView({ block: "nearest" });
     }
+  }
+
+  /** Zeigt nach der Antwort das Merktier der Note, zum Beispiel „D wie Delfin“. */
+  function zeigeMerkhilfe(note) {
+    var box = $("merkhilfe");
+    if (!note.tier || !window.Tiere.hat(note.tier)) {
+      box.hidden = true;
+      return;
+    }
+    var name = window.Tiere.NAMEN[note.tier];
+    $("merkhilfe-bild").innerHTML = window.Tiere.zeichne(note.tier, "froh", name);
+    $("merkhilfe-text").textContent = note.name + " wie " + name;
+    box.hidden = false;
   }
 
   function naechsteAufgabe() {

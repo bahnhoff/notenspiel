@@ -31,7 +31,7 @@ Die Noten stehen in der Datei `js/noten-konfiguration.js`.
 
 - Den aktiven Übungssatz wählst du mit `aktiverUebungssatz`. Voreingestellt ist `"violin-c4-g4"` mit C, D, E, F und G. Als zweiter Satz ist `"violin-c4-h4"` mit C bis H vorbereitet.
 - Unter `uebungssaetze` legst du fest, welche Noten zu einem Satz gehören. Die Reihenfolge der Liste ist auch die Reihenfolge der Antwortschaltflächen.
-- Unter `noten` steht jede Note mit Kennung (`id`), Schlüssel (`schluessel`), Position im Notensystem (`position`), deutschem Namen (`name`) und Hinweis (`hinweis`). Die Position zählt in Schritten von der untersten Linie aus: `0` ist die unterste Linie, `1` der erste Zwischenraum, `-1` direkt unter dem System und `-2` die erste Hilfslinie unten.
+- Unter `noten` steht jede Note mit Kennung (`id`), Schlüssel (`schluessel`), Position im Notensystem (`position`), deutschem Namen (`name`), Hinweis (`hinweis`) und Merktier (`tier`). Die Position zählt in Schritten von der untersten Linie aus: `0` ist die unterste Linie, `1` der erste Zwischenraum, `-1` direkt unter dem System und `-2` die erste Hilfslinie unten.
 
 Ein Beispiel: Für einen Satz mit E, F und G trägst du einen neuen Eintrag unter `uebungssaetze` ein und setzt `aktiverUebungssatz` auf dessen Kennung.
 
@@ -44,6 +44,18 @@ uebungssaetze: {
 ```
 
 Nach dem Speichern lädst du die Seite neu. Nimm pro Übungssatz jeden Notennamen nur einmal auf, sonst entstehen zwei gleich beschriftete Schaltflächen. In dieser Version zeichnet das Spiel nur den Violinschlüssel.
+
+## Merktiere
+
+Nach jeder Antwort zeigt das Spiel das Tier zur Note, zum Beispiel „D wie Delfin“. Vor der Antwort ist das Tier nicht zu sehen. Die Zuordnung steht im Feld `tier` jeder Note:
+
+- C: Zebra
+- D: Delfin
+- E: Elefant
+- F: Frosch für das tiefe F (erster Zwischenraum), Fuchs für das hohe F (oberste Linie)
+- G: Giraffe
+- A: Affe
+- H: Hase
 
 ## Spielregeln
 

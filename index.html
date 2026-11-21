@@ -53,7 +53,13 @@
           <div class="tier-zeile">
             <div class="tier-klein" id="runde-tier"></div>
             <div class="sprechblase" id="sprechblase">
-              <p id="sprechblase-text" aria-live="polite"></p>
+              <div aria-live="polite">
+                <div class="merkhilfe" id="merkhilfe" hidden>
+                  <div class="merkhilfe-bild" id="merkhilfe-bild"></div>
+                  <p class="merkhilfe-text" id="merkhilfe-text"></p>
+                </div>
+                <p id="sprechblase-text"></p>
+              </div>
               <button type="button" class="knopf knopf-haupt knopf-weiter" id="knopf-weiter" hidden>Weiter</button>
             </div>
           </div>

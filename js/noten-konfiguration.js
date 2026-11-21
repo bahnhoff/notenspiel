@@ -31,6 +31,9 @@
  *    - name       deutscher Notenname auf der Antwortschaltfläche
  *                 (C, D, E, F, G, A, H)
  *    - hinweis    kurzer Satz, der nach einer falschen Antwort erscheint
+ *    - tier       Merktier, das nach der Antwort erscheint („D wie Delfin“).
+ *                 Verfügbar: zebra, delfin, elefant, frosch, fuchs, giraffe,
+ *                 affe, hase, katze
  *
  * Hinweis: Zwei Noten mit demselben Namen (zum Beispiel C4 und C5) in einem
  * Übungssatz ergeben zwei gleich beschriftete Schaltflächen. Nimm deshalb pro
@@ -58,6 +61,7 @@ window.NOTEN_KONFIGURATION = {
   noten: [
     {
       id: "violin-C4",
+      tier: "zebra",
       schluessel: "violin",
       position: -2,
       name: "C",
@@ -65,6 +69,7 @@ window.NOTEN_KONFIGURATION = {
     },
     {
       id: "violin-D4",
+      tier: "delfin",
       schluessel: "violin",
       position: -1,
       name: "D",
@@ -72,6 +77,7 @@ window.NOTEN_KONFIGURATION = {
     },
     {
       id: "violin-E4",
+      tier: "elefant",
       schluessel: "violin",
       position: 0,
       name: "E",
@@ -79,6 +85,7 @@ window.NOTEN_KONFIGURATION = {
     },
     {
       id: "violin-F4",
+      tier: "frosch",
       schluessel: "violin",
       position: 1,
       name: "F",
@@ -86,6 +93,7 @@ window.NOTEN_KONFIGURATION = {
     },
     {
       id: "violin-G4",
+      tier: "giraffe",
       schluessel: "violin",
       position: 2,
       name: "G",
@@ -93,6 +101,7 @@ window.NOTEN_KONFIGURATION = {
     },
     {
       id: "violin-A4",
+      tier: "affe",
       schluessel: "violin",
       position: 3,
       name: "A",
@@ -100,6 +109,7 @@ window.NOTEN_KONFIGURATION = {
     },
     {
       id: "violin-H4",
+      tier: "hase",
       schluessel: "violin",
       position: 4,
       name: "H",
@@ -107,10 +117,35 @@ window.NOTEN_KONFIGURATION = {
     },
     {
       id: "violin-C5",
+      tier: "zebra",
       schluessel: "violin",
       position: 5,
       name: "C",
       hinweis: "Die Note liegt im dritten Zwischenraum von unten. Das ist das hohe C."
+    },
+    {
+      id: "violin-D5",
+      tier: "delfin",
+      schluessel: "violin",
+      position: 6,
+      name: "D",
+      hinweis: "Die Note liegt auf der vierten Linie von unten."
+    },
+    {
+      id: "violin-E5",
+      tier: "elefant",
+      schluessel: "violin",
+      position: 7,
+      name: "E",
+      hinweis: "Die Note liegt im obersten Zwischenraum."
+    },
+    {
+      id: "violin-F5",
+      tier: "fuchs",
+      schluessel: "violin",
+      position: 8,
+      name: "F",
+      hinweis: "Die Note liegt auf der obersten Linie. Das hohe F ist der Fuchs, das tiefe F der Frosch."
     }
   ]
 };
