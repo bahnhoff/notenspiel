@@ -118,10 +118,80 @@
     return knoepfe;
   }
 
+  function sterneText(n) { return n === 1 ? "1 Stern" : n + " Sterne"; }
+
+  /** Sterne und Punkte im Kopf einer Ansicht anzeigen. */
+  function zeigeSterne(sterneEl, punkteEl, sterne, gesamt, punkte) {
+    sterneEl.innerHTML = sternSymbole(sterne, gesamt);
+    sterneEl.setAttribute("aria-label", sterne + " von " + gesamt + " Sternen");
+    if (punkteEl) punkteEl.textContent = punkte + " Punkte";
+  }
+
+  /**
+   * Zeigt nach der Antwort das Merktier, zum Beispiel „d1 wie Delfin“.
+   * `id` ist die Kennung der Box, Bild und Text heißen id-bild und id-text.
+   */
+  function zeigeMerkhilfe(umgebung, note, id) {
+    var box = document.getElementById(id);
+    var hilfe = note ? umgebung.merkhilfe(note) : null;
+    if (!hilfe) {
+      box.hidden = true;
+      return;
+    }
+    document.getElementById(id + "-bild").innerHTML = root.Tiere.zeichne(hilfe.tier, "froh", hilfe.name);
+    document.getElementById(id + "-text").textContent = hilfe.text;
+    box.hidden = false;
+  }
+
+  /**
+   * Schließt eine Runde mit 10 Aufgaben nach den klassischen Regeln ab
+   * (js/spiel-logik.js) und übergibt das Ergebnis an die App.
+   */
+  function klassischesEnde(umgebung, runde) {
+    var L = root.SpielLogik;
+    var e = L.klassischesErgebnis(runde);
+    var spruch;
+    if (e.vorzeitig) spruch = "Versuchen wir’s noch mal?";
+    else if (e.richtige === L.REGELN.aufgabenProRunde) spruch = "Alles richtig. Du bist ein Notenprofi!";
+    else spruch = "Toll gemacht!";
+    umgebung.beende({
+      gesamt: e.gesamt,
+      neueSterne: e.neueSterne,
+      titel: e.vorzeitig ? "Runde vorbei" : "Geschafft!",
+      spruch: spruch,
+      stimmung: e.vorzeitig ? "normal" : "froh",
+      zeilen: [
+        ["Richtige Antworten", e.richtige + " von " + L.REGELN.aufgabenProRunde],
+        ["Punkte dafür", String(e.punkte)],
+        ["Bonus", e.bonus + (e.bonus > 0 ? " (" + sterneText(e.verbleibendeSterne) + " × " + L.REGELN.bonusProStern + ")" : "")]
+      ],
+      schwierig: e.schwierig
+    });
+  }
+
+  /** Zufällige Reihenfolge (Fisher-Yates), ändert die Liste nicht. */
+  function mische(liste, zufall) {
+    var a = liste.slice();
+    zufall = zufall || Math.random;
+    for (var i = a.length - 1; i > 0; i--) {
+      var j = Math.floor(zufall() * (i + 1));
+      var t = a[i]; a[i] = a[j]; a[j] = t;
+    }
+    return a;
+  }
+
   root.Modi = {
     registriere: registriere,
     hole: hole,
     liste: function () { return liste.slice(); },
-    hilfen: { sternSymbole: sternSymbole, antwortKnoepfe: antwortKnoepfe }
+    hilfen: {
+      sternSymbole: sternSymbole,
+      sterneText: sterneText,
+      zeigeSterne: zeigeSterne,
+      antwortKnoepfe: antwortKnoepfe,
+      zeigeMerkhilfe: zeigeMerkhilfe,
+      klassischesEnde: klassischesEnde,
+      mische: mische
+    }
   };
 })(this);

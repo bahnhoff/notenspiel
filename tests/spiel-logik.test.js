@@ -126,3 +126,23 @@ test("Migration eines alten Spielstands", () => {
   assert.deepEqual(neu.rekorde.klassisch, [{ gesamt: 120, sterne: 2, zeit: 5, nr: 3 }]);
   assert.equal(neu.einstellungen, null);
 });
+
+test("Notenflug: jedes Level 15 % schneller, Punkte 10 × Level, Ende nach drei Fehlern", () => {
+  assert.equal(L.flugzeit(1), 8000);
+  assert.ok(Math.abs(L.flugzeit(2) - 8000 / 1.15) < 1e-9);
+  const flug = L.neuerFlug();
+  for (let i = 0; i < 10; i++) L.flugAntwort(flug, true);
+  assert.equal(flug.level, 2);
+  L.flugAntwort(flug, true);
+  assert.equal(flug.punkte, 10 * 10 + 20);
+  L.flugAntwort(flug, false);
+  L.flugAntwort(flug, false);
+  assert.deepEqual(L.flugAntwort(flug, false), { levelGeschafft: false, beendet: true });
+  assert.equal(L.flugAntwort(flug, true), null);
+  assert.equal(L.flugSterne(flug), 1);
+});
+
+test("Noten-Memory: Sterne nach Zügen und Punkte", () => {
+  assert.deepEqual([6, 9, 10, 13, 14].map((z) => L.memorySterne(z)), [3, 3, 2, 2, 1]);
+  assert.equal(L.memoryPunkte(6, 3), 90);
+});

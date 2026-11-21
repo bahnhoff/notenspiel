@@ -1,6 +1,6 @@
 /*
- * Anpassungen für „Welche Note ist das?“
- * ======================================
+ * Anpassungen für den Notenzoo
+ * ============================
  *
  * Die Noten selbst musst du nicht von Hand pflegen. Das Spiel erzeugt sie aus
  * Schlüssel und Bereich: Name, Lage im Notensystem, Hinweis und Merktier.

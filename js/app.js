@@ -411,14 +411,17 @@
     box.innerHTML = "";
     window.Modi.liste().forEach(function (modus) {
       if (modus.hauptspiel) return;
+      // Kachel mit großem Symbol und kurzem Namen
       var b = element("button", "knopf knopf-neben knopf-modus");
       b.type = "button";
+      b.dataset.modus = modus.id;
       if (modus.symbol) b.appendChild(element("span", "modus-symbol", modus.symbol)).setAttribute("aria-hidden", "true");
-      b.appendChild(document.createTextNode(" " + modus.name));
+      b.appendChild(element("span", "modus-name", modus.name));
       b.addEventListener("click", function () { starteModus(modus); });
       box.appendChild(b);
     });
     box.hidden = box.children.length === 0;
+    $("titel-modi").hidden = box.hidden;
   }
 
   var hauptspiel = window.Modi.liste().filter(function (m) { return m.hauptspiel; })[0] || window.Modi.liste()[0];

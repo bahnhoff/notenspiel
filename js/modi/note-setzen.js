@@ -1,0 +1,185 @@
+/*
+ * Modus „Note setzen“: Der Name steht da, zum Beispiel „f1“. Das Kind tippt
+ * im Notensystem die richtige Linie oder den Zwischenraum an. Die Note
+ * erscheint dort und lässt sich mit ▲ und ▼ verschieben, „Prüfen“ wertet.
+ * Jeder Tipp ins System zählt zur nächstgelegenen Linie oder zum nächsten
+ * Zwischenraum, auch auf Hilfslinien. Tastatur: Pfeiltasten und Eingabe.
+ * 10 Aufgaben, Wertung wie im klassischen Spiel (js/spiel-logik.js).
+ * Nutzt die Ansicht #ansicht-setzen aus index.html.
+ */
+(function () {
+  "use strict";
+
+  var L = window.SpielLogik;
+  var N = window.Noten;
+  var H = window.Modi.hilfen;
+  var PAUSE_NACH_RICHTIG = 1300; // Millisekunden
+  // Schmales System, damit Linien und Zwischenräume auf dem Handy groß sind.
+  var FORM = { breite: 114, noteX: 66, falschX: 92 };
+
+  var umgebung = null;
+  var runde = null;
+  var weiterTimer = null;
+  var gewaehlt = null;    // gesetzte Position oder null
+  var erlaubt = [0, 8];   // tiefste und höchste Position zum Antippen
+
+  function $(id) { return document.getElementById(id); }
+
+  function aktiv() {
+    return runde && umgebung && umgebung.laeuft();
+  }
+
+  function starte(u) {
+    stoppe();
+    umgebung = u;
+    runde = L.neueRunde(u.noten, { vorrang: u.schwierig });
+    // Etwas Platz über und unter dem Bereich, damit auch falsche Stellen antippbar sind.
+    erlaubt = [Math.min(u.bereich[0], 0) - 2, Math.max(u.bereich[1], 8) + 2];
+    u.zeigeTier($("setzen-tier"), "normal");
+    u.zeigeAnsicht();
+    zeigeAufgabe();
+  }
+
+  function stoppe() {
+    clearTimeout(weiterTimer);
+    runde = null;
+    gewaehlt = null;
+  }
+
+  function note() { return runde.aktuell.note; }
+
+  function stufeVon(position) {
+    return position + N.SCHLUESSEL[note().schluessel].untersteLinie;
+  }
+
+  function zeichne(optionen) {
+    var o = { bereich: erlaubt, breite: FORM.breite, noteX: FORM.noteX, falschX: FORM.falschX, schluessel: note().schluessel };
+    for (var k in optionen) o[k] = optionen[k];
+    var n = optionen.note !== undefined ? optionen.note : null;
+    $("setzen-notensystem").innerHTML = window.Notensystem.zeichne(n, o);
+  }
+
+  function zeigeStatus() {
+    $("setzen-aufgabe").textContent = "Aufgabe " + (runde.aufgabe + 1) + " von " + L.REGELN.aufgabenProRunde;
+    H.zeigeSterne($("setzen-sterne"), $("setzen-punkte"), runde.sterne, L.REGELN.startSterne, runde.punkte);
+  }
+
+  function zeigeAufgabe() {
+    gewaehlt = null;
+    zeigeStatus();
+    $("setzen-name").textContent = note().name;
+    var system = $("setzen-notensystem");
+    system.classList.remove("ist-falsch", "ist-richtig", "hat-vorschau");
+    system.classList.add("ist-offen");
+    system.setAttribute("aria-valuemin", String(erlaubt[0]));
+    system.setAttribute("aria-valuemax", String(erlaubt[1]));
+    system.setAttribute("aria-valuenow", "4");
+    system.setAttribute("aria-valuetext", "Noch keine Note gesetzt");
+    zeichne({});
+    $("setzen-weiter").hidden = true;
+    $("setzen-merkhilfe").hidden = true;
+    $("setzen-pruefen").disabled = true;
+    $("setzen-hoeher").disabled = false;
+    $("setzen-tiefer").disabled = false;
+    $("setzen-text").textContent = "Tippe ins Notensystem, wo " + note().name + " hingehört. Dann tippe auf Prüfen.";
+  }
+
+  /** Setzt die Vorschau-Note an eine Position. */
+  function setze(position) {
+    if (!aktiv() || runde.gesperrt) return;
+    position = Math.max(erlaubt[0], Math.min(erlaubt[1], position));
+    gewaehlt = position;
+    var system = $("setzen-notensystem");
+    system.classList.add("hat-vorschau");
+    zeichne({ note: { position: position, schluessel: note().schluessel } });
+    system.setAttribute("aria-valuenow", String(position));
+    system.setAttribute("aria-valuetext", N.hinweis(note().schluessel, stufeVon(position)));
+    $("setzen-pruefen").disabled = false;
+  }
+
+  function verschiebe(schritte) {
+    if (!aktiv() || runde.gesperrt) return;
+    setze(gewaehlt === null ? 4 : gewaehlt + schritte);
+  }
+
+  /** Antippen im System: nächstgelegene Linie oder nächster Zwischenraum. */
+  function beiTipp(ev) {
+    if (!aktiv() || runde.gesperrt) return;
+    var svg = $("setzen-notensystem").querySelector("svg");
+    if (!svg || !svg.getScreenCTM) return;
+    var punkt = svg.createSVGPoint();
+    punkt.x = ev.clientX;
+    punkt.y = ev.clientY;
+    var matrix = svg.getScreenCTM();
+    if (!matrix) return;
+    var lage = punkt.matrixTransform(matrix.inverse());
+    setze(window.Notensystem.positionVon(lage.y));
+  }
+
+  function pruefe() {
+    if (!aktiv() || runde.gesperrt || gewaehlt === null) return;
+    var gesetzt = N.name(stufeVon(gewaehlt));
+    var a = L.antworte(runde, gesetzt);
+    if (!a) return; // schon geprüft
+    $("setzen-pruefen").disabled = true;
+    $("setzen-hoeher").disabled = true;
+    $("setzen-tiefer").disabled = true;
+    var system = $("setzen-notensystem");
+    system.classList.remove("ist-offen", "hat-vorschau");
+    system.classList.add(a.richtig ? "ist-richtig" : "ist-falsch");
+    zeichne({ note: a.note, beschriftung: a.note.name, falsch: a.richtig ? undefined : gewaehlt });
+    zeigeStatus();
+    H.zeigeMerkhilfe(umgebung, a.note, "setzen-merkhilfe");
+    $("setzen-text").textContent = a.richtig
+      ? "✓ " + a.nachricht
+      : "✗ Du hast " + gesetzt + " gesetzt. So sieht " + a.note.name + " aus. " + a.note.hinweis;
+    umgebung.zeigeTier($("setzen-tier"), a.richtig ? "froh" : "oje");
+
+    if (a.richtig) {
+      weiterTimer = setTimeout(naechsteAufgabe, PAUSE_NACH_RICHTIG);
+    } else {
+      var weiter = $("setzen-weiter");
+      weiter.hidden = false;
+      weiter.focus({ preventScroll: true });
+      if (weiter.scrollIntoView) weiter.scrollIntoView({ block: "nearest" });
+    }
+  }
+
+  function naechsteAufgabe() {
+    clearTimeout(weiterTimer);
+    if (!aktiv()) return;
+    var w = L.weiter(runde);
+    if (!w) return; // doppelter Aufruf
+    if (w.beendet) {
+      var r = runde;
+      runde = null;
+      H.klassischesEnde(umgebung, r);
+      return;
+    }
+    umgebung.zeigeTier($("setzen-tier"), "normal");
+    zeigeAufgabe();
+    if (document.activeElement === $("setzen-weiter") || document.activeElement === document.body) {
+      $("setzen-notensystem").focus({ preventScroll: true });
+    }
+  }
+
+  $("setzen-notensystem").addEventListener("click", beiTipp);
+  $("setzen-notensystem").addEventListener("keydown", function (ev) {
+    if (ev.key === "ArrowUp" || ev.key === "ArrowRight") { ev.preventDefault(); verschiebe(1); }
+    else if (ev.key === "ArrowDown" || ev.key === "ArrowLeft") { ev.preventDefault(); verschiebe(-1); }
+    else if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); pruefe(); }
+  });
+  $("setzen-hoeher").addEventListener("click", function () { verschiebe(1); });
+  $("setzen-tiefer").addEventListener("click", function () { verschiebe(-1); });
+  $("setzen-pruefen").addEventListener("click", pruefe);
+  $("setzen-weiter").addEventListener("click", naechsteAufgabe);
+
+  window.Modi.registriere({
+    id: "note-setzen",
+    name: "Note setzen",
+    symbol: "✏️",
+    ansicht: "setzen",
+    starte: starte,
+    stoppe: stoppe
+  });
+})();

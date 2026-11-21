@@ -10,8 +10,8 @@
   var ABSTAND = 10;           // Linienabstand
   var UNTERSTE_LINIE = 72;    // y der untersten Linie
   var LINKS = 4;
-  var RECHTS = 146;
-  var NOTE_X = 98;
+  var RECHTS_STANDARD = 146;
+  var NOTE_X_STANDARD = 98;
 
   /** y-Koordinate für eine Position (0 = unterste Linie, 1 = erster Zwischenraum …). */
   function yVon(position) {
@@ -48,11 +48,31 @@
    * optionen: bereich      [tiefste, höchste Position] für einen festen Ausschnitt
    *           beschriftung Text neben der Note (zum Beispiel nach der Antwort)
    *           schluessel   "violin" oder "bass", sonst der Schlüssel der Note
+   *           breite       Ende der Linien rechts (Standard 146), für schmale Systeme
+   *           noteX        x-Mitte der Note (Standard 98)
+   *           falsch       Position einer zusätzlichen, falsch gesetzten Note (mit ✗)
+   *           falschX      x-Mitte dieser Note (Standard noteX − 24)
+   *           klasse       zusätzliche CSS-Klasse für das SVG
+   * Die Note samt Hilfslinien liegt in <g class="note-gruppe">, damit ein Modus
+   * sie verschieben kann (Notenflug).
    */
   function zeichne(note, optionen) {
     optionen = optionen || {};
     var teile = [];
     var i, y;
+    var RECHTS = optionen.breite || RECHTS_STANDARD;
+    var NOTE_X = optionen.noteX || NOTE_X_STANDARD;
+
+    // Hilfslinien unter und über dem System für eine Note an Position p und x-Mitte x
+    function hilfslinien(p, x) {
+      var t = "";
+      for (var j = -2; j >= p; j -= 2) t += hilfslinie(yVon(j), x);
+      for (j = 10; j <= p; j += 2) t += hilfslinie(yVon(j), x);
+      return t;
+    }
+    function hilfslinie(hy, x) {
+      return '<line class="hilfslinie" x1="' + (x - 13) + '" x2="' + (x + 13) + '" y1="' + hy + '" y2="' + hy + '" stroke="currentColor" stroke-width="1.4"/>';
+    }
 
     // Fünf Linien
     for (i = 0; i < 5; i++) {
@@ -65,18 +85,19 @@
     var schluessel = optionen.schluessel || (note && note.schluessel) || "violin";
     teile.push(schluessel === "bass" ? BASSSCHLUESSEL : VIOLINSCHLUESSEL);
 
+    if (typeof optionen.falsch === "number" && (!note || optionen.falsch !== note.position)) {
+      var fy = yVon(optionen.falsch);
+      var fx = optionen.falschX || NOTE_X - 24;
+      teile.push('<g class="note-falsch">' + hilfslinien(optionen.falsch, fx) +
+        '<ellipse cx="' + fx + '" cy="' + fy + '" rx="6.6" ry="4.6" transform="rotate(-20 ' + fx + " " + fy + ')" fill="none" stroke="currentColor" stroke-width="1.6" stroke-dasharray="2.4 1.6"/>' +
+        '<text x="' + (fx + 8) + '" y="' + (fy - 3) + '" font-size="11" font-weight="700" fill="currentColor">✗</text></g>');
+    }
+
     if (note) {
       var p = note.position;
       var ny = yVon(p);
-      // Hilfslinien unter und über dem System
-      for (i = -2; i >= p; i -= 2) {
-        y = yVon(i);
-        teile.push('<line class="hilfslinie" x1="' + (NOTE_X - 13) + '" x2="' + (NOTE_X + 13) + '" y1="' + y + '" y2="' + y + '" stroke="currentColor" stroke-width="1.4"/>');
-      }
-      for (i = 10; i <= p; i += 2) {
-        y = yVon(i);
-        teile.push('<line class="hilfslinie" x1="' + (NOTE_X - 13) + '" x2="' + (NOTE_X + 13) + '" y1="' + y + '" y2="' + y + '" stroke="currentColor" stroke-width="1.4"/>');
-      }
+      teile.push('<g class="note-gruppe">');
+      teile.push(hilfslinien(p, NOTE_X));
       // Notenhals: unterhalb der Mittellinie nach oben rechts, sonst nach unten links
       var halsLaenge = 35;
       if (p < 4) {
@@ -90,6 +111,7 @@
       if (optionen.beschriftung) {
         teile.push('<text class="notenname" x="' + (NOTE_X + 22) + '" y="' + (ny + 5.5) + '" font-size="16" font-weight="700" fill="currentColor">' + optionen.beschriftung + "</text>");
       }
+      teile.push("</g>");
     }
 
     // Fester Ausschnitt für den ganzen Übungssatz, damit das System beim
@@ -97,10 +119,16 @@
     var bereich = optionen.bereich || [-3, 11];
     var oben = Math.min(10, yVon(bereich[1]) - (bereich[1] < 4 ? 38 : 8));
     var unten = Math.max(94, yVon(bereich[0]) + (bereich[0] >= 4 ? 38 : 8));
-    return '<svg class="notensystem-svg" viewBox="0 ' + oben + " 150 " + (unten - oben) + '" role="img" aria-label="' +
+    var breiteGesamt = Math.max(RECHTS + 4, optionen.beschriftung ? NOTE_X + 52 : 0);
+    return '<svg class="notensystem-svg' + (optionen.klasse ? " " + optionen.klasse : "") + '" viewBox="0 ' + oben + " " + breiteGesamt + " " + (unten - oben) + '" role="img" aria-label="' +
       ((schluessel === "bass" ? "Bassschlüssel" : "Violinschlüssel") + (optionen.beschriftung ? " mit der Note " + optionen.beschriftung : (note ? " mit einer Note" : ""))) +
       '" xmlns="http://www.w3.org/2000/svg">' + teile.join("") + "</svg>";
   }
 
-  root.Notensystem = { zeichne: zeichne, yVon: yVon, NOTE_X: NOTE_X };
+  /** Position (0 = unterste Linie) zu einer y-Koordinate, auf ganze Schritte gerundet. */
+  function positionVon(y) {
+    return Math.round((UNTERSTE_LINIE - y) / (ABSTAND / 2));
+  }
+
+  root.Notensystem = { zeichne: zeichne, yVon: yVon, positionVon: positionVon, NOTE_X: NOTE_X_STANDARD };
 })(this);

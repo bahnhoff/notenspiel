@@ -1,4 +1,4 @@
-/* Welche Note ist das? – Gestaltung */
+/* Notenzoo – Gestaltung */
 
 :root {
   --hintergrund: #fff7ea;
@@ -144,15 +144,50 @@ h1:focus { outline: none; }
   font-size: 0.95rem;
 }
 
-.start-modi {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 10px;
-  width: 100%;
-  max-width: 560px;
+.knopf-start {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  line-height: 1.1;
 }
 
-.knopf-modus { font-size: 1.1rem; min-height: 56px; }
+.start-unterzeile { font-size: 1.05rem; font-weight: 600; }
+
+.start-modi-titel {
+  margin: 6px 0 -6px;
+  font-size: 1.3rem;
+}
+
+/* Kacheln der Mini-Spiele: 2 Spalten auf dem Handy, 4 auf dem Tablet.
+   Bei 7 Spielen bleibt es bei höchstens zwei Reihen auf dem Tablet. */
+.start-modi {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  width: 100%;
+  max-width: 760px;
+}
+
+.knopf-modus {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-height: 112px;
+  padding: 10px 6px;
+  font-size: 1.15rem;
+  line-height: 1.15;
+}
+
+.modus-symbol { font-size: 2.6rem; line-height: 1; }
+.modus-name { overflow-wrap: anywhere; }
+
+@media (min-width: 700px) {
+  .start-modi { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
 
 .hinweis-speicher {
   max-width: 32em;
@@ -684,6 +719,190 @@ h1:focus { outline: none; }
   margin: 10px 0 0;
 }
 
+/* ---------- Notenflug ---------- */
+
+.notensystem-flug { overflow: hidden; }
+
+/* ---------- Klaviertasten ---------- */
+
+.klaviatur {
+  display: flex;
+  flex-direction: column-reverse; /* tiefe Reihe unten, hohe oben */
+  gap: 10px;
+  margin: 14px auto 0;
+}
+
+.klavier-reihe {
+  position: relative;
+  z-index: 0;
+  display: grid;
+  gap: 0;
+}
+
+.taste {
+  position: relative;
+  min-width: 0;
+  min-height: 48px;
+  height: 128px;
+  padding: 0 0 8px;
+  font: inherit;
+  font-weight: 800;
+  font-size: 1.2rem;
+  color: var(--text);
+  background: #fff;
+  border: 2px solid #4a3a2e;
+  border-left-width: 1px;
+  border-right-width: 1px;
+  border-radius: 0 0 10px 10px;
+  box-shadow: inset 0 -6px 0 #eadfce;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  cursor: pointer;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.taste:active { background: #fff3df; box-shadow: inset 0 -2px 0 #eadfce; }
+.taste:focus-visible { outline: 4px solid var(--fokus); outline-offset: -4px; z-index: 3; }
+
+/* Schwarze Taste: nur Dekoration, Tippen geht an die weiße Taste darunter. */
+.taste-schwarz {
+  display: none;
+  position: absolute;
+  top: -2px;
+  right: -28%;
+  width: 56%;
+  height: 58%;
+  background: #2a1d14;
+  border-radius: 0 0 6px 6px;
+  z-index: 2;
+  pointer-events: none;
+}
+.taste.mit-schwarz .taste-schwarz { display: block; }
+
+/* Mehrere Reihen: flachere Tasten, damit die Klaviatur auf das Handy passt */
+.klaviatur-mehrreihig { gap: 8px; }
+.klaviatur-mehrreihig .taste { height: 84px; }
+.klaviatur-mehrreihig .taste-schwarz { height: 52%; }
+
+.taste-mitte { background: #fff8d6; }
+.taste-mitte-zeichen {
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: #fff;
+  background: var(--akzent);
+  border-radius: 999px;
+  padding: 1px 6px;
+  margin-top: 2px;
+}
+
+.taste-name { font-size: 1.3rem; }
+.taste-name:empty { display: none; }
+
+.taste-marke { font-size: 1.3rem; line-height: 1; }
+.taste-marke:empty { display: none; }
+
+.taste.ist-richtig,
+.taste.ist-loesung { background: var(--gruen-hell); color: var(--gruen); border: 4px solid var(--gruen); }
+.taste.ist-loesung { outline: 3px dashed var(--gruen); outline-offset: -9px; }
+.taste.ist-falsch { background: var(--rot-hell); color: var(--rot); border: 4px dashed var(--rot); }
+.klaviatur.gesperrt .taste { cursor: default; }
+
+/* ---------- Note setzen ---------- */
+
+.setzen-name {
+  display: inline-block;
+  min-width: 2.2em;
+  padding: 0 10px;
+  border-radius: 12px;
+  background: var(--akzent);
+  color: #fff;
+}
+
+.notensystem-setzen { cursor: pointer; touch-action: manipulation; }
+.notensystem-setzen:focus-visible { outline: 4px solid var(--fokus); outline-offset: 3px; }
+.notensystem-setzen .notensystem-svg { max-height: 58vh; margin: 0 auto; }
+.notensystem-setzen.hat-vorschau .note-gruppe { color: var(--akzent-dunkel); }
+.notensystem-setzen.ist-falsch .note-falsch { color: var(--rot); }
+.notensystem-setzen.ist-richtig .note-gruppe,
+.notensystem-setzen.ist-falsch .note-gruppe { color: var(--gruen); }
+.notensystem-setzen.ist-falsch .notenname { fill: var(--gruen); }
+
+.setzen-steuerung {
+  display: grid;
+  grid-template-columns: 64px 64px 1fr;
+  gap: 10px;
+}
+
+.knopf-schritt { font-size: 1.5rem; min-height: 60px; padding: 0; }
+.knopf-pruefen { font-size: 1.4rem; min-height: 60px; }
+
+/* ---------- Noten-Memory ---------- */
+
+.ansicht-memory { max-width: 760px; margin: 0 auto; }
+.ansicht-memory .frage { margin: 6px 0 10px; }
+
+.memory-karten {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.memory-karte {
+  position: relative;
+  flex: 0 0 calc((100% - 16px) / 3);
+  height: clamp(96px, 16vh, 150px);
+  min-height: 48px;
+  padding: 4px;
+  font: inherit;
+  border-radius: 14px;
+  border: 2px solid var(--akzent-dunkel);
+  background: repeating-linear-gradient(45deg, var(--akzent) 0 10px, #f08a3c 10px 20px);
+  color: #fff;
+  box-shadow: var(--schatten);
+  cursor: pointer;
+  touch-action: manipulation;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.memory-karte:focus-visible { outline: 4px solid var(--fokus); outline-offset: 3px; }
+.memory-karte:active { transform: translateY(2px); box-shadow: none; }
+
+.karte-rueckseite { font-size: 2.4rem; font-weight: 800; text-shadow: 0 2px 0 var(--akzent-dunkel); }
+.karte-vorderseite { display: none; width: 100%; height: 100%; color: #111; }
+.karte-vorderseite .notensystem-svg { width: 100%; height: 100%; max-height: none; }
+.karte-name { align-items: center; justify-content: center; font-size: 2.2rem; font-weight: 800; color: var(--text); }
+
+.memory-karte.ist-offen { background: var(--karte); border-color: var(--rand); cursor: default; }
+.memory-karte.ist-offen .karte-rueckseite { display: none; }
+.memory-karte.ist-offen .karte-vorderseite { display: flex; }
+.memory-karte.ist-gefunden { background: var(--gruen-hell); border: 4px solid var(--gruen); }
+.memory-karte.ist-kein-paar { border: 4px dashed var(--rot); }
+
+.karte-marke {
+  position: absolute;
+  top: 2px;
+  right: 6px;
+  font-size: 1.2rem;
+  font-weight: 800;
+}
+.memory-karte.ist-gefunden .karte-marke { color: var(--gruen); }
+.memory-karte.ist-kein-paar .karte-marke { color: var(--rot); }
+
+@media (min-width: 700px) {
+  .memory-karte { flex-basis: calc((100% - 24px) / 4); height: clamp(110px, 20vh, 170px); }
+  .taste { height: 150px; }
+  .klaviatur-mehrreihig .taste { height: 104px; }
+}
+
 /* ---------- Tablet und Querformat ---------- */
 
 @media (min-width: 700px) {
@@ -701,7 +920,7 @@ h1:focus { outline: none; }
     gap: 20px;
     align-items: center;
   }
-  .ansicht-runde:not([hidden]) {
+  .ansicht-runde:not([hidden]):not(.ansicht-klavier) {
     display: flex;
     flex-direction: column;
     min-height: calc(100dvh - 28px);
@@ -709,6 +928,7 @@ h1:focus { outline: none; }
   .runde-inhalt { flex: 1 1 auto; grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr); }
   .runde-antworten { margin-top: 0; }
   .notensystem-svg { max-height: 62vh; }
+  .ansicht-klavier .notensystem-svg { max-height: 36vh; }
 }
 
 /* Niedrige Querformat-Bildschirme (Handy quer) */
@@ -718,4 +938,6 @@ h1:focus { outline: none; }
   .tier-klein { width: 64px; flex-basis: 64px; }
   .ansicht-start { padding-top: 0; gap: 10px; }
   .start-tier { width: 120px; }
+  .taste,
+  .klaviatur-mehrreihig .taste { height: 80px; }
 }

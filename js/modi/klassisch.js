@@ -41,10 +41,7 @@
 
   function zeigeStatus() {
     $("aufgabe-nr").textContent = "Aufgabe " + (runde.aufgabe + 1) + " von " + L.REGELN.aufgabenProRunde;
-    var sterne = $("sterne-anzeige");
-    sterne.innerHTML = H.sternSymbole(runde.sterne, L.REGELN.startSterne);
-    sterne.setAttribute("aria-label", runde.sterne + " von " + L.REGELN.startSterne + " Sternen");
-    $("punkte-anzeige").textContent = runde.punkte + " Punkte";
+    H.zeigeSterne($("sterne-anzeige"), $("punkte-anzeige"), runde.sterne, L.REGELN.startSterne, runde.punkte);
   }
 
   function zeigeAufgabe() {
@@ -93,7 +90,7 @@
     $("notensystem").innerHTML = window.Notensystem.zeichne(a.note, { beschriftung: a.note.name, bereich: umgebung.bereich });
     $("notensystem").classList.add(a.richtig ? "ist-richtig" : "ist-falsch");
 
-    zeigeMerkhilfe(a.note);
+    H.zeigeMerkhilfe(umgebung, a.note, "merkhilfe");
     $("sprechblase-text").textContent = (a.richtig ? "✓ " : "✗ ") + a.nachricht;
     umgebung.zeigeTier($("runde-tier"), a.richtig ? "froh" : "oje");
 
@@ -106,19 +103,6 @@
       // Auf kleinen Bildschirmen den Hinweis und die Schaltfläche sichtbar machen.
       if (weiterKnopf.scrollIntoView) weiterKnopf.scrollIntoView({ block: "nearest" });
     }
-  }
-
-  /** Zeigt nach der Antwort das Merktier, zum Beispiel „d1 wie Delfin“. */
-  function zeigeMerkhilfe(note) {
-    var hilfe = umgebung.merkhilfe(note);
-    var box = $("merkhilfe");
-    if (!hilfe) {
-      box.hidden = true;
-      return;
-    }
-    $("merkhilfe-bild").innerHTML = window.Tiere.zeichne(hilfe.tier, "froh", hilfe.name);
-    $("merkhilfe-text").textContent = hilfe.text;
-    box.hidden = false;
   }
 
   function naechsteAufgabe() {
@@ -135,28 +119,10 @@
     zeigeAufgabe();
   }
 
-  function sterneText(n) { return n === 1 ? "1 Stern" : n + " Sterne"; }
-
   function beende() {
-    var e = L.klassischesErgebnis(runde);
+    var r = runde;
     runde = null;
-    var spruch;
-    if (e.vorzeitig) spruch = "Versuchen wir’s noch mal?";
-    else if (e.richtige === L.REGELN.aufgabenProRunde) spruch = "Alles richtig. Du bist ein Notenprofi!";
-    else spruch = "Toll gemacht!";
-    umgebung.beende({
-      gesamt: e.gesamt,
-      neueSterne: e.neueSterne,
-      titel: e.vorzeitig ? "Runde vorbei" : "Geschafft!",
-      spruch: spruch,
-      stimmung: e.vorzeitig ? "normal" : "froh",
-      zeilen: [
-        ["Richtige Antworten", e.richtige + " von " + L.REGELN.aufgabenProRunde],
-        ["Punkte dafür", String(e.punkte)],
-        ["Bonus", e.bonus + (e.bonus > 0 ? " (" + sterneText(e.verbleibendeSterne) + " × " + L.REGELN.bonusProStern + ")" : "")]
-      ],
-      schwierig: e.schwierig
-    });
+    H.klassischesEnde(umgebung, r);
   }
 
   /* Tastatur: Buchstabe tippen, wenn er unter den Antworten eindeutig ist. */

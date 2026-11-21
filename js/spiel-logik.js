@@ -263,6 +263,76 @@
     };
   }
 
+  /* ---------- Notenflug ---------- */
+
+  var NOTENFLUG = {
+    notenProLevel: 10,
+    startFlugzeit: 8000,   // Millisekunden im ersten Level
+    tempoFaktor: 1.15,     // jedes Level etwa 15 % schneller
+    punkteProLevel: 10,    // Punkte pro richtiger Note = 10 × Level
+    leben: 3,
+    maxSterne: 3
+  };
+
+  /** Flugzeit einer Note in Millisekunden für ein Level (ab 1). */
+  function flugzeit(level) {
+    return NOTENFLUG.startFlugzeit / Math.pow(NOTENFLUG.tempoFaktor, Math.max(1, level) - 1);
+  }
+
+  function neuerFlug() {
+    return { level: 1, imLevel: 0, punkte: 0, richtige: 0, fehler: 0, levelGeschafft: 0, beendet: false };
+  }
+
+  /**
+   * Verbucht eine Note im Notenflug: richtig, falsch oder zu spät (richtig = false).
+   * Liefert { levelGeschafft, beendet } oder null, wenn das Spiel schon vorbei ist.
+   */
+  function flugAntwort(flug, richtig) {
+    if (flug.beendet) return null;
+    if (richtig) {
+      flug.punkte += NOTENFLUG.punkteProLevel * flug.level;
+      flug.richtige += 1;
+    } else {
+      flug.fehler += 1;
+    }
+    flug.imLevel += 1;
+    if (flug.fehler >= NOTENFLUG.leben) {
+      flug.beendet = true;
+      return { levelGeschafft: false, beendet: true };
+    }
+    if (flug.imLevel >= NOTENFLUG.notenProLevel) {
+      flug.levelGeschafft += 1;
+      flug.level += 1;
+      flug.imLevel = 0;
+      return { levelGeschafft: true, beendet: false };
+    }
+    return { levelGeschafft: false, beendet: false };
+  }
+
+  /** Neue Sterne: 1 pro abgeschlossenem Level, höchstens 3. */
+  function flugSterne(flug) {
+    return Math.min(NOTENFLUG.maxSterne, flug.levelGeschafft);
+  }
+
+  /* ---------- Noten-Memory ---------- */
+
+  var MEMORY = { paare: 6, punkteProPaar: 10, punkteProStern: 10 };
+
+  /**
+   * Sterne nach Zügen. Bei 6 Paaren: bis 9 Züge 3, bis 13 Züge 2, sonst 1.
+   * Bei weniger Paaren (kleiner Tonumfang) verschieben sich die Grenzen mit.
+   */
+  function memorySterne(zuege, paare) {
+    paare = paare || MEMORY.paare;
+    if (zuege <= paare + 3) return 3;
+    if (zuege <= paare + 7) return 2;
+    return 1;
+  }
+
+  function memoryPunkte(paare, sterne) {
+    return paare * MEMORY.punkteProPaar + sterne * MEMORY.punkteProStern;
+  }
+
   /* ---------- Spielstand ---------- */
 
   function standardEinstellungen() {
@@ -479,6 +549,14 @@
     weiter: weiter,
     ergebnis: ergebnis,
     klassischesErgebnis: klassischesErgebnis,
+    NOTENFLUG: NOTENFLUG,
+    flugzeit: flugzeit,
+    neuerFlug: neuerFlug,
+    flugAntwort: flugAntwort,
+    flugSterne: flugSterne,
+    MEMORY: MEMORY,
+    memorySterne: memorySterne,
+    memoryPunkte: memoryPunkte,
     leererSpielstand: leererSpielstand,
     bereinigeSpielstand: bereinigeSpielstand,
     bereinigeEinstellungen: bereinigeEinstellungen,

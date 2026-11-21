@@ -1,6 +1,6 @@
-# Welche Note ist das?
+# Notenzoo
 
-Ein Browserspiel zum Üben von Noten im Violin- und Bassschlüssel. Das Spiel zeigt eine Note im Notensystem, und das Kind tippt den passenden deutschen Notennamen an, zum Beispiel `c1`, `g` oder `F`. Für richtige Antworten gibt es Punkte und Sterne, mit gesammelten Sternen kommen neue Tiere dazu.
+Ein Browserspiel zum Üben von Noten im Violin- und Bassschlüssel. Im Hauptspiel „Welche Note ist das?“ zeigt das Spiel eine Note im Notensystem, und das Kind tippt den passenden deutschen Notennamen an, zum Beispiel `c1`, `g` oder `F`. Dazu kommen vier Mini-Spiele. Für richtige Antworten gibt es Punkte und Sterne, mit gesammelten Sternen kommen neue Tiere dazu.
 
 Das Spiel ist eine statische Website aus HTML, CSS und JavaScript. Es braucht keinen Server, keinen Build-Schritt, keine Anmeldung und lädt nichts von fremden Diensten. Den Spielstand speichert der Browser lokal im `localStorage`.
 
@@ -67,7 +67,7 @@ Das Füchschen ist von Anfang an da. Alle 5 gesammelten Sterne kommt ein zufäll
 
 Das Spiel führt für jedes Spiel die fünf besten Ergebnisse. Schafft ein Ergebnis die Top 5, fragt der Ergebnisbildschirm „Wer hat gespielt?“. Zuletzt benutzte Namen stehen als Schnellwahl bereit, der zuletzt gewählte ist vorausgewählt. Wer keinen Namen eintragen möchte, tippt auf „Ohne Namen“. Die Namen liegen nur im Browser des Geräts. Sterne und Tiere gehören allen Kindern auf dem Gerät gemeinsam.
 
-## Spielregeln
+## Spielregeln „Welche Note ist das?“
 
 - Eine Runde hat 10 Aufgaben und beginnt mit 0 Punkten und 3 Sternen.
 - Eine richtige Antwort bringt 10 Punkte. Bei einem Fehler erlischt ein Stern, und das Spiel zeigt die richtige Antwort mit einem Hinweis.
@@ -75,6 +75,15 @@ Das Spiel führt für jedes Spiel die fünf besten Ergebnisse. Schafft ein Ergeb
 - Nach 10 Aufgaben gibt es 10 Bonuspunkte pro verbliebenem Stern, und die Sterne kommen in die Sammlung.
 - Der dritte Fehler beendet die Runde ohne Bonus und ohne neue Sterne. Die Punkte zählen für die Rekorde.
 - Alle 5 gesammelten Sterne kommt ein neues Tier dazu.
+
+## Mini-Spiele
+
+Alle Mini-Spiele nutzen die Einstellungen (Schlüssel, Tonumfang, Merktiere), sammeln Sterne in dieselbe Sammlung und haben eigene Rekorde.
+
+- **Notenflug:** Eine Note fliegt von rechts nach links über das Notensystem. Tippe ihren Namen, bevor sie den Schlüssel erreicht. Zu spät oder falsch kostet einen von drei Sternen, nach dem dritten Fehler ist das Spiel vorbei. Jedes Level hat 10 Noten und ist etwa 15 % schneller als das vorige. Eine richtige Note bringt 10 Punkte mal Level, jedes geschaffte Level einen neuen Stern (höchstens 3).
+- **Klaviertasten:** Unter der Note liegt eine Klaviatur über den gewählten Tonumfang, das mittlere C ist markiert. Tippe die passende weiße Taste. 10 Aufgaben, Wertung wie bei „Welche Note ist das?“.
+- **Note setzen:** Das Spiel nennt einen Notennamen, zum Beispiel `f1`. Tippe im Notensystem auf die passende Linie oder den Zwischenraum, verschiebe die Note bei Bedarf mit ▲ und ▼ und tippe auf **Prüfen**. 10 Aufgaben, Wertung wie bei „Welche Note ist das?“.
+- **Noten-Memory:** 6 Paare aus Notenkarte und Namenskarte liegen verdeckt. Decke zwei Karten auf und finde die Paare mit möglichst wenigen Zügen: bis 9 Züge gibt es 3 Sterne, bis 13 Züge 2, sonst 1. Hat der Tonumfang weniger als 6 Noten, gibt es entsprechend weniger Paare.
 
 Ältere Spielstände bleiben erhalten: Sterne und Rekorde zählen weiter, Häschen und Kätzchen bleiben, fehlende Tiere ergänzt das Spiel einmalig nach Sternzahl.
 
@@ -89,6 +98,7 @@ Das Spiel führt für jedes Spiel die fünf besten Ergebnisse. Schafft ein Ergeb
 - `js/tiere.js`: die Tierzeichnungen
 - `js/modi.js`: die gemeinsame Schnittstelle für Spielmodi
 - `js/modi/klassisch.js`: das Spiel „Welche Note ist das?“
+- `js/modi/notenflug.js`, `js/modi/klaviertasten.js`, `js/modi/note-setzen.js`, `js/modi/noten-memory.js`: die Mini-Spiele
 - `js/app.js`: Startseite, Ergebnis, Einstellungen, Tiere, Rekorde und Speichern
 - `tests/spiel-logik.test.js`: automatische Tests der Spiellogik
 
