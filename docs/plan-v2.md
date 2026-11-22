@@ -98,3 +98,17 @@ Startseite: großer **Start** für das klassische Spiel bleibt. Darunter eine Au
 1. **Mehrfachauswahl statt Entweder-oder:** In den Einstellungen gibt es keine Optionsfelder (Radio-Buttons) mehr. Die Schlüssel Violin und Bass sind Kästchen zum Ankreuzen, auch beide gleichzeitig, mindestens einer bleibt aktiv. Merktiere ist ein Schalter.
 2. **Noten einzeln wählen:** Für jeden angekreuzten Schlüssel zeigt die Ansicht alle verfügbaren Noten als große Ankreuz-Knöpfe, nach Oktaven in Reihen. Dazu kommen Schnellwahl-Knöpfe: „Erste Noten“, „1 Oktave“, „2 Oktaven“, „Alle“ und „Keine“. Sie setzen nur Häkchen. Insgesamt müssen mindestens 3 Noten gewählt sein, sonst erscheint ein freundlicher Hinweis und die Spiele starten nicht. Alte Einstellungen werden in Notenlisten übersetzt.
 3. **Korrekte Schreibweise:** Die Oktavziffer steht hochgestellt rechts neben dem Buchstaben: C, c, c¹, c², c³ (Unicode-Hochzahlen ¹ ² ³). Das gilt überall, wo ein Name erscheint: Antwortknöpfe, Merkhilfe („d¹ wie Delfin“), Beschriftung im Notensystem, Klaviatur, Memory, Note setzen, Hör-Spiel, Hinweise, Einstellungen und README. Die Kennungen (`violin-c1`) bleiben ASCII, damit Spielstände gültig bleiben.
+
+## 12. Antwortmodus „Einfach“ und „Genau“ (2026-11-22)
+
+- Neue Einstellung „Antworten“ mit zwei Stufen als großer Umschalter (kein kleines Optionsfeld):
+  - **Einfach:** Die Antwortknöpfe zeigen nur die Buchstaben C, D, E, F, G, A, H (Großbuchstaben, nur die Buchstaben, die in der Notenauswahl vorkommen, in dieser Reihenfolge). Jede Oktave des richtigen Buchstabens zählt als richtig. Rückmeldung, Merkhilfe und Beschriftung im Notensystem nennen danach den genauen Namen, zum Beispiel „Genau, das ist d²!“ oder „d² wie Delfin“.
+  - **Genau:** wie bisher, Knöpfe mit Oktave (c¹, d² …).
+- Standard und Migration bestehender Spielstände: **Einfach**.
+- Auswirkung je Modus:
+  - Welche Note ist das?, Notenflug: Antwortknöpfe wie oben.
+  - Klaviertasten: Im einfachen Modus zählt jede Taste mit dem richtigen Buchstaben.
+  - Note setzen: Im einfachen Modus steht nur der Buchstabe als Aufgabe, und jede passende Position im Bereich zählt. Danach wird der genaue Name gezeigt.
+  - Noten-Memory: Im einfachen Modus zeigen Namenskarten nur den Buchstaben. Pro Spiel kommt jeder Buchstabe höchstens einmal vor, damit Paare eindeutig sind.
+  - Höher oder tiefer, Hör-Spiel: unverändert.
+- Wiederholung falsch beantworteter Noten bleibt pro Note (Kennung), nicht pro Buchstabe.
