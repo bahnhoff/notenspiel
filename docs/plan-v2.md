@@ -154,3 +154,31 @@ Ziel: Ein amerikanisches Kind kann den Notenzoo komplett auf Englisch spielen. D
 
 - Jede Taste spielt beim Drücken ihren Klavierton (gemeinsamer Ton aus `js/klang.js`, auch vom Hör-Spiel genutzt).
 - Alle schwarzen Tasten sind tippbar und klingen, nicht nur die gewählten Vorzeichen-Noten (ersetzt „schwarze nur Dekoration“ aus Abschnitt 7). Ohne gewählte Vorzeichen-Noten zählt eine schwarze Taste als falsche Antwort, der Hinweis „Welche weiße Taste …“ bleibt.
+
+## 16. Rückmeldung vom 2026-11-22: ruhige Spielfläche und „Fehler üben“
+
+Umfang der ersten Überarbeitung, wie in der Rückmeldung empfohlen. Die übrigen Vorschläge stehen unten als spätere Kandidaten.
+
+### Note und Antworten bleiben an ihrer Stelle
+
+- Problem: Die Sprechblase des Fuchses steht über den Antwortknöpfen. Bei einem Fehler wächst sie, „Weiter“ erscheint, und die Knöpfe rutschen nach unten (bei 340 px Breite rund 200 px).
+- Neue Reihenfolge: Kopfzeile mit Fortschritt, Note im Notensystem, Antworten, darunter die Rückmeldung (Fuchs, Merkhilfe, kurzer Hinweis, „Weiter“).
+- Zwischen Aufgabe und Rückmeldung verschieben sich Notensystem und Antworten um keinen Pixel. Wächst die Rückmeldung, wächst nur der Bereich darunter. Bei Bedarf scrollt die Seite so, dass „Weiter“ sichtbar ist, ohne die Antworten aus dem Bild zu schieben, wenn es sich vermeiden lässt.
+- Im Notensystem wird nach der Antwort die Linie oder der Zwischenraum der Note dezent hervorgehoben (zum Beispiel weiche, halbtransparente Farbfläche hinter der Linie oder im Zwischenraum, auch für Hilfslinien). So sieht das Kind beim Lesen der Erklärung, wo die Note liegt.
+- Gilt für alle Modi mit diesem Aufbau (Welche Note ist das?, Klaviertasten, Note setzen, Höher oder tiefer, Hör-Spiel, Etappen der Notenreise). Beim Notenflug bleibt die Spielfläche ebenfalls ruhig. Querformat-Layout auf Tablets mitprüfen.
+
+### „Fehler üben“
+
+- Nach einer Runde mit mindestens einem Fehler zeigt das Ergebnis einen deutlichen Knopf „Fehler üben“ (englisch „Practice mistakes“). Gilt für die Modi mit klassischer Wertung (Welche Note ist das?, Klaviertasten, Note setzen) und für die Notenreise. Grundlage sind die falsch beantworteten Noten der Runde (`runde.verlauf`).
+- Ablauf: Für jede verwechselte Note (höchstens 3 verschiedene, die häufigsten Fehler zuerst) zwei kurze Aufgaben: erst die Note im Notensystem erkennen (Antwortknöpfe wie im klassischen Spiel), danach dieselbe Note auf der Klaviatur finden. Also höchstens 6 Aufgaben. Antwortmodus Einfach/Genau gilt wie eingestellt.
+- Kein Druck: keine Sterne zu verlieren, keine Punkte, kein Rekord, kein vorzeitiges Ende. Bei einer falschen Antwort zeigt das Spiel die Lösung mit Hinweis, und die Aufgabe kommt am Ende der Übung noch einmal.
+- Abschluss: freundliche Meldung („Super, jetzt kennst du f¹ und a¹!“) und Knöpfe „Noch eine Runde“ und „Startseite“. Keine neuen Sterne, damit sich die Übung nicht als Sternquelle ausnutzen lässt.
+- Die Übung nutzt die vorhandenen Bausteine (Antwortknöpfe und Klaviatur) und hält sich an die Regel oben: Note und Antworten bleiben an ihrer Stelle.
+
+### Spätere Kandidaten (noch nicht umsetzen)
+
+- Startseite mit zwei klaren Einstiegen: Hauptknopf „Noten üben · 10 Aufgaben · C bis G“ und eine eigene Karte „Tägliche Notenreise · 3 Spiele à 5 Aufgaben“.
+- Gezeichnete Symbole im Stil des Fuchses statt System-Emojis auf den Spielkacheln.
+- Ergebnis stärker: „9 von 10 richtig“ als Überschrift, darunter Fortschritt zum nächsten Tier mit Silhouette, Namenseingabe erst über „Rekord speichern“.
+- Hauptmodus immer bis zur zehnten Aufgabe spielen, schwierige Noten später erneut zeigen (Notenflug behält die Fehlergrenze).
+- „Spiel eine Melodie“: vier bis sieben Noten nachspielen, am Ende erklingt die Melodie.
