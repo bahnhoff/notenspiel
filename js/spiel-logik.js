@@ -6,6 +6,8 @@
 (function (root) {
   "use strict";
 
+  var Texte = typeof module !== "undefined" && module.exports ? require("./texte.js") : root.Texte;
+
   var REGELN = {
     aufgabenProRunde: 10,
     startSterne: 3,
@@ -18,40 +20,43 @@
    * Sammeltiere für „Meine Tiere“. Füchschen ist von Anfang an da.
    * Alle 5 gesammelten Sterne kommt ein zufälliges neues Tier dazu,
    * seltene Tiere erst ab 50 gesammelten Sternen.
+   * `name` liefert den Namen in der aktuellen Sprache (js/texte.js, "tier.<id>").
    */
   var TIERE = [
-    { id: "fuchs", name: "Füchschen" },
-    { id: "hase", name: "Häschen" },
-    { id: "katze", name: "Kätzchen" },
-    { id: "hund", name: "Hündchen" },
-    { id: "baer", name: "Bärchen" },
-    { id: "panda", name: "Panda" },
-    { id: "pinguin", name: "Pinguin" },
-    { id: "eule", name: "Eule" },
-    { id: "igel", name: "Igel" },
-    { id: "eichhoernchen", name: "Eichhörnchen" },
-    { id: "schildkroete", name: "Schildkröte" },
-    { id: "koala", name: "Koala" },
-    { id: "loewe", name: "Löwe" },
-    { id: "tiger", name: "Tiger" },
-    { id: "waschbaer", name: "Waschbär" },
-    { id: "schaf", name: "Schäfchen" },
-    { id: "schwein", name: "Schweinchen" },
-    { id: "kueken", name: "Küken" },
-    { id: "otter", name: "Otter" },
-    { id: "faultier", name: "Faultier" },
-    { id: "maus", name: "Maus" },
-    { id: "kuh", name: "Kuh" },
-    { id: "einhorn", name: "Einhorn", selten: true },
-    { id: "drache", name: "Drache", selten: true },
-    { id: "phoenix", name: "Phönix", selten: true }
+    { id: "fuchs" },
+    { id: "hase" },
+    { id: "katze" },
+    { id: "hund" },
+    { id: "baer" },
+    { id: "panda" },
+    { id: "pinguin" },
+    { id: "eule" },
+    { id: "igel" },
+    { id: "eichhoernchen" },
+    { id: "schildkroete" },
+    { id: "koala" },
+    { id: "loewe" },
+    { id: "tiger" },
+    { id: "waschbaer" },
+    { id: "schaf" },
+    { id: "schwein" },
+    { id: "kueken" },
+    { id: "otter" },
+    { id: "faultier" },
+    { id: "maus" },
+    { id: "kuh" },
+    { id: "einhorn", selten: true },
+    { id: "drache", selten: true },
+    { id: "phoenix", selten: true }
   ];
+  TIERE.forEach(function (tier) {
+    Object.defineProperty(tier, "name", { enumerable: true, get: function () { return Texte.t("tier." + tier.id); } });
+  });
   var STERNE_PRO_TIER = 5;
   var SELTEN_AB_STERNEN = 50;
   var MAX_NAMEN = 6;
   var NAME_LAENGE = 20;
 
-  var ZAHLWORTE = { 3: "Drei", 6: "Sechs", 9: "Neun" };
 
   function positionsSchluessel(note) {
     return note.schluessel + ":" + note.position;
@@ -162,19 +167,17 @@
     if (runde.uebertrag.indexOf(id) === -1) runde.uebertrag.push(id);
   }
 
+  /** Rückmeldung in der aktuellen Sprache mit dem angezeigten Namen der Note (note.anzeige). */
   function rueckmeldung(richtig, note, serie, zufall) {
+    var name = note.anzeige || note.name;
     if (!richtig) {
-      return "Das ist " + note.name + ". " + note.hinweis;
+      return Texte.t("rueckmeldung.falsch", { name: name, hinweis: note.hinweis });
     }
     if (serie > 0 && serie % 3 === 0) {
-      return (ZAHLWORTE[serie] || String(serie)) + " Richtige in Folge!";
+      var zahl = Texte.t("zahlwort." + serie);
+      return Texte.t("rueckmeldung.serie", { zahl: zahl === "zahlwort." + serie ? String(serie) : zahl });
     }
-    var lob = [
-      "Genau, das ist " + note.name + "!",
-      "Super, " + note.name + " stimmt!",
-      "Richtig, das ist " + note.name + "!"
-    ];
-    return zufallsElement(lob, zufall || Math.random);
+    return zufallsElement(Texte.liste("rueckmeldung.lob", { name: name }), zufall || Math.random);
   }
 
   /**
@@ -364,6 +367,7 @@
       zaehler: 0,
       namen: [],
       einstellungen: null,
+      sprache: null,                 // "de" oder "en"; null = beim Laden nach der Browsersprache wählen
       reise: { tag: "", serie: 0 }   // Tägliche Notenreise: letzter geschaffter Tag, Tagesserie
     };
   }
@@ -511,6 +515,8 @@
       });
     }
     stand.einstellungen = bereinigeEinstellungen(roh.einstellungen);
+    // Ältere Spielstände haben keine Sprache; die App wählt sie dann nach der Browsersprache.
+    if (roh.sprache === "de" || roh.sprache === "en") stand.sprache = roh.sprache;
     // Ältere Spielstände haben kein Feld `reise` und beginnen ohne Tagesserie.
     if (roh.reise && typeof roh.reise.tag === "string" && /^\d{4}-\d{2}-\d{2}$/.test(roh.reise.tag) && istZahl(roh.reise.serie)) {
       stand.reise = { tag: roh.reise.tag, serie: Math.floor(roh.reise.serie) };

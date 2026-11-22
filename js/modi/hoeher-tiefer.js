@@ -13,6 +13,7 @@
   "use strict";
 
   var L = window.SpielLogik;
+  var T = window.Texte;
   var H = window.Modi.hilfen;
   var PAUSE_NACH_RICHTIG = 1300; // Millisekunden
   var ANTEIL_TIEFER = 0.35;      // so oft lautet die Frage „Welche ist tiefer?“
@@ -65,7 +66,7 @@
 
   /* ---------- Aufgabe bilden ---------- */
 
-  function wort(frage) { return frage === "hoeher" ? "höher" : "tiefer"; }
+  function wort(frage) { return T.t(frage === "hoeher" ? "ht.hoeher" : "ht.tiefer"); }
 
   /**
    * Andere Note im selben Schlüssel: bei „höher“ tiefer als das Ziel, bei
@@ -129,8 +130,8 @@
     var svg = box.querySelector("svg");
     var vb = svg.viewBox.baseVal;
     var zielSeite = aufgabe.zielLinks ? "links" : "rechts";
-    svg.setAttribute("aria-label", window.Noten.SCHLUESSEL[aufgabe.ziel.schluessel].name + " mit zwei Noten" +
-      (auswertung ? ": links " + links.name + ", rechts " + rechts.name : ""));
+    svg.setAttribute("aria-label", T.t("ht.zweiNoten", { schluessel: window.Noten.SCHLUESSEL[aufgabe.ziel.schluessel].name }) +
+      (auswertung ? T.t("ht.linksRechts", { links: links.anzeige, rechts: rechts.anzeige }) : ""));
 
     // Die linke Note ist die Hauptnote, die rechte steht in .note-weitere.
     var gruppen = { links: svg.querySelector(".note-gruppe"), rechts: svg.querySelector(".note-weitere") };
@@ -155,13 +156,13 @@
           "class": "ht-name ht-name-" + status, x: (seite === "links" ? FORM.links : FORM.rechts) + 10,
           y: window.Notensystem.yVon(note.position) + 4.5, "font-size": "13", "font-weight": "800", fill: "currentColor"
         });
-        text.textContent = note.name + (status === "falsch" ? " ✗" : " ✓");
+        text.textContent = note.anzeige + (status === "falsch" ? " ✗" : " ✓");
         svg.appendChild(text);
       }
       // Trefferfläche über der ganzen Höhe, per Tastatur erreichbar
       var ziel = svgElement("g", {
         "class": "ht-ziel", tabindex: auswertung ? "-1" : "0", role: "button",
-        "aria-label": (seite === "links" ? "Linke Note" : "Rechte Note") + (auswertung ? ", " + noteAuf(seite).name : ""),
+        "aria-label": T.t(seite === "links" ? "ht.linke" : "ht.rechte") + (auswertung ? ", " + noteAuf(seite).anzeige : ""),
         "data-seite": seite
       });
       if (auswertung) ziel.setAttribute("aria-disabled", "true");
@@ -177,7 +178,7 @@
   /* ---------- Ablauf ---------- */
 
   function zeigeStatus() {
-    $("ht-aufgabe").textContent = "Aufgabe " + (runde.aufgabe + 1) + " von " + runde.anzahl;
+    $("ht-aufgabe").textContent = H.aufgabeText(runde);
     H.zeigeSterne($("ht-sterne"), $("ht-punkte"), runde.sterne, L.REGELN.startSterne, runde.punkte);
   }
 
@@ -190,7 +191,7 @@
     $("ht-notensystem").classList.remove("ist-richtig", "ist-falsch");
     zeichne(null);
     $("ht-weiter").hidden = true;
-    $("ht-text").textContent = "Tippe auf die Note, die " + wort(aufgabe.frage) + " ist.";
+    $("ht-text").textContent = T.t("ht.tippe", { wort: wort(aufgabe.frage) });
     var fokus = document.activeElement;
     if (letzteSeite && (fokus === document.body || fokus === $("ht-weiter") ||
         (fokus && fokus.classList && fokus.classList.contains("ht-ziel")) || !document.contains(fokus))) {
@@ -208,20 +209,19 @@
       document.activeElement.classList.contains("ht-ziel");
     letzteSeite = hatFokus ? seite : "";
     var ziel = aufgabe.ziel, partner = aufgabe.partner;
-    var gegen = aufgabe.frage === "hoeher" ? "tiefer" : "höher";
+    var gegen = wort(aufgabe.frage === "hoeher" ? "tiefer" : "hoeher");
 
     zeigeStatus();
     zeichne({ getippt: seite });
     $("ht-notensystem").classList.add(a.richtig ? "ist-richtig" : "ist-falsch");
     var text;
     if (a.richtig) {
-      text = "✓ Richtig! " + ziel.name + " ist " + wort(aufgabe.frage) + " als " + partner.name + ".";
+      text = T.t("ht.richtig", { ziel: ziel.anzeige, wort: wort(aufgabe.frage), partner: partner.anzeige });
       if (a.serie > 0 && a.serie % 3 === 0) text += " " + a.nachricht;
     } else {
-      text = "✗ Die " + (aufgabe.zielLinks ? "linke" : "rechte") + " Note " + ziel.name + " ist " + wort(aufgabe.frage) +
-        ", " + partner.name + " ist " + gegen + "." + (ziel.position === partner.position
-          ? " Ein Kreuz macht eine Note einen Halbton höher, ein B einen Halbton tiefer."
-          : " Höhere Noten stehen weiter oben.");
+      text = T.t(aufgabe.zielLinks ? "ht.falschLinks" : "ht.falschRechts",
+        { ziel: ziel.anzeige, wort: wort(aufgabe.frage), partner: partner.anzeige, gegen: gegen }) +
+        T.t(ziel.position === partner.position ? "ht.halbton" : "ht.weiterOben");
     }
     $("ht-text").textContent = text;
     umgebung.zeigeTier($("ht-tier"), a.richtig ? "froh" : "oje");
@@ -265,7 +265,7 @@
 
   window.Modi.registriere({
     id: "hoeher-tiefer",
-    name: "Höher oder tiefer",
+    get name() { return T.t("modus.hoeher-tiefer"); },
     symbol: "↕️",
     ansicht: "hoeher",
     reise: true,

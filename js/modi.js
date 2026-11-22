@@ -6,7 +6,9 @@
  *
  *   Modi.registriere({
  *     id: "notenflug",        // Kennung, auch für die Rekorde (a–z, 0–9, -)
- *     name: "Notenflug",      // Name auf der Startseite und bei den Rekorden
+ *     get name() { return Texte.t("modus.notenflug"); },
+ *                             // Name auf der Startseite und bei den Rekorden,
+ *                             // als Getter, damit er der gewählten Sprache folgt
  *     symbol: "🚀",           // optional, Bild vor dem Namen auf der Startseite
  *     hauptspiel: false,      // true nur beim klassischen Spiel (großer Start-Knopf)
  *     ansicht: "notenflug",   // zeigt <section id="ansicht-notenflug" class="ansicht"> in index.html
@@ -29,15 +31,20 @@
  *                  ("d²", "fis¹"). `note.vorzeichen` ist 0, 1 (♯) oder -1 (♭),
  *                  `note.halbton` die Tonhöhe (fis und ges gleich), `note.stufe`
  *                  die Stufe des Stammtons (fis¹ steht wie f¹ im System).
- *   antworten      die Antwortknöpfe { name, stufe, oktave, buchstabe, vorzeichen },
- *                  `name` ist die Beschriftung und wird an SpielLogik.antworte gegeben.
+ *   antworten      die Antwortknöpfe { name, anzeige, stufe, oktave, buchstabe, vorzeichen },
+ *                  `name` ist der sprachunabhängige Schlüssel und wird an
+ *                  SpielLogik.antworte gegeben, `anzeige` die Beschriftung.
  *                  Genau: eindeutige Notennamen, tief nach hoch. Einfach: nur die
  *                  vorkommenden Antworten C Cis D Es … H (stufe und oktave null).
  *   namen          eindeutige genaue Notennamen (Noten.ton), tief nach hoch, in beiden Modi
  *   antwortmodus   "einfach" oder "genau". Für andere Antworten (Klaviertaste,
  *                  gesetzte Position) liefert Noten.antwortSchluessel(note,
  *                  antwortmodus) den Schlüssel zum Vergleich. Rückmeldungen
- *                  nennen immer den genauen Namen (note.name).
+ *                  nennen immer den genauen Namen.
+ *                  Sprache: `name` und `antwort` sind deutsche Schlüssel und
+ *                  ändern sich nie. Angezeigt werden `note.anzeige` (c¹ oder C4)
+ *                  und `note.antwortAnzeige` (einfach „Fis“ oder „F♯“). Alle
+ *                  Texte kommen aus js/texte.js über Texte.t(…).
  *   bereich        [tiefste, höchste Position] für Notensystem.zeichne(…, { bereich })
  *   einstellungen  { schluessel: ["violin", "bass"], noten: [Kennungen], merktiere, antwortmodus }
  *   schwierig      Notenkennungen, die zuletzt Mühe gemacht haben
@@ -83,6 +90,7 @@
   "use strict";
 
   var liste = [];
+  function t(schluessel, werte) { return root.Texte.t(schluessel, werte); }
 
   function registriere(modus) {
     if (!modus || !/^[a-z0-9-]{1,30}$/.test(modus.id) || typeof modus.starte !== "function") {
@@ -151,10 +159,11 @@
         b.type = "button";
         b.className = "knopf knopf-antwort" + (a.vorzeichen ? " knopf-antwort-vorzeichen" : "");
         b.dataset.name = a.name;
+        b.dataset.anzeige = a.anzeige || a.name;
         if (!einfach) b.style.gridColumn = String(root.Noten.BUCHSTABEN.indexOf(a.buchstabe) + 1);
         b.innerHTML = '<span class="antwort-name"></span><span class="antwort-marke" aria-hidden="true"></span>';
-        b.querySelector(".antwort-name").textContent = a.name;
-        b.setAttribute("aria-label", a.name);
+        b.querySelector(".antwort-name").textContent = b.dataset.anzeige;
+        b.setAttribute("aria-label", b.dataset.anzeige);
         b.addEventListener("click", function () { beiKlick(a.name); });
         reihe.appendChild(b);
         knoepfe.push(b);
@@ -164,13 +173,28 @@
     return knoepfe;
   }
 
-  function sterneText(n) { return n === 1 ? "1 Stern" : n + " Sterne"; }
+  function sterneText(n) { return t("sterne", { n: n }); }
+  function punkteText(n) { return t("punkte", { n: n }); }
+
+  /** Aufgabennummer, zum Beispiel „Aufgabe 3 von 10“. */
+  function aufgabeText(runde) { return t("runde.aufgabe", { nr: runde.aufgabe + 1, anzahl: runde.anzahl }); }
+
+  /**
+   * Markiert einen Antwortknopf nach der Antwort: Klasse, Zeichen ✓ oder ✗
+   * und aria-label „c¹, richtig“. Ohne `richtig` wird er zurückgesetzt.
+   */
+  function markiereAntwort(b, klasse, richtig) {
+    if (klasse) b.classList.add(klasse);
+    b.querySelector(".antwort-marke").textContent = richtig === undefined ? "" : (richtig ? "✓" : "✗");
+    b.setAttribute("aria-label", richtig === undefined ? b.dataset.anzeige
+      : t(richtig ? "runde.richtig" : "runde.falsch", { name: b.dataset.anzeige }));
+  }
 
   /** Sterne und Punkte im Kopf einer Ansicht anzeigen. */
   function zeigeSterne(sterneEl, punkteEl, sterne, gesamt, punkte) {
     sterneEl.innerHTML = sternSymbole(sterne, gesamt);
-    sterneEl.setAttribute("aria-label", sterne + " von " + gesamt + " Sternen");
-    if (punkteEl) punkteEl.textContent = punkte + " Punkte";
+    sterneEl.setAttribute("aria-label", t("sterne.aria", { n: sterne, gesamt: gesamt }));
+    if (punkteEl) punkteEl.textContent = punkteText(punkte);
   }
 
   /**
@@ -206,19 +230,19 @@
     var L = root.SpielLogik;
     var e = L.klassischesErgebnis(runde);
     var spruch;
-    if (e.vorzeitig) spruch = "Versuchen wir’s noch mal?";
-    else if (e.richtige === e.aufgaben) spruch = "Alles richtig. Du bist ein Notenprofi!";
-    else spruch = "Toll gemacht!";
+    if (e.vorzeitig) spruch = t("ende.nochmal");
+    else if (e.richtige === e.aufgaben) spruch = t("ende.profi");
+    else spruch = t("ende.toll");
     umgebung.beende({
       gesamt: e.gesamt,
       neueSterne: e.neueSterne,
-      titel: e.vorzeitig ? "Runde vorbei" : "Geschafft!",
+      titel: e.vorzeitig ? t("ende.vorbei") : t("ende.geschafft"),
       spruch: spruch,
       stimmung: e.vorzeitig ? "normal" : "froh",
       zeilen: [
-        ["Richtige Antworten", e.richtige + " von " + e.aufgaben],
-        ["Punkte dafür", String(e.punkte)],
-        ["Bonus", e.bonus + (e.bonus > 0 ? " (" + sterneText(e.verbleibendeSterne) + " × " + L.REGELN.bonusProStern + ")" : "")]
+        [t("ende.richtige"), t("ende.vonAufgaben", { richtige: e.richtige, aufgaben: e.aufgaben })],
+        [t("ende.punkteDafuer"), String(e.punkte)],
+        [t("ende.bonus"), e.bonus + (e.bonus > 0 ? " (" + sterneText(e.verbleibendeSterne) + " × " + L.REGELN.bonusProStern + ")" : "")]
       ],
       schwierig: e.schwierig,
       geschafft: !e.vorzeitig,
@@ -245,6 +269,9 @@
     hilfen: {
       sternSymbole: sternSymbole,
       sterneText: sterneText,
+      punkteText: punkteText,
+      aufgabeText: aufgabeText,
+      markiereAntwort: markiereAntwort,
       zeigeSterne: zeigeSterne,
       antwortKnoepfe: antwortKnoepfe,
       zeigeMerkhilfe: zeigeMerkhilfe,

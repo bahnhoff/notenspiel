@@ -24,6 +24,7 @@
  *    vom tiefsten bis zum höchsten Bereich des Schlüssels. Jeder Eintrag hat:
  *    - id    Kennung (für die Standard-Einstellungen und alte Spielstände)
  *    - name  Text auf dem Schnellwahl-Knopf
+ *    - nameEnglisch  derselbe Text auf Englisch (fehlt er, gilt `name`)
  *    - von   tiefste Note, zum Beispiel "c1"
  *    - bis   höchste Note, zum Beispiel "g1"
  *    Im Violinschlüssel liegt e1 auf der untersten Linie, im Bassschlüssel G.
@@ -34,8 +35,12 @@
  *    ein Buchstabe ab einer bestimmten Note ein anderes Tier (hohes F = Fuchs).
  *    Eine Vorzeichen-Note kann ein eigenes Tier haben (fis = Fisch), sonst
  *    gilt das Tier des Stammtons: „cis¹ – C wie Chamäleon, nur einen Halbton höher“.
+ *    Auf Englisch gelten eigene Merktiere (`merktiereEnglisch`,
+ *    `merktierAbEnglisch`), passend zu den englischen Namen: „D4 – D is for
+ *    Dolphin“, „C♯4 – C is for Cat, just a half step higher“. Englisch heißt
+ *    das h „B“ (B is for Bear). Die Schlüssel bleiben die deutschen Buchstaben.
  *    Verfügbare Merktiere: chamaeleon, delfin, elefant, frosch, fuchs,
- *    giraffe, affe, hase, fisch.
+ *    giraffe, affe, hase, fisch, katze, baer, alligator.
  *
  * 3. STANDARD-EINSTELLUNGEN
  *    Gelten beim ersten Start. Danach merkt sich das Spiel die Auswahl aus
@@ -52,14 +57,14 @@
 window.NOTEN_KONFIGURATION = {
   bereiche: {
     violin: [
-      { id: "erste", name: "Erste Noten", von: "c1", bis: "g1" },
-      { id: "oktave1", name: "1 Oktave", von: "c1", bis: "c2" },
-      { id: "oktave2", name: "2 Oktaven", von: "c1", bis: "c3" }
+      { id: "erste", name: "Erste Noten", nameEnglisch: "First notes", von: "c1", bis: "g1" },
+      { id: "oktave1", name: "1 Oktave", nameEnglisch: "1 octave", von: "c1", bis: "c2" },
+      { id: "oktave2", name: "2 Oktaven", nameEnglisch: "2 octaves", von: "c1", bis: "c3" }
     ],
     bass: [
-      { id: "erste", name: "Erste Noten", von: "c", bis: "g" },
-      { id: "oktave1", name: "1 Oktave", von: "c", bis: "c1" },
-      { id: "oktave2", name: "2 Oktaven", von: "C", bis: "c1" }
+      { id: "erste", name: "Erste Noten", nameEnglisch: "First notes", von: "c", bis: "g" },
+      { id: "oktave1", name: "1 Oktave", nameEnglisch: "1 octave", von: "c", bis: "c1" },
+      { id: "oktave2", name: "2 Oktaven", nameEnglisch: "2 octaves", von: "C", bis: "c1" }
     ]
   },
 
@@ -75,6 +80,23 @@ window.NOTEN_KONFIGURATION = {
   },
 
   merktierAb: {
+    f: { ab: "f2", tier: "fuchs" }
+  },
+
+  // Englische Merktiere: C Cat, D Dolphin, E Elephant, F Frog (ab F5 Fox),
+  // G Giraffe, A Alligator, B Bear (deutsch h), F♯ Fish.
+  merktiereEnglisch: {
+    c: "katze",
+    d: "delfin",
+    e: "elefant",
+    f: "frosch",
+    g: "giraffe",
+    a: "alligator",
+    h: "baer",
+    fis: "fisch"
+  },
+
+  merktierAbEnglisch: {
     f: { ab: "f2", tier: "fuchs" }
   },
 

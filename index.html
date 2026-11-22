@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="description" content="Notenzoo: Spiele zum Erkennen von Noten im Violin- und Bassschlüssel.">
+  <meta name="description" content="Notenzoo: Spiele zum Erkennen von Noten im Violin- und Bassschlüssel." data-text-content="meta.beschreibung">
   <meta name="theme-color" content="#fff7ea">
   <meta name="robots" content="noindex, nofollow, noimageindex">
   <title>Notenzoo</title>
@@ -15,48 +15,51 @@
 
     <!-- Startseite -->
     <section id="ansicht-start" class="ansicht ansicht-start" aria-labelledby="titel-start">
+      <!-- Sprachumschalter nur auf der Startseite, damit keine Runde mitten im Spiel die Sprache wechselt -->
+      <div class="sprach-umschalter" id="sprach-umschalter" role="group" aria-label="Sprache" data-text-aria-label="sprache.gruppe">
+        <button type="button" class="sprach-knopf" data-sprache="de" lang="de" aria-label="Deutsch" aria-pressed="true">DE</button>
+        <button type="button" class="sprach-knopf" data-sprache="en" lang="en" aria-label="English" aria-pressed="false">EN</button>
+      </div>
       <div class="start-tier" id="start-tier"></div>
-      <h1 id="titel-start" class="spieltitel" tabindex="-1">Notenzoo</h1>
+      <h1 id="titel-start" class="spieltitel" tabindex="-1" data-text="meta.titel">Notenzoo</h1>
       <button type="button" class="knopf knopf-haupt knopf-start" id="knopf-start">
-        <span class="start-text">Start</span>
-        <span class="start-unterzeile">Welche Note ist das?</span>
+        <span class="start-text" data-text="start.start">Start</span>
+        <span class="start-unterzeile" data-text="modus.klassisch">Welche Note ist das?</span>
       </button>
       <p class="start-auswahl" id="start-auswahl"></p>
       <!-- Weitere Spielmodi aus js/modi/ erscheinen hier automatisch. -->
-      <h2 class="start-modi-titel" id="titel-modi">Mehr Spiele</h2>
+      <h2 class="start-modi-titel" id="titel-modi" data-text="start.mehrSpiele">Mehr Spiele</h2>
       <div class="start-modi" id="start-modi" role="group" aria-labelledby="titel-modi" hidden></div>
       <div class="start-menue">
         <button type="button" class="knopf knopf-neben" id="knopf-tiere">
-          <span aria-hidden="true">🐾</span> Meine Tiere
+          <span aria-hidden="true">🐾</span> <span data-text="start.tiere">Meine Tiere</span>
         </button>
         <button type="button" class="knopf knopf-neben" id="knopf-rekorde">
-          <span aria-hidden="true">🏆</span> Rekorde
+          <span aria-hidden="true">🏆</span> <span data-text="start.rekorde">Rekorde</span>
         </button>
         <button type="button" class="knopf knopf-neben" id="knopf-einstellungen">
-          <span aria-hidden="true">⚙️</span> Einstellungen
+          <span aria-hidden="true">⚙️</span> <span data-text="start.einstellungen">Einstellungen</span>
         </button>
       </div>
-      <p class="hinweis-speicher" id="hinweis-speicher" hidden>
-        Dieser Browser kann den Spielstand nicht speichern. Du kannst trotzdem spielen.
-      </p>
+      <p class="hinweis-speicher" id="hinweis-speicher" data-text="start.keinSpeicher" hidden>Dieser Browser kann den Spielstand nicht speichern. Du kannst trotzdem spielen.</p>
     </section>
 
     <!-- Spielrunde -->
     <section id="ansicht-runde" class="ansicht ansicht-runde" aria-labelledby="titel-runde" hidden>
       <header class="runde-kopf">
-        <button type="button" class="knopf knopf-klein knopf-zurueck" aria-label="Zurück zur Startseite">
-          <span aria-hidden="true">←</span><span class="knopf-text"> Startseite</span>
+        <button type="button" class="knopf knopf-klein knopf-zurueck" aria-label="Zurück zur Startseite" data-text-aria-label="zurueck.aria">
+          <span aria-hidden="true">←</span> <span class="knopf-text" data-text="zurueck.startseite">Startseite</span>
         </button>
         <div class="runde-status">
-          <span class="sterne-anzeige" id="sterne-anzeige" role="img" aria-label="3 von 3 Sternen"></span>
-          <span class="punkte-anzeige" id="punkte-anzeige">0 Punkte</span>
+          <span class="sterne-anzeige" id="sterne-anzeige" role="img"></span>
+          <span class="punkte-anzeige" id="punkte-anzeige"></span>
         </div>
       </header>
 
       <div class="runde-inhalt">
         <div class="runde-noten">
-          <p class="aufgabe-nr" id="aufgabe-nr">Aufgabe 1 von 10</p>
-          <h1 id="titel-runde" class="frage" tabindex="-1">Welche Note ist das?</h1>
+          <p class="aufgabe-nr" id="aufgabe-nr"></p>
+          <h1 id="titel-runde" class="frage" tabindex="-1" data-text="modus.klassisch">Welche Note ist das?</h1>
           <div class="notensystem" id="notensystem"></div>
         </div>
 
@@ -71,10 +74,10 @@
                 </div>
                 <p id="sprechblase-text"></p>
               </div>
-              <button type="button" class="knopf knopf-haupt knopf-weiter" id="knopf-weiter" hidden>Weiter</button>
+              <button type="button" class="knopf knopf-haupt knopf-weiter" id="knopf-weiter" hidden data-text="runde.weiter">Weiter</button>
             </div>
           </div>
-          <div class="antworten" id="antworten" role="group" aria-label="Antworten"></div>
+          <div class="antworten" id="antworten" role="group" aria-label="Antworten" data-text-aria-label="runde.antwortenAria"></div>
         </div>
       </div>
     </section>
@@ -82,19 +85,19 @@
     <!-- Notenflug -->
     <section id="ansicht-notenflug" class="ansicht ansicht-runde ansicht-notenflug" aria-labelledby="titel-notenflug" hidden>
       <header class="runde-kopf">
-        <button type="button" class="knopf knopf-klein knopf-zurueck" aria-label="Zurück zur Startseite">
-          <span aria-hidden="true">←</span><span class="knopf-text"> Startseite</span>
+        <button type="button" class="knopf knopf-klein knopf-zurueck" aria-label="Zurück zur Startseite" data-text-aria-label="zurueck.aria">
+          <span aria-hidden="true">←</span> <span class="knopf-text" data-text="zurueck.startseite">Startseite</span>
         </button>
         <div class="runde-status">
-          <span class="sterne-anzeige" id="flug-sterne" role="img" aria-label="3 von 3 Sternen"></span>
-          <span class="punkte-anzeige" id="flug-punkte">0 Punkte</span>
+          <span class="sterne-anzeige" id="flug-sterne" role="img"></span>
+          <span class="punkte-anzeige" id="flug-punkte"></span>
         </div>
       </header>
 
       <div class="runde-inhalt">
         <div class="runde-noten">
-          <p class="aufgabe-nr" id="flug-level">Level 1 · Note 1 von 10</p>
-          <h1 id="titel-notenflug" class="frage" tabindex="-1">Notenflug</h1>
+          <p class="aufgabe-nr" id="flug-level"></p>
+          <h1 id="titel-notenflug" class="frage" tabindex="-1" data-text="modus.notenflug">Notenflug</h1>
           <div class="notensystem notensystem-flug" id="flug-notensystem"></div>
         </div>
         <div class="runde-antworten">
@@ -108,10 +111,10 @@
                 </div>
                 <p id="flug-text"></p>
               </div>
-              <button type="button" class="knopf knopf-haupt knopf-weiter" id="flug-weiter" hidden>Weiter</button>
+              <button type="button" class="knopf knopf-haupt knopf-weiter" id="flug-weiter" hidden data-text="runde.weiter">Weiter</button>
             </div>
           </div>
-          <div class="antworten" id="flug-antworten" role="group" aria-label="Antworten"></div>
+          <div class="antworten" id="flug-antworten" role="group" aria-label="Antworten" data-text-aria-label="runde.antwortenAria"></div>
         </div>
       </div>
     </section>
@@ -119,19 +122,19 @@
     <!-- Klaviertasten -->
     <section id="ansicht-klavier" class="ansicht ansicht-runde ansicht-klavier" aria-labelledby="titel-klavier" hidden>
       <header class="runde-kopf">
-        <button type="button" class="knopf knopf-klein knopf-zurueck" aria-label="Zurück zur Startseite">
-          <span aria-hidden="true">←</span><span class="knopf-text"> Startseite</span>
+        <button type="button" class="knopf knopf-klein knopf-zurueck" aria-label="Zurück zur Startseite" data-text-aria-label="zurueck.aria">
+          <span aria-hidden="true">←</span> <span class="knopf-text" data-text="zurueck.startseite">Startseite</span>
         </button>
         <div class="runde-status">
-          <span class="sterne-anzeige" id="klavier-sterne" role="img" aria-label="3 von 3 Sternen"></span>
-          <span class="punkte-anzeige" id="klavier-punkte">0 Punkte</span>
+          <span class="sterne-anzeige" id="klavier-sterne" role="img"></span>
+          <span class="punkte-anzeige" id="klavier-punkte"></span>
         </div>
       </header>
 
       <div class="runde-inhalt">
         <div class="runde-noten">
-          <p class="aufgabe-nr" id="klavier-aufgabe">Aufgabe 1 von 10</p>
-          <h1 id="titel-klavier" class="frage" tabindex="-1">Welche Taste ist das?</h1>
+          <p class="aufgabe-nr" id="klavier-aufgabe"></p>
+          <h1 id="titel-klavier" class="frage" tabindex="-1" data-text="klavier.frage">Welche Taste ist das?</h1>
           <div class="notensystem" id="klavier-notensystem"></div>
         </div>
         <div class="runde-antworten">
@@ -145,43 +148,43 @@
                 </div>
                 <p id="klavier-text"></p>
               </div>
-              <button type="button" class="knopf knopf-haupt knopf-weiter" id="klavier-weiter" hidden>Weiter</button>
+              <button type="button" class="knopf knopf-haupt knopf-weiter" id="klavier-weiter" hidden data-text="runde.weiter">Weiter</button>
             </div>
           </div>
         </div>
       </div>
-      <div class="klaviatur" id="klaviatur" role="group" aria-label="Klaviatur"></div>
+      <div class="klaviatur" id="klaviatur" role="group" aria-label="Klaviatur" data-text-aria-label="klavier.aria"></div>
     </section>
 
     <!-- Note setzen -->
     <section id="ansicht-setzen" class="ansicht ansicht-runde ansicht-setzen" aria-labelledby="titel-setzen" hidden>
       <header class="runde-kopf">
-        <button type="button" class="knopf knopf-klein knopf-zurueck" aria-label="Zurück zur Startseite">
-          <span aria-hidden="true">←</span><span class="knopf-text"> Startseite</span>
+        <button type="button" class="knopf knopf-klein knopf-zurueck" aria-label="Zurück zur Startseite" data-text-aria-label="zurueck.aria">
+          <span aria-hidden="true">←</span> <span class="knopf-text" data-text="zurueck.startseite">Startseite</span>
         </button>
         <div class="runde-status">
-          <span class="sterne-anzeige" id="setzen-sterne" role="img" aria-label="3 von 3 Sternen"></span>
-          <span class="punkte-anzeige" id="setzen-punkte">0 Punkte</span>
+          <span class="sterne-anzeige" id="setzen-sterne" role="img"></span>
+          <span class="punkte-anzeige" id="setzen-punkte"></span>
         </div>
       </header>
 
       <div class="runde-inhalt">
         <div class="runde-noten">
-          <p class="aufgabe-nr" id="setzen-aufgabe">Aufgabe 1 von 10</p>
-          <h1 id="titel-setzen" class="frage" tabindex="-1">Setze die Note <span class="setzen-name" id="setzen-name">c¹</span></h1>
+          <p class="aufgabe-nr" id="setzen-aufgabe"></p>
+          <h1 id="titel-setzen" class="frage" tabindex="-1"><span data-text="setzen.frage">Setze die Note</span> <span class="setzen-name" id="setzen-name"></span></h1>
           <div class="notensystem notensystem-setzen" id="setzen-notensystem" tabindex="0" role="slider"
-               aria-label="Notensystem: Tippe auf eine Linie oder einen Zwischenraum" aria-valuemin="-20" aria-valuemax="20" aria-valuenow="0"></div>
+               aria-label="Notensystem: Tippe auf eine Linie oder einen Zwischenraum" data-text-aria-label="setzen.systemAria" aria-valuemin="-20" aria-valuemax="20" aria-valuenow="0"></div>
         </div>
         <div class="runde-antworten">
-          <div class="setzen-vorzeichen" id="setzen-vorzeichen" role="group" aria-label="Vorzeichen" hidden>
-            <button type="button" class="knopf knopf-neben knopf-vorzeichen" data-vorzeichen="0" aria-pressed="true" aria-label="Ohne Vorzeichen">♮</button>
-            <button type="button" class="knopf knopf-neben knopf-vorzeichen" data-vorzeichen="1" aria-pressed="false" aria-label="Kreuz">♯</button>
-            <button type="button" class="knopf knopf-neben knopf-vorzeichen" data-vorzeichen="-1" aria-pressed="false" aria-label="B">♭</button>
+          <div class="setzen-vorzeichen" id="setzen-vorzeichen" role="group" aria-label="Vorzeichen" data-text-aria-label="setzen.vorzeichenAria" hidden>
+            <button type="button" class="knopf knopf-neben knopf-vorzeichen" data-vorzeichen="0" aria-pressed="true" aria-label="Ohne Vorzeichen" data-text-aria-label="setzen.ohne">♮</button>
+            <button type="button" class="knopf knopf-neben knopf-vorzeichen" data-vorzeichen="1" aria-pressed="false" aria-label="Kreuz" data-text-aria-label="setzen.kreuz">♯</button>
+            <button type="button" class="knopf knopf-neben knopf-vorzeichen" data-vorzeichen="-1" aria-pressed="false" aria-label="B" data-text-aria-label="setzen.b">♭</button>
           </div>
           <div class="setzen-steuerung">
-            <button type="button" class="knopf knopf-neben knopf-schritt" id="setzen-tiefer" aria-label="Note eine Stufe tiefer">▼</button>
-            <button type="button" class="knopf knopf-neben knopf-schritt" id="setzen-hoeher" aria-label="Note eine Stufe höher">▲</button>
-            <button type="button" class="knopf knopf-haupt knopf-pruefen" id="setzen-pruefen" disabled>Prüfen</button>
+            <button type="button" class="knopf knopf-neben knopf-schritt" id="setzen-tiefer" aria-label="Note eine Stufe tiefer" data-text-aria-label="setzen.tiefer">▼</button>
+            <button type="button" class="knopf knopf-neben knopf-schritt" id="setzen-hoeher" aria-label="Note eine Stufe höher" data-text-aria-label="setzen.hoeher">▲</button>
+            <button type="button" class="knopf knopf-haupt knopf-pruefen" id="setzen-pruefen" disabled data-text="setzen.pruefen">Prüfen</button>
           </div>
           <div class="tier-zeile">
             <div class="tier-klein" id="setzen-tier"></div>
@@ -193,7 +196,7 @@
                 </div>
                 <p id="setzen-text"></p>
               </div>
-              <button type="button" class="knopf knopf-haupt knopf-weiter" id="setzen-weiter" hidden>Weiter</button>
+              <button type="button" class="knopf knopf-haupt knopf-weiter" id="setzen-weiter" hidden data-text="runde.weiter">Weiter</button>
             </div>
           </div>
         </div>
@@ -203,16 +206,16 @@
     <!-- Noten-Memory -->
     <section id="ansicht-memory" class="ansicht ansicht-memory" aria-labelledby="titel-memory" hidden>
       <header class="runde-kopf">
-        <button type="button" class="knopf knopf-klein knopf-zurueck" aria-label="Zurück zur Startseite">
-          <span aria-hidden="true">←</span><span class="knopf-text"> Startseite</span>
+        <button type="button" class="knopf knopf-klein knopf-zurueck" aria-label="Zurück zur Startseite" data-text-aria-label="zurueck.aria">
+          <span aria-hidden="true">←</span> <span class="knopf-text" data-text="zurueck.startseite">Startseite</span>
         </button>
         <div class="runde-status">
-          <span class="punkte-anzeige" id="memory-zuege">0 Züge</span>
-          <span class="punkte-anzeige" id="memory-paare">0 von 6 Paaren</span>
+          <span class="punkte-anzeige" id="memory-zuege"></span>
+          <span class="punkte-anzeige" id="memory-paare"></span>
         </div>
       </header>
-      <h1 id="titel-memory" class="frage" tabindex="-1">Noten-Memory</h1>
-      <div class="memory-karten" id="memory-karten" role="group" aria-label="Karten"></div>
+      <h1 id="titel-memory" class="frage" tabindex="-1" data-text="modus.noten-memory">Noten-Memory</h1>
+      <div class="memory-karten" id="memory-karten" role="group" aria-label="Karten" data-text-aria-label="memory.kartenAria"></div>
           <div class="tier-zeile">
             <div class="tier-klein" id="memory-tier"></div>
             <div class="sprechblase">
@@ -230,20 +233,20 @@
     <!-- Höher oder tiefer -->
     <section id="ansicht-hoeher" class="ansicht ansicht-runde ansicht-hoeher" aria-labelledby="titel-hoeher" hidden>
       <header class="runde-kopf">
-        <button type="button" class="knopf knopf-klein knopf-zurueck" aria-label="Zurück zur Startseite">
-          <span aria-hidden="true">←</span><span class="knopf-text"> Startseite</span>
+        <button type="button" class="knopf knopf-klein knopf-zurueck" aria-label="Zurück zur Startseite" data-text-aria-label="zurueck.aria">
+          <span aria-hidden="true">←</span> <span class="knopf-text" data-text="zurueck.startseite">Startseite</span>
         </button>
         <div class="runde-status">
-          <span class="sterne-anzeige" id="ht-sterne" role="img" aria-label="3 von 3 Sternen"></span>
-          <span class="punkte-anzeige" id="ht-punkte">0 Punkte</span>
+          <span class="sterne-anzeige" id="ht-sterne" role="img"></span>
+          <span class="punkte-anzeige" id="ht-punkte"></span>
         </div>
       </header>
 
       <div class="runde-inhalt">
         <div class="runde-noten">
-          <p class="aufgabe-nr" id="ht-aufgabe">Aufgabe 1 von 10</p>
-          <h1 id="titel-hoeher" class="frage" tabindex="-1">Welche Note ist <span class="ht-wort" id="ht-wort">höher</span>?</h1>
-          <div class="notensystem notensystem-hoeher" id="ht-notensystem" role="group" aria-label="Zwei Noten zum Antippen"></div>
+          <p class="aufgabe-nr" id="ht-aufgabe"></p>
+          <h1 id="titel-hoeher" class="frage" tabindex="-1"><span data-text="ht.frage">Welche Note ist</span> <span class="ht-wort" id="ht-wort"></span>?</h1>
+          <div class="notensystem notensystem-hoeher" id="ht-notensystem" role="group" aria-label="Zwei Noten zum Antippen" data-text-aria-label="ht.systemAria"></div>
         </div>
         <div class="runde-antworten">
           <div class="tier-zeile">
@@ -252,7 +255,7 @@
               <div aria-live="polite">
                 <p id="ht-text"></p>
               </div>
-              <button type="button" class="knopf knopf-haupt knopf-weiter" id="ht-weiter" hidden>Weiter</button>
+              <button type="button" class="knopf knopf-haupt knopf-weiter" id="ht-weiter" hidden data-text="runde.weiter">Weiter</button>
             </div>
           </div>
         </div>
@@ -262,29 +265,29 @@
     <!-- Hör-Spiel -->
     <section id="ansicht-hoeren" class="ansicht ansicht-runde ansicht-hoeren" aria-labelledby="titel-hoeren" hidden>
       <header class="runde-kopf">
-        <button type="button" class="knopf knopf-klein knopf-zurueck" aria-label="Zurück zur Startseite">
-          <span aria-hidden="true">←</span><span class="knopf-text"> Startseite</span>
+        <button type="button" class="knopf knopf-klein knopf-zurueck" aria-label="Zurück zur Startseite" data-text-aria-label="zurueck.aria">
+          <span aria-hidden="true">←</span> <span class="knopf-text" data-text="zurueck.startseite">Startseite</span>
         </button>
         <div class="runde-status">
-          <span class="sterne-anzeige" id="hoeren-sterne" role="img" aria-label="3 von 3 Sternen"></span>
-          <span class="punkte-anzeige" id="hoeren-punkte">0 Punkte</span>
+          <span class="sterne-anzeige" id="hoeren-sterne" role="img"></span>
+          <span class="punkte-anzeige" id="hoeren-punkte"></span>
         </div>
       </header>
 
       <div class="runde-inhalt">
         <div class="runde-noten">
-          <p class="aufgabe-nr" id="hoeren-aufgabe">Aufgabe 1 von 10</p>
-          <h1 id="titel-hoeren" class="frage" tabindex="-1">Welche Note hörst du?</h1>
+          <p class="aufgabe-nr" id="hoeren-aufgabe"></p>
+          <h1 id="titel-hoeren" class="frage" tabindex="-1" data-text="hoeren.frage">Welche Note hörst du?</h1>
           <div class="hoeren-steuerung">
             <button type="button" class="knopf knopf-haupt knopf-hoeren" id="hoeren-nochmal">
-              <span aria-hidden="true">🔊</span> Nochmal hören
+              <span aria-hidden="true">🔊</span> <span data-text="hoeren.nochmal">Nochmal hören</span>
             </button>
-            <button type="button" class="knopf knopf-neben knopf-bezug" id="hoeren-bezug" aria-label="Bezugston c¹ hören">
-              <span aria-hidden="true">🎹</span> c¹
+            <button type="button" class="knopf knopf-neben knopf-bezug" id="hoeren-bezug">
+              <span aria-hidden="true">🎹</span> <span id="hoeren-bezug-name"></span>
             </button>
           </div>
           <p class="hoeren-hinweis" id="hoeren-hinweis" role="status" hidden></p>
-          <div class="hoeren-optionen" id="hoeren-optionen" role="group" aria-label="Drei Noten zur Auswahl"></div>
+          <div class="hoeren-optionen" id="hoeren-optionen" role="group" aria-label="Drei Noten zur Auswahl" data-text-aria-label="hoeren.optionenAria"></div>
         </div>
         <div class="runde-antworten">
           <div class="tier-zeile">
@@ -297,7 +300,7 @@
                 </div>
                 <p id="hoeren-text"></p>
               </div>
-              <button type="button" class="knopf knopf-haupt knopf-weiter" id="hoeren-weiter" hidden>Weiter</button>
+              <button type="button" class="knopf knopf-haupt knopf-weiter" id="hoeren-weiter" hidden data-text="runde.weiter">Weiter</button>
             </div>
           </div>
         </div>
@@ -307,10 +310,10 @@
     <!-- Tägliche Notenreise: Übersicht vor und zwischen den Etappen -->
     <section id="ansicht-reise" class="ansicht ansicht-reise" aria-labelledby="titel-reise" hidden>
       <header class="seiten-kopf">
-        <button type="button" class="knopf knopf-klein knopf-zurueck" aria-label="Zurück zur Startseite">
-          <span aria-hidden="true">←</span> Zurück
+        <button type="button" class="knopf knopf-klein knopf-zurueck" aria-label="Zurück zur Startseite" data-text-aria-label="zurueck.aria">
+          <span aria-hidden="true">←</span> <span data-text="zurueck.text">Zurück</span>
         </button>
-        <h1 id="titel-reise" class="titel" tabindex="-1">Notenreise</h1>
+        <h1 id="titel-reise" class="titel" tabindex="-1" data-text="reise.titel">Notenreise</h1>
       </header>
       <p class="reise-status" id="reise-status"></p>
       <ol class="reise-etappen" id="reise-etappen"></ol>
@@ -318,12 +321,12 @@
         <div class="tier-klein" id="reise-tier"></div>
         <div class="sprechblase"><p id="reise-text" aria-live="polite"></p></div>
       </div>
-      <button type="button" class="knopf knopf-haupt knopf-reise-los" id="reise-los">Los geht’s!</button>
+      <button type="button" class="knopf knopf-haupt knopf-reise-los" id="reise-los"></button>
     </section>
 
     <!-- Ergebnis -->
     <section id="ansicht-ergebnis" class="ansicht ansicht-ergebnis" aria-labelledby="titel-ergebnis" hidden>
-      <h1 id="titel-ergebnis" class="titel" tabindex="-1">Geschafft!</h1>
+      <h1 id="titel-ergebnis" class="titel" tabindex="-1"></h1>
       <div class="tier-zeile tier-zeile-gross">
         <div class="tier-mittel" id="ergebnis-tier"></div>
         <div class="sprechblase"><p id="ergebnis-spruch"></p></div>
@@ -331,32 +334,32 @@
       <dl class="ergebnis-liste" id="ergebnis-liste"></dl>
       <div class="neues-tier" id="neues-tier" hidden></div>
       <section class="rekord-name" id="rekord-name" aria-labelledby="titel-rekord-name" hidden>
-        <h2 id="titel-rekord-name" tabindex="-1">Wer hat gespielt?</h2>
+        <h2 id="titel-rekord-name" tabindex="-1" data-text="rekordName.titel">Wer hat gespielt?</h2>
         <p class="rekord-name-info" id="rekord-name-info"></p>
-        <div class="namen-schnellwahl" id="namen-schnellwahl" role="group" aria-label="Zuletzt benutzte Namen"></div>
+        <div class="namen-schnellwahl" id="namen-schnellwahl" role="group" aria-label="Zuletzt benutzte Namen" data-text-aria-label="rekordName.schnellwahl"></div>
         <form class="name-formular" id="name-formular">
-          <label for="name-eingabe">Name</label>
+          <label for="name-eingabe" data-text="rekordName.name">Name</label>
           <div class="name-zeile">
             <input type="text" id="name-eingabe" maxlength="20" autocomplete="off" autocapitalize="words" spellcheck="false" enterkeyhint="done">
-            <button type="submit" class="knopf knopf-haupt">Eintragen</button>
+            <button type="submit" class="knopf knopf-haupt" data-text="rekordName.eintragen">Eintragen</button>
           </div>
         </form>
-        <button type="button" class="knopf knopf-neben knopf-ohne-name" id="knopf-ohne-name">Ohne Namen</button>
+        <button type="button" class="knopf knopf-neben knopf-ohne-name" id="knopf-ohne-name" data-text="rekordName.ohne">Ohne Namen</button>
         <p class="rekord-name-fertig" id="rekord-name-fertig" role="status"></p>
       </section>
       <div class="knopf-reihe">
-        <button type="button" class="knopf knopf-haupt" id="knopf-nochmal">Noch eine Runde</button>
-        <button type="button" class="knopf knopf-neben" id="knopf-ergebnis-start">Zur Startseite</button>
+        <button type="button" class="knopf knopf-haupt" id="knopf-nochmal" data-text="ergebnis.nochmal">Noch eine Runde</button>
+        <button type="button" class="knopf knopf-neben" id="knopf-ergebnis-start" data-text="ergebnis.zurStartseite">Zur Startseite</button>
       </div>
     </section>
 
     <!-- Meine Tiere -->
     <section id="ansicht-tiere" class="ansicht ansicht-tiere" aria-labelledby="titel-tiere" hidden>
       <header class="seiten-kopf">
-        <button type="button" class="knopf knopf-klein knopf-zurueck" aria-label="Zurück zur Startseite">
-          <span aria-hidden="true">←</span> Zurück
+        <button type="button" class="knopf knopf-klein knopf-zurueck" aria-label="Zurück zur Startseite" data-text-aria-label="zurueck.aria">
+          <span aria-hidden="true">←</span> <span data-text="zurueck.text">Zurück</span>
         </button>
-        <h1 id="titel-tiere" class="titel" tabindex="-1">Meine Tiere</h1>
+        <h1 id="titel-tiere" class="titel" tabindex="-1" data-text="start.tiere">Meine Tiere</h1>
       </header>
       <p class="sterne-gesamt" id="tiere-sterne"></p>
       <p class="naechstes-tier" id="tiere-naechstes"></p>
@@ -366,10 +369,10 @@
     <!-- Einstellungen -->
     <section id="ansicht-einstellungen" class="ansicht ansicht-einstellungen" aria-labelledby="titel-einstellungen" hidden>
       <header class="seiten-kopf">
-        <button type="button" class="knopf knopf-klein knopf-zurueck" aria-label="Zurück zur Startseite">
-          <span aria-hidden="true">←</span> Zurück
+        <button type="button" class="knopf knopf-klein knopf-zurueck" aria-label="Zurück zur Startseite" data-text-aria-label="zurueck.aria">
+          <span aria-hidden="true">←</span> <span data-text="zurueck.text">Zurück</span>
         </button>
-        <h1 id="titel-einstellungen" class="titel" tabindex="-1">Einstellungen</h1>
+        <h1 id="titel-einstellungen" class="titel" tabindex="-1" data-text="start.einstellungen">Einstellungen</h1>
       </header>
       <form class="einstellungen" id="einstellungen-formular"></form>
     </section>
@@ -377,16 +380,17 @@
     <!-- Rekorde -->
     <section id="ansicht-rekorde" class="ansicht ansicht-rekorde" aria-labelledby="titel-rekorde" hidden>
       <header class="seiten-kopf">
-        <button type="button" class="knopf knopf-klein knopf-zurueck" aria-label="Zurück zur Startseite">
-          <span aria-hidden="true">←</span> Zurück
+        <button type="button" class="knopf knopf-klein knopf-zurueck" aria-label="Zurück zur Startseite" data-text-aria-label="zurueck.aria">
+          <span aria-hidden="true">←</span> <span data-text="zurueck.text">Zurück</span>
         </button>
-        <h1 id="titel-rekorde" class="titel" tabindex="-1">Rekorde</h1>
+        <h1 id="titel-rekorde" class="titel" tabindex="-1" data-text="start.rekorde">Rekorde</h1>
       </header>
       <div id="rekorde-inhalt"></div>
     </section>
 
   </main>
 
+  <script src="js/texte.js"></script>
   <script src="js/noten-konfiguration.js"></script>
   <script src="js/noten.js"></script>
   <script src="js/spiel-logik.js"></script>

@@ -7,7 +7,9 @@
  *
  * Sammeltiere: siehe SpielLogik.TIERE (fuchs, hase, katze, hund, baer, panda …)
  * Merktiere:   chamaeleon, delfin, elefant, frosch, fuchs, giraffe, affe, hase,
- *              fisch (für fis, kein Sammeltier)
+ *              fisch (für fis, kein Sammeltier); englisch zusätzlich katze,
+ *              baer und alligator (A is for Alligator, kein Sammeltier)
+ * Die Namen der Merktiere stehen in js/texte.js ("merktier.<art>").
  */
 (function (root) {
   "use strict";
@@ -18,11 +20,8 @@
 
   var REGENBOGEN = ["#ff6b6b", "#ffa94d", "#ffd43b", "#69db7c", "#4dabf7", "#9775fa"];
 
-  // Namen der Merktiere („d¹ wie Delfin“).
-  var NAMEN = {
-    chamaeleon: "Chamäleon", delfin: "Delfin", elefant: "Elefant", frosch: "Frosch",
-    fuchs: "Fuchs", giraffe: "Giraffe", affe: "Affe", hase: "Hase", fisch: "Fisch"
-  };
+  /** Name eines Merktiers in der aktuellen Sprache („d¹ wie Delfin“, „D4 – D is for Dolphin“). */
+  function name(art) { return root.Texte.t("merktier." + art); }
 
   function r1(x) { return Math.round(x * 10) / 10; }
 
@@ -222,6 +221,33 @@
         if (stimmung === "froh") return form("M43 68 Q60 86 77 68 Q60 75 43 68 Z", "#c2414f");
         if (stimmung === "oje") return oval(60, 73, 4, 4, DUNKEL);
         return strich("M43 69 Q60 80 77 69", DUNKEL, 2.5);
+      }
+    },
+
+    alligator: {
+      farben: { fell: "#4f9d4a", hell: "#cfe8a9", innen: "#2f6e2c" },
+      // Langer Schwanz mit Zacken rechts hinter dem Körper
+      hinten: function (f) {
+        var p = "M80 102 C100 110 114 100 116 84";
+        return strich(p, "#3d2b1f", 12) + strich(p, f.fell, 7) +
+          form("M97 104 L102 95 L106 103 Z", f.innen) + form("M108 99 L115 91 L114 100 Z", f.innen);
+      },
+      koerper: function (f) { return strich("M50 93 L70 93 M49 100 L71 100 M51 107 L69 107", f.innen, 1.6); },
+      // Augenhöcker oben auf dem Kopf
+      vorKopf: function (f) { return kreis(43, 34, 11, f.fell, true) + kreis(77, 34, 11, f.fell, true); },
+      // Breite, lange Schnauze und Rückenzacken auf der Stirn
+      kopf: function (f) {
+        return kreis(43, 34, 7.5, "#ffffff") + kreis(77, 34, 7.5, "#ffffff") +
+          kreis(54, 44, 2.5, f.innen) + kreis(66, 44, 2.5, f.innen) + kreis(60, 49, 2.5, f.innen) +
+          oval(60, 71, 27, 13, f.hell, true);
+      },
+      augen: [[43, 35], [77, 35]],
+      nase: function () { return kreis(53, 64, 1.8, DUNKEL) + kreis(67, 64, 1.8, DUNKEL); },
+      mund: function (stimmung) {
+        var zaehne = form("M45 75.2 L47.5 79.5 L50 76 Z", "#ffffff") + form("M70 76 L72.5 79.5 L75 75.2 Z", "#ffffff");
+        if (stimmung === "froh") return strich("M38 72 Q60 84 82 72", DUNKEL, 2.5) + zaehne;
+        if (stimmung === "oje") return oval(60, 77, 4, 3.5, DUNKEL);
+        return strich("M40 74 Q60 79 80 74", DUNKEL, 2.5) + zaehne;
       }
     },
 
@@ -593,5 +619,5 @@
       "</svg>";
   }
 
-  root.Tiere = { zeichne: zeichne, NAMEN: NAMEN, hat: function (art) { return !!ARTEN[art]; } };
+  root.Tiere = { zeichne: zeichne, name: name, hat: function (art) { return !!ARTEN[art]; } };
 })(this);

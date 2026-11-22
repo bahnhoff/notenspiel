@@ -12,6 +12,7 @@
   "use strict";
 
   var L = window.SpielLogik;
+  var T = window.Texte;
   var H = window.Modi.hilfen;
   var ZUDECKEN_NACH = 1300;  // Millisekunden, bis ein falsches Paar wieder zugeht
   var ENDE_NACH = 1200;
@@ -46,7 +47,7 @@
     baueKarten();
     u.zeigeTier($("memory-tier"), "normal");
     $("memory-merkhilfe").hidden = true;
-    $("memory-text").textContent = "Finde zu jeder Note den passenden Namen.";
+    $("memory-text").textContent = T.t("memory.start");
     zeigeStatus();
     u.zeigeAnsicht();
   }
@@ -58,8 +59,8 @@
   }
 
   function zeigeStatus() {
-    $("memory-zuege").textContent = spiel.zuege === 1 ? "1 Zug" : spiel.zuege + " Züge";
-    $("memory-paare").textContent = spiel.gefunden + " von " + spiel.paare + " Paaren";
+    $("memory-zuege").textContent = T.t("memory.zuege", { n: spiel.zuege });
+    $("memory-paare").textContent = T.t("memory.paare", { gefunden: spiel.gefunden, paare: spiel.paare });
   }
 
   function baueKarten() {
@@ -79,7 +80,7 @@
         var vz = umgebung.noten.some(function (n) { return n.vorzeichen; });
         vorne.innerHTML = window.Notensystem.zeichne(k.note, { bereich: umgebung.bereich, breite: vz ? 100 : 94, noteX: vz ? 80 : 74 });
       } else {
-        vorne.textContent = k.note.antwort;
+        vorne.textContent = k.note.antwortAnzeige;
         vorne.classList.add("karte-name");
       }
       b.addEventListener("click", function () { decke(i); });
@@ -91,10 +92,10 @@
   }
 
   function beschrifte(k, i) {
-    var text = "Karte " + (i + 1);
-    if (k.zustand === "zu") text += ", verdeckt";
-    else text += k.art === "note" ? ", Notenkarte" : ", Name " + k.note.antwort;
-    if (k.zustand === "gefunden") text += ", gefunden";
+    var text = T.t("memory.karte", { nr: i + 1 });
+    if (k.zustand === "zu") text += T.t("memory.verdeckt");
+    else text += k.art === "note" ? T.t("memory.notenkarte") : T.t("memory.name", { name: k.note.antwortAnzeige });
+    if (k.zustand === "gefunden") text += T.t("memory.gefunden");
     k.knopf.setAttribute("aria-label", text);
     k.knopf.classList.toggle("ist-offen", k.zustand !== "zu");
     k.knopf.classList.toggle("ist-gefunden", k.zustand === "gefunden");
@@ -134,7 +135,7 @@
       spiel.offen = [];
       spiel.gefunden += 1;
       H.zeigeMerkhilfe(umgebung, a.note, "memory-merkhilfe");
-      $("memory-text").textContent = "✓ Paar gefunden: " + a.note.name + ".";
+      $("memory-text").textContent = T.t("memory.paar", { name: a.note.anzeige });
       umgebung.zeigeTier($("memory-tier"), "froh");
       if (spiel.gefunden === spiel.paare) {
         spiel.fertig = true;
@@ -146,7 +147,7 @@
       beschrifte(a, spiel.offen[0]);
       beschrifte(b, spiel.offen[1]);
       $("memory-merkhilfe").hidden = true;
-      $("memory-text").textContent = "✗ Kein Paar. Merk dir die Karten.";
+      $("memory-text").textContent = T.t("memory.keinPaar");
       umgebung.zeigeTier($("memory-tier"), "oje");
       timer = setTimeout(deckeZu, ZUDECKEN_NACH);
     }
@@ -162,20 +163,20 @@
     umgebung.beende({
       gesamt: L.memoryPunkte(s.paare, sterne),
       neueSterne: sterne,
-      titel: "Alle Paare gefunden!",
-      spruch: sterne === 3 ? "Was für ein Gedächtnis!" : "Toll gemacht!",
+      titel: T.t("memory.alle"),
+      spruch: sterne === 3 ? T.t("memory.gedaechtnis") : T.t("ende.toll"),
       stimmung: "froh",
       zeilen: [
-        ["Züge", String(s.zuege)],
-        ["Punkte für " + s.paare + " Paare", String(s.paare * L.MEMORY.punkteProPaar)],
-        ["Bonus", String(sterne * L.MEMORY.punkteProStern) + " (" + H.sterneText(sterne) + " × " + L.MEMORY.punkteProStern + ")"]
+        [T.t("memory.zeileZuege"), String(s.zuege)],
+        [T.t("memory.zeilePunkte", { n: s.paare }), String(s.paare * L.MEMORY.punkteProPaar)],
+        [T.t("ende.bonus"), String(sterne * L.MEMORY.punkteProStern) + " (" + H.sterneText(sterne) + " × " + L.MEMORY.punkteProStern + ")"]
       ]
     });
   }
 
   window.Modi.registriere({
     id: "noten-memory",
-    name: "Noten-Memory",
+    get name() { return T.t("modus.noten-memory"); },
     symbol: "🃏",
     ansicht: "memory",
     starte: starte,

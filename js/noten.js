@@ -14,19 +14,32 @@
  * (MIDI-Nummer, c¹ = 60). Namen deutsch: cis, dis, fis, gis, ais und des,
  * es, ges, as, b (h mit B-Vorzeichen); große Oktave mit großem Anfangs-
  * buchstaben (Fis, Es, B). Kennungen ASCII: `violin-fis1`, `bass-B`.
+ *
+ * Sprache: `name` bleibt immer deutsch und dient mit `antwort` und `id` als
+ * sprachunabhängiger Schlüssel (Antwortvergleich, Spielstand). Angezeigt wird
+ * `anzeige` in der aktuellen Sprache (js/texte.js): deutsch c¹, englisch
+ * (amerikanisch, wissenschaftliche Schreibweise) C4, B♭3, F♯4. Hinweise und
+ * Merktiere entstehen beim Erzeugen der Note in der aktuellen Sprache.
  */
 (function (root) {
   "use strict";
 
+  var Texte = typeof module !== "undefined" && module.exports ? require("./texte.js") : root.Texte;
+  function t(schluessel, werte) { return Texte.t(schluessel, werte); }
+  function englisch() { return Texte.sprache() === "en"; }
+
   var BUCHSTABEN = ["c", "d", "e", "f", "g", "a", "h"];
 
   // Stufe der untersten Linie je Schlüssel: Violin e1, Bass G.
+  // `name` liefert den Namen des Schlüssels in der aktuellen Sprache.
   var SCHLUESSEL = {
-    violin: { name: "Violinschlüssel", untersteLinie: 4 * 7 + 2 },
-    bass: { name: "Bassschlüssel", untersteLinie: 2 * 7 + 4 }
+    violin: { get name() { return t("schluessel.violin"); }, untersteLinie: 4 * 7 + 2 },
+    bass: { get name() { return t("schluessel.bass"); }, untersteLinie: 2 * 7 + 4 }
   };
 
-  var ORDNUNG = ["ersten", "zweiten", "dritten", "vierten", "fünften", "sechsten"];
+  // Englische Buchstaben: deutsch h = englisch B.
+  var BUCHSTABEN_EN = { c: "C", d: "D", e: "E", f: "F", g: "G", a: "A", h: "B" };
+  var VORZEICHEN_EN = { "1": "\u266f", "-1": "\u266d" };
 
   var HALBTOENE = [0, 2, 4, 5, 7, 9, 11];
 
@@ -59,6 +72,39 @@
   /** Deutscher Name zum Anzeigen, Oktavziffer hochgestellt: C, c, c¹, fis¹, es², B … */
   function name(stufe, vorzeichen) {
     return kennung(stufe, vorzeichen).replace(/\d/g, function (z) { return HOCH[Number(z)]; });
+  }
+
+  /** Englischer Name (amerikanisch): C4, C3, C2, B3, B♭3, F♯4, E♭5. */
+  function englischerName(stufe, vorzeichen) {
+    return englischerBuchstabe(BUCHSTABEN[((stufe % 7) + 7) % 7], vorzeichen) + Math.floor(stufe / 7);
+  }
+
+  /** Englischer Buchstabe mit Vorzeichen ohne Oktave: C, F♯, B♭, B. */
+  function englischerBuchstabe(buchstabe, vorzeichen) {
+    return BUCHSTABEN_EN[buchstabe] + (VORZEICHEN_EN[vorzeichen || 0] || "");
+  }
+
+  /** Name zum Anzeigen in der aktuellen Sprache: deutsch c¹, englisch C4. */
+  function anzeigeName(stufe, vorzeichen) {
+    return englisch() ? englischerName(stufe, vorzeichen) : name(stufe, vorzeichen);
+  }
+
+  /** Buchstabe ohne Oktave zum Anzeigen: deutsch C, Fis, B; englisch C, F♯, B♭. */
+  function buchstabenAnzeige(buchstabe, vorzeichen) {
+    return englisch() ? englischerBuchstabe(buchstabe, vorzeichen) : gross(grundname(buchstabe, vorzeichen || 0));
+  }
+
+  /**
+   * Getippte Taste zum Buchstaben (c bis h) oder null. Englisch heißt das h
+   * „B“, die Taste h zählt dort nicht.
+   */
+  function tasteZuBuchstabe(taste) {
+    taste = String(taste || "").toLowerCase();
+    if (englisch()) {
+      if (taste === "b") return "h";
+      return /^[a-g]$/.test(taste) ? taste : null;
+    }
+    return /^[a-h]$/.test(taste) && taste !== "b" ? taste : null;
   }
 
   /**
@@ -110,7 +156,7 @@
   }
 
   /**
-   * Ton ohne Schlüssel: { name, grundname, buchstabe, vorzeichen, oktave, stufe, halbton }.
+   * Ton ohne Schlüssel: { name, anzeige, grundname, buchstabe, vorzeichen, oktave, stufe, halbton }.
    * Reicht für Noten.antwortSchluessel, zum Beispiel für Klaviertasten.
    */
   function ton(stufe, vorzeichen) {
@@ -118,6 +164,7 @@
     var b = BUCHSTABEN[stufe % 7];
     return {
       name: name(stufe, vorzeichen),
+      anzeige: anzeigeName(stufe, vorzeichen),
       grundname: grundname(b, vorzeichen),
       buchstabe: b,
       vorzeichen: vorzeichen,
@@ -133,37 +180,51 @@
 
   /** Erzeugter Hinweis zur Lage der Note, zum Beispiel „Die Note liegt auf der zweiten Linie von unten.“ */
   function lageText(p) {
-    if (p === 0) return "auf der untersten Linie";
-    if (p === 8) return "auf der obersten Linie";
-    if (p === 4) return "auf der mittleren Linie";
-    if (p > 0 && p < 8 && p % 2 === 0) return "auf der " + ORDNUNG[p / 2] + " Linie von unten";
-    if (p > 0 && p < 8) return "im " + ORDNUNG[(p - 1) / 2] + " Zwischenraum von unten";
-    if (p === -1) return "knapp unter der untersten Linie";
-    if (p === 9) return "knapp über der obersten Linie";
+    var ord = Texte.liste("ordnung");
+    if (p === 0) return t("lage.unterste");
+    if (p === 8) return t("lage.oberste");
+    if (p === 4) return t("lage.mittlere");
+    if (p > 0 && p < 8 && p % 2 === 0) return t("lage.linie", { ord: ord[p / 2] });
+    if (p > 0 && p < 8) return t("lage.zwischenraum", { ord: ord[(p - 1) / 2] });
+    if (p === -1) return t("lage.knappUnter");
+    if (p === 9) return t("lage.knappUeber");
     if (p < 0) {
-      if (p % 2 === 0) return "auf der " + ORDNUNG[-p / 2 - 1] + " Hilfslinie unter dem System";
-      return "unter der " + ORDNUNG[(-p - 1) / 2 - 1] + " Hilfslinie unter dem System";
+      if (p % 2 === 0) return t("lage.hilfsUnterAuf", { ord: ord[-p / 2 - 1] });
+      return t("lage.hilfsUnterUnter", { ord: ord[(-p - 1) / 2 - 1] });
     }
-    if (p % 2 === 0) return "auf der " + ORDNUNG[(p - 8) / 2 - 1] + " Hilfslinie über dem System";
-    return "über der " + ORDNUNG[(p - 9) / 2 - 1] + " Hilfslinie über dem System";
+    if (p % 2 === 0) return t("lage.hilfsUeberAuf", { ord: ord[(p - 8) / 2 - 1] });
+    return t("lage.hilfsUeberUeber", { ord: ord[(p - 9) / 2 - 1] });
   }
 
+  /** Hinweis zur Lage in der aktuellen Sprache, zum Beispiel „Die Note liegt im ersten Zwischenraum von unten.“ */
   function hinweis(schluessel, s, vorzeichen) {
     var p = position(schluessel, s);
-    var text = "Die Note liegt " + lageText(p) +
-      (vorzeichen > 0 ? " und hat ein Kreuz" : (vorzeichen < 0 ? " und hat ein B" : "")) + ".";
-    if (s === 28 && !vorzeichen) text += " Das ist das mittlere C.";
-    if (schluessel === "violin" && p === 2) text += " Um diese Linie kringelt sich der Violinschlüssel.";
-    if (schluessel === "bass" && p === 6) text += " Diese Linie liegt zwischen den beiden Punkten des Bassschlüssels.";
+    var text = t("hinweis.satz", { lage: lageText(p),
+      vorzeichen: vorzeichen > 0 ? t("hinweis.kreuz") : (vorzeichen < 0 ? t("hinweis.b") : "") });
+    if (s === 28 && !vorzeichen) text += t("hinweis.mittleresC");
+    if (schluessel === "violin" && p === 2) text += t("hinweis.violin");
+    if (schluessel === "bass" && p === 6) text += t("hinweis.bass");
     return text;
+  }
+
+  /**
+   * Merktier-Tabellen der aktuellen Sprache: deutsch `merktiere` und
+   * `merktierAb`, englisch `merktiereEnglisch` und `merktierAbEnglisch`.
+   */
+  function merktierTabellen(konfiguration) {
+    if (englisch() && konfiguration.merktiereEnglisch) {
+      return { tiere: konfiguration.merktiereEnglisch, ab: konfiguration.merktierAbEnglisch || {} };
+    }
+    return { tiere: konfiguration.merktiere || {}, ab: konfiguration.merktierAb || {} };
   }
 
   /** Merktier des Stammtons (mit `merktierAb`). */
   function stammTier(konfiguration, s) {
+    var tabellen = merktierTabellen(konfiguration);
     var b = BUCHSTABEN[s % 7];
-    var regel = (konfiguration.merktierAb || {})[b];
+    var regel = tabellen.ab[b];
     if (regel && stufe(regel.ab) !== null && s >= stufe(regel.ab)) return regel.tier;
-    return (konfiguration.merktiere || {})[b] || null;
+    return tabellen.tiere[b] || null;
   }
 
   /**
@@ -172,7 +233,7 @@
    */
   function erzeugeNote(konfiguration, schluessel, s, vorzeichen) {
     var n = ton(s, vorzeichen);
-    var eigenes = n.vorzeichen ? (konfiguration.merktiere || {})[n.grundname] : null;
+    var eigenes = n.vorzeichen ? merktierTabellen(konfiguration).tiere[n.grundname] : null;
     n.id = schluessel + "-" + kennung(s, n.vorzeichen);
     n.schluessel = schluessel;
     n.position = position(schluessel, s);
@@ -247,6 +308,11 @@
     return antwortmodus === "genau" ? note.name : gross(grundname(note.buchstabe, note.vorzeichen || 0));
   }
 
+  /** Antwort zum Anzeigen in der aktuellen Sprache: einfach „F♯“ oder „Fis“, genau „F♯4“ oder „fis¹“. */
+  function antwortAnzeige(note, antwortmodus) {
+    return antwortmodus === "genau" ? anzeigeName(note.stufe, note.vorzeichen) : buchstabenAnzeige(note.buchstabe, note.vorzeichen);
+  }
+
   /**
    * Reicht eine Auswahl (aus fuerEinstellungen) zum Spielen? Es braucht
    * mindestens MINDEST_NOTEN verschiedene Antworten: im einfachen Modus
@@ -311,7 +377,8 @@
    * - noten:        alle abgefragten Noten der angekreuzten Schlüssel, je Schlüssel tief nach hoch.
    *                  Jede Note hat `antwort` (siehe antwortSchluessel), damit vergleicht
    *                  SpielLogik.antworte die getippte Antwort.
-   * - antworten:    die Antwortknöpfe. Genau: eindeutige Namen tief nach hoch.
+   *                  `antwortAnzeige` ist dieselbe Antwort zum Anzeigen in der aktuellen Sprache.
+   * - antworten:    die Antwortknöpfe. `name` ist der Schlüssel, `anzeige` die Beschriftung. Genau: eindeutige Namen tief nach hoch.
    *                  Einfach: die vorkommenden Antworten ohne Oktave in chromatischer
    *                  Reihenfolge (C Cis D Es E F Fis G A B H), alle in einer Reihe.
    * - namen:        eindeutige genaue Namen, tief nach hoch, in beiden Modi
@@ -328,7 +395,10 @@
     var namen = noten.slice().sort(chromatisch)
       .filter(function (n) { if (gesehen[n.name]) return false; gesehen[n.name] = true; return true; })
       .map(function (n) { return ton(n.stufe, n.vorzeichen); });
-    noten.forEach(function (n) { n.antwort = antwortSchluessel(n, e.antwortmodus); });
+    noten.forEach(function (n) {
+      n.antwort = antwortSchluessel(n, e.antwortmodus);
+      n.antwortAnzeige = antwortAnzeige(n, e.antwortmodus);
+    });
     var antworten = namen;
     if (e.antwortmodus === "einfach") {
       var schon = {};
@@ -338,7 +408,7 @@
         schon[k] = true;
         return true;
       }).map(function (n) {
-        return { name: antwortSchluessel(n, "einfach"), stufe: null, oktave: null, buchstabe: n.buchstabe, vorzeichen: n.vorzeichen,
+        return { name: antwortSchluessel(n, "einfach"), anzeige: buchstabenAnzeige(n.buchstabe, n.vorzeichen), stufe: null, oktave: null, buchstabe: n.buchstabe, vorzeichen: n.vorzeichen,
           reihe: HALBTOENE[BUCHSTABEN.indexOf(n.buchstabe)] + n.vorzeichen };
       }).sort(function (x, y) { return (x.reihe - y.reihe) || (y.vorzeichen - x.vorzeichen); });
     }
@@ -358,6 +428,11 @@
     MINDEST_NOTEN: MINDEST_NOTEN,
     kennung: kennung,
     name: name,
+    englischerName: englischerName,
+    anzeigeName: anzeigeName,
+    buchstabenAnzeige: buchstabenAnzeige,
+    antwortAnzeige: antwortAnzeige,
+    tasteZuBuchstabe: tasteZuBuchstabe,
     stufe: stufe,
     zerlege: zerlege,
     halbton: halbton,

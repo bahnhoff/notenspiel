@@ -194,8 +194,16 @@
     // Platz für den Namen rechts neben der Note, auch für längere wie „fis¹“
     var breiteGesamt = Math.max(RECHTS + 4, optionen.beschriftung ? NOTE_X + 30 + String(optionen.beschriftung).length * 10 : 0);
     return '<svg class="notensystem-svg' + (optionen.klasse ? " " + optionen.klasse : "") + '" viewBox="0 ' + oben + " " + breiteGesamt + " " + (unten - oben) + '" role="img" aria-label="' +
-      ((schluessel === "bass" ? "Bassschlüssel" : "Violinschlüssel") + (optionen.beschriftung ? " mit der Note " + optionen.beschriftung : (note ? " mit einer Note" : ""))) +
+      systemText(schluessel, optionen.beschriftung, note) +
       '" xmlns="http://www.w3.org/2000/svg">' + teile.join("") + "</svg>";
+  }
+
+  /** Beschreibung für Screenreader in der aktuellen Sprache, zum Beispiel „Violinschlüssel mit der Note c¹“. */
+  function systemText(schluessel, beschriftung, note) {
+    var T = root.Texte;
+    var name = T.t(schluessel === "bass" ? "schluessel.bass" : "schluessel.violin");
+    if (beschriftung) return T.t("system.mitNote", { schluessel: name, name: beschriftung });
+    return note ? T.t("system.mitEinerNote", { schluessel: name }) : name;
   }
 
   /** Position (0 = unterste Linie) zu einer y-Koordinate, auf ganze Schritte gerundet. */

@@ -15,6 +15,7 @@
   "use strict";
 
   var L = window.SpielLogik;
+  var T = window.Texte;
   var N = window.Noten;
   var H = window.Modi.hilfen;
   var PAUSE_NACH_RICHTIG = 1300; // Millisekunden
@@ -72,7 +73,7 @@
   }
 
   function zeigeStatus() {
-    $("setzen-aufgabe").textContent = "Aufgabe " + (runde.aufgabe + 1) + " von " + runde.anzahl;
+    $("setzen-aufgabe").textContent = H.aufgabeText(runde);
     H.zeigeSterne($("setzen-sterne"), $("setzen-punkte"), runde.sterne, L.REGELN.startSterne, runde.punkte);
   }
 
@@ -97,14 +98,14 @@
     vorzeichen = 0;
     zeigeVorzeichenKnoepfe(false);
     zeigeStatus();
-    $("setzen-name").textContent = note().antwort || note().name;
+    $("setzen-name").textContent = note().antwortAnzeige || note().anzeige;
     var system = $("setzen-notensystem");
     system.classList.remove("ist-falsch", "ist-richtig", "hat-vorschau");
     system.classList.add("ist-offen");
     system.setAttribute("aria-valuemin", String(erlaubt[0]));
     system.setAttribute("aria-valuemax", String(erlaubt[1]));
     system.setAttribute("aria-valuenow", "4");
-    system.setAttribute("aria-valuetext", "Noch keine Note gesetzt");
+    system.setAttribute("aria-valuetext", T.t("setzen.nochKeine"));
     zeichne({});
     $("setzen-weiter").hidden = true;
     $("setzen-merkhilfe").hidden = true;
@@ -112,9 +113,9 @@
     $("setzen-hoeher").disabled = false;
     $("setzen-tiefer").disabled = false;
     $("setzen-text").textContent = (umgebung.antwortmodus === "einfach"
-      ? "Tippe ins Notensystem, wo ein " + note().antwort + " hingehört."
-      : "Tippe ins Notensystem, wo " + note().name + " hingehört.") +
-      (mitVorzeichen ? " Wähle das Vorzeichen: ohne, Kreuz oder B." : "") + " Dann tippe auf Prüfen.";
+      ? T.t("setzen.tippeEinfach", { name: note().antwortAnzeige })
+      : T.t("setzen.tippeGenau", { name: note().anzeige })) +
+      (mitVorzeichen ? T.t("setzen.vorzeichenWahl") : "") + T.t("setzen.dannPruefen");
   }
 
   /** Setzt die Vorschau-Note an eine Position. */
@@ -153,6 +154,7 @@
     if (!aktiv() || runde.gesperrt || gewaehlt === null) return;
     var ton = N.ton(stufeVon(gewaehlt), vorzeichen);
     var gesetzt = ton.name;
+    var gesetztAnzeige = ton.anzeige;
     var a = L.antworte(runde, N.antwortSchluessel(ton, umgebung.antwortmodus));
     if (!a) return; // schon geprüft
     // Im einfachen Modus kann eine andere Oktave richtig sein: dann die gesetzte Note zeigen.
@@ -168,13 +170,13 @@
     system.classList.remove("ist-offen", "hat-vorschau");
     system.classList.add(a.richtig ? "ist-richtig" : "ist-falsch");
     // Bei falscher Antwort steht der Name oben, damit er die falsch gesetzte Note nicht verdeckt.
-    zeichne({ note: gezeigt, beschriftung: a.richtig ? gezeigt.name : undefined, falsch: a.richtig ? undefined : gewaehlt, falschVorzeichen: vorzeichen });
-    $("setzen-name").textContent = gezeigt.name;
+    zeichne({ note: gezeigt, beschriftung: a.richtig ? gezeigt.anzeige : undefined, falsch: a.richtig ? undefined : gewaehlt, falschVorzeichen: vorzeichen });
+    $("setzen-name").textContent = gezeigt.anzeige;
     zeigeStatus();
     H.zeigeMerkhilfe(umgebung, gezeigt, "setzen-merkhilfe");
     $("setzen-text").textContent = a.richtig
-      ? "✓ " + (gezeigt === a.note ? a.nachricht : "Genau, das ist " + gezeigt.name + "!")
-      : "✗ Du hast " + gesetzt + " gesetzt. So sieht " + a.note.name + " aus. " + a.note.hinweis;
+      ? "✓ " + (gezeigt === a.note ? a.nachricht : T.liste("rueckmeldung.lob", { name: gezeigt.anzeige })[0])
+      : T.t("setzen.falsch", { gesetzt: gesetztAnzeige, name: a.note.anzeige, hinweis: a.note.hinweis });
     umgebung.zeigeTier($("setzen-tier"), a.richtig ? "froh" : "oje");
 
     if (a.richtig) {
@@ -223,7 +225,7 @@
 
   window.Modi.registriere({
     id: "note-setzen",
-    name: "Note setzen",
+    get name() { return T.t("modus.note-setzen"); },
     symbol: "✏️",
     ansicht: "setzen",
     reise: true,

@@ -124,6 +124,21 @@ test("Vorzeichen-Noten: Namen, Positionen und Antworten in beiden Schlüsseln", 
   assert.deepEqual([L.istRichtig(fis, "Fis"), L.istRichtig(fis, "Ges"), L.istRichtig(fis, "F")], [true, false, false]);
 });
 
+test("englische Notennamen: C4, B3, B♭3, F♯4, C2, E♭5; Antworten bleiben deutsch", () => {
+  const englisch = (name) => { const z = N.zerlege(name); return N.englischerName(z.stufe, z.vorzeichen); };
+  assert.deepEqual(["c1", "h", "b", "fis1", "C", "es2"].map(englisch), ["C4", "B3", "B♭3", "F♯4", "C2", "E♭5"]);
+  const Texte = require("../js/texte.js");
+  Texte.setzeSprache("en");
+  try {
+    const a = N.fuerEinstellungen(K, { schluessel: ["violin"], noten: ["violin-fis1", "violin-b1", "violin-h1"], antwortmodus: "einfach" });
+    assert.equal(a.antworten.map((x) => x.name + "=" + x.anzeige).join(" "), "Fis=F♯ B=B♭ H=B");
+    assert.equal(a.noten.find((n) => n.id === "violin-h1").anzeige, "B4");
+    assert.equal(a.noten.find((n) => n.id === "violin-fis1").tier, "fisch");
+  } finally {
+    Texte.setzeSprache("de");
+  }
+});
+
 test("Mindestauswahl: 3 verschiedene Antworten, im einfachen Modus Buchstaben", () => {
   const noten = ["violin-c1", "violin-c2", "violin-d1"];
   assert.equal(N.auswahlReicht(N.fuerEinstellungen(K, { schluessel: ["violin"], noten, antwortmodus: "einfach" })), false);

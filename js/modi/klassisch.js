@@ -7,6 +7,7 @@
   "use strict";
 
   var L = window.SpielLogik;
+  var t = window.Texte.t;
   var H = window.Modi.hilfen;
   var PAUSE_NACH_RICHTIG = 1200; // Millisekunden
 
@@ -27,7 +28,7 @@
     u.zeigeTier($("runde-tier"), "normal");
     u.zeigeAnsicht();
     zeigeAufgabe();
-    $("sprechblase-text").textContent = "Schau genau hin. Welche Note ist das?";
+    $("sprechblase-text").textContent = t("klassisch.start");
   }
 
   function stoppe() {
@@ -40,7 +41,7 @@
   }
 
   function zeigeStatus() {
-    $("aufgabe-nr").textContent = "Aufgabe " + (runde.aufgabe + 1) + " von " + runde.anzahl;
+    $("aufgabe-nr").textContent = H.aufgabeText(runde);
     H.zeigeSterne($("sterne-anzeige"), $("punkte-anzeige"), runde.sterne, L.REGELN.startSterne, runde.punkte);
   }
 
@@ -53,8 +54,7 @@
     knoepfe.forEach(function (b) {
       b.classList.remove("ist-richtig", "ist-falsch", "ist-loesung");
       b.setAttribute("aria-disabled", "false");
-      b.setAttribute("aria-label", b.dataset.name);
-      b.querySelector(".antwort-marke").textContent = "";
+      H.markiereAntwort(b);
     });
     $("antworten").classList.remove("gesperrt");
     // Tastaturfokus auf derselben Schaltfläche lassen wie bei der letzten Antwort.
@@ -75,19 +75,12 @@
     knoepfe.forEach(function (b, i) {
       b.setAttribute("aria-disabled", "true");
       if (b.dataset.name === name) letzterAntwortKnopf = i;
-      if (b.dataset.name === a.note.antwort) {
-        b.classList.add(a.richtig ? "ist-richtig" : "ist-loesung");
-        b.querySelector(".antwort-marke").textContent = "✓";
-        b.setAttribute("aria-label", b.dataset.name + ", richtig");
-      } else if (b.dataset.name === name) {
-        b.classList.add("ist-falsch");
-        b.querySelector(".antwort-marke").textContent = "✗";
-        b.setAttribute("aria-label", b.dataset.name + ", falsch");
-      }
+      if (b.dataset.name === a.note.antwort) H.markiereAntwort(b, a.richtig ? "ist-richtig" : "ist-loesung", true);
+      else if (b.dataset.name === name) H.markiereAntwort(b, "ist-falsch", false);
     });
 
     zeigeStatus();
-    $("notensystem").innerHTML = window.Notensystem.zeichne(a.note, { beschriftung: a.note.name, bereich: umgebung.bereich });
+    $("notensystem").innerHTML = window.Notensystem.zeichne(a.note, { beschriftung: a.note.anzeige, bereich: umgebung.bereich });
     $("notensystem").classList.add(a.richtig ? "ist-richtig" : "ist-falsch");
 
     H.zeigeMerkhilfe(umgebung, a.note, "merkhilfe");
@@ -114,7 +107,7 @@
       beende();
       return;
     }
-    $("sprechblase-text").textContent = "Und diese hier?";
+    $("sprechblase-text").textContent = t("runde.undDiese");
     umgebung.zeigeTier($("runde-tier"), "normal");
     zeigeAufgabe();
   }
@@ -128,8 +121,8 @@
   /* Tastatur: Buchstabe tippen, wenn er unter den Antworten (ohne Vorzeichen-Noten) eindeutig ist. */
   document.addEventListener("keydown", function (ev) {
     if (!aktiv() || $("ansicht-runde").hidden || runde.gesperrt || ev.altKey || ev.ctrlKey || ev.metaKey) return;
-    var taste = (ev.key || "").toLowerCase();
-    if (!/^[a-h]$/.test(taste)) return;
+    var taste = window.Noten.tasteZuBuchstabe(ev.key);
+    if (!taste) return;
     var treffer = umgebung.antworten.filter(function (a) { return a.buchstabe === taste && !a.vorzeichen; });
     if (treffer.length === 1) {
       ev.preventDefault();
@@ -141,7 +134,7 @@
 
   window.Modi.registriere({
     id: "klassisch",
-    name: "Welche Note ist das?",
+    get name() { return t("modus.klassisch"); },
     symbol: "🎵",
     hauptspiel: true,
     ansicht: "runde",

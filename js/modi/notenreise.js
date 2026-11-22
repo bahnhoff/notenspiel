@@ -19,6 +19,7 @@
   "use strict";
 
   var L = window.SpielLogik;
+  var T = window.Texte;
   var H = window.Modi.hilfen;
   var ETAPPEN = 3;
   var AUFGABEN = 5;
@@ -82,11 +83,9 @@
   function statusText() {
     var t = umgebung.tagesreise || { heute: false, serie: 0 };
     if (t.heute) {
-      return "Heute schon geschafft ✓" + (t.serie > 1 ? " · " + t.serie + " Tage in Folge" : "") +
-        ". Den Extrastern gibt es nur einmal am Tag, Punkte und Sterne zählen trotzdem.";
+      return T.t("reise.heute") + (t.serie > 1 ? T.t("reise.inFolge", { n: t.serie }) : "") + T.t("reise.nurEinmal");
     }
-    return (t.serie > 0 ? "Deine Serie: " + (t.serie === 1 ? "1 Tag" : t.serie + " Tage in Folge") + ". " : "") +
-      "Schaffst du alle drei Etappen, bekommst du heute einen Extrastern.";
+    return (t.serie > 0 ? T.t("reise.serie", { serie: T.t("tage", { n: t.serie }) }) : "") + T.t("reise.extrastern");
   }
 
   function zeigeUebersicht() {
@@ -103,15 +102,15 @@
       li.querySelector(".reise-symbol").textContent = modus.symbol || "🎵";
       li.querySelector(".reise-name").textContent = (i + 1) + ". " + modus.name;
       li.querySelector(".reise-stand").textContent = e
-        ? "✓ " + e.richtige + " von " + e.aufgaben
-        : i === n ? "Jetzt dran" : "Noch offen";
+        ? T.t("reise.stand", { richtige: e.richtige, aufgaben: e.aufgaben })
+        : T.t(i === n ? "reise.dran" : "reise.offen");
       liste.appendChild(li);
     });
     var los = $("reise-los");
-    los.textContent = n === 0 ? "Los geht’s!" : "Weiter zur " + (n + 1) + ". Etappe";
+    los.textContent = n === 0 ? T.t("reise.los") : T.t("reise.weiterZur", { n: n + 1 });
     $("reise-text").textContent = n === 0
-      ? "Heute reisen wir durch " + ETAPPEN + " kleine Spiele mit je " + AUFGABEN + " Aufgaben."
-      : "Etappe " + n + " geschafft! Als Nächstes: " + etappen[n].name + ".";
+      ? T.t("reise.einleitung", { etappen: ETAPPEN, aufgaben: AUFGABEN })
+      : T.t("reise.etappeGeschafft", { n: n, name: etappen[n].name });
     umgebung.zeigeTier($("reise-tier"), n === 0 ? "normal" : "froh");
   }
 
@@ -165,17 +164,17 @@
     }
     var zeilen = etappen.map(function (modus, i) {
       var e = ergebnisse[i];
-      if (!e) return [modus.name, "Nicht gespielt"];
+      if (!e) return [modus.name, T.t("reise.nichtGespielt")];
       gesamt += e.gesamt;
       sterne += e.sterne;
       if (e.schwierig) { merke(gefragt, e.schwierig.gefragt); merke(neu, e.schwierig.neu); }
-      return [modus.name, (e.geschafft ? "✓ " : "✗ ") + e.richtige + " von " + e.aufgaben + " richtig"];
+      return [modus.name, (e.geschafft ? "✓ " : "✗ ") + T.t("reise.richtig", { richtige: e.richtige, aufgaben: e.aufgaben })];
     });
     umgebung.beende({
       gesamt: gesamt,
       neueSterne: geschafft ? Math.round(sterne / etappen.length) : 0,
-      titel: geschafft ? "Reise geschafft!" : "Reise unterbrochen",
-      spruch: geschafft ? "Was für eine Notenreise! Bis morgen?" : "Diese Etappe war knifflig. Versuchen wir’s noch mal?",
+      titel: T.t(geschafft ? "reise.geschafft" : "reise.unterbrochen"),
+      spruch: T.t(geschafft ? "reise.bisMorgen" : "reise.knifflig"),
       stimmung: geschafft ? "froh" : "normal",
       zeilen: zeilen,
       schwierig: { gefragt: gefragt, neu: neu },
@@ -187,17 +186,17 @@
 
   window.Modi.registriere({
     id: "notenreise",
-    name: "Tägliche Notenreise",
+    get name() { return T.t("modus.notenreise"); },
     symbol: "🧭",
     ansicht: "reise",
     starte: starte,
     stoppe: stoppe,
     kachelInfo: function (status) {
       var t = status.tagesreise;
-      if (t.heute) return "Heute geschafft ✓" + (t.serie > 1 ? " · " + t.serie + " Tage in Folge" : "");
-      if (t.serie > 1) return t.serie + " Tage in Folge · heute noch offen";
-      if (t.serie === 1) return "Gestern geschafft · heute noch offen";
-      return "Heute noch offen";
+      if (t.heute) return T.t("reise.kachelHeute") + (t.serie > 1 ? T.t("reise.inFolge", { n: t.serie }) : "");
+      if (t.serie > 1) return T.t("reise.kachelSerie", { n: t.serie });
+      if (t.serie === 1) return T.t("reise.kachelGestern");
+      return T.t("reise.kachelOffen");
     }
   });
 })();

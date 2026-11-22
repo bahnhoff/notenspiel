@@ -10,6 +10,7 @@
   "use strict";
 
   var L = window.SpielLogik;
+  var t = window.Texte.t;
   var H = window.Modi.hilfen;
   var START_DX = 34;          // Startversatz der Note nach rechts (SVG-Einheiten)
   var ZIEL_DX = -46;          // hier erreicht die Note den Schlüssel
@@ -46,7 +47,7 @@
     zeigeStatus();
     zeichneSystem(null);
     sperreKnoepfe(true);
-    $("flug-text").textContent = "Tippe den Namen der Note, bevor sie den Schlüssel erreicht.";
+    $("flug-text").textContent = t("flug.start");
     timer = setTimeout(naechsteNote, PAUSE_VOR_START);
   }
 
@@ -67,7 +68,7 @@
     // Während eine Note fliegt oder ausgewertet wird, zählt ihre eigene Nummer.
     var level = zustand ? zustand.level : flug.level;
     var nr = zustand ? zustand.nr : flug.imLevel + 1;
-    $("flug-level").textContent = "Level " + level + " · Note " + nr + " von " + L.NOTENFLUG.notenProLevel;
+    $("flug-level").textContent = t("flug.level", { level: level, nr: nr, anzahl: L.NOTENFLUG.notenProLevel });
   }
 
   function zeichneSystem(note, beschriftung) {
@@ -107,12 +108,11 @@
     $("flug-merkhilfe").hidden = true;
     knoepfe.forEach(function (b) {
       b.classList.remove("ist-richtig", "ist-falsch", "ist-loesung");
-      b.setAttribute("aria-label", b.dataset.name);
-      b.querySelector(".antwort-marke").textContent = "";
+      H.markiereAntwort(b);
     });
     sperreKnoepfe(false);
     umgebung.zeigeTier($("flug-tier"), "normal");
-    $("flug-text").textContent = "Schnell, wie heißt diese Note?";
+    $("flug-text").textContent = t("flug.schnell");
     letzteZeit = null;
     if (!document.hidden) raf = requestAnimationFrame(schritt);
     else pausiert = true;
@@ -167,30 +167,24 @@
     sperreKnoepfe(true);
 
     knoepfe.forEach(function (b) {
-      if (b.dataset.name === note.antwort) {
-        b.classList.add(richtig ? "ist-richtig" : "ist-loesung");
-        b.querySelector(".antwort-marke").textContent = "✓";
-        b.setAttribute("aria-label", b.dataset.name + ", richtig");
-      } else if (b.dataset.name === name) {
-        b.classList.add("ist-falsch");
-        b.querySelector(".antwort-marke").textContent = "✗";
-        b.setAttribute("aria-label", b.dataset.name + ", falsch");
-      }
+      if (b.dataset.name === note.antwort) H.markiereAntwort(b, richtig ? "ist-richtig" : "ist-loesung", true);
+      else if (b.dataset.name === name) H.markiereAntwort(b, "ist-falsch", false);
     });
 
     // Lösung an der Stelle zeigen, an der die Note gerade ist (Name passt rechts daneben).
-    zeichneSystem(note, note.name);
+    zeichneSystem(note, note.anzeige);
     setzeVersatz(Math.min(0, zustand.dx));
     $("flug-notensystem").classList.add(richtig ? "ist-richtig" : "ist-falsch");
     zeigeStatus();
     H.zeigeMerkhilfe(umgebung, note, "flug-merkhilfe");
 
     var text;
-    if (richtig) text = "✓ Super, " + note.name + "!";
-    else if (name === null) text = "✗ Zu spät. Das ist " + note.name + ". " + note.hinweis;
-    else text = "✗ Das ist " + note.name + ". " + note.hinweis;
-    if (e.levelGeschafft) text += " Level " + zustand.level + " geschafft! Jetzt wird es schneller.";
-    if (e.beendet) text += " Das war der dritte Fehler.";
+    var werte = { name: note.anzeige, hinweis: note.hinweis };
+    if (richtig) text = t("flug.super", werte);
+    else if (name === null) text = t("flug.zuSpaet", werte);
+    else text = t("flug.falsch", werte);
+    if (e.levelGeschafft) text += t("flug.levelGeschafft", { level: zustand.level });
+    if (e.beendet) text += t("flug.dritterFehler");
     $("flug-text").textContent = text;
     umgebung.zeigeTier($("flug-tier"), richtig ? "froh" : "oje");
 
@@ -200,7 +194,7 @@
     } else {
       wartetAufWeiter = danach;
       var weiter = $("flug-weiter");
-      weiter.textContent = e.beendet ? "Zum Ergebnis" : "Weiter";
+      weiter.textContent = e.beendet ? t("flug.zumErgebnis") : t("runde.weiter");
       weiter.hidden = false;
       weiter.focus({ preventScroll: true });
       if (weiter.scrollIntoView) weiter.scrollIntoView({ block: "nearest" });
@@ -225,13 +219,13 @@
     umgebung.beende({
       gesamt: f.punkte,
       neueSterne: sterne,
-      titel: "Notenflug vorbei",
-      spruch: f.levelGeschafft >= 3 ? "Wow, du bist richtig schnell!" : (f.levelGeschafft > 0 ? "Toll geflogen!" : "Versuchen wir’s noch mal?"),
+      titel: t("flug.vorbei"),
+      spruch: f.levelGeschafft >= 3 ? t("flug.wow") : (f.levelGeschafft > 0 ? t("flug.toll") : t("ende.nochmal")),
       stimmung: f.levelGeschafft > 0 ? "froh" : "normal",
       zeilen: [
-        ["Erreichtes Level", String(f.level)],
-        ["Geschaffte Level", String(f.levelGeschafft)],
-        ["Richtige Noten", String(f.richtige)]
+        [t("flug.erreicht"), String(f.level)],
+        [t("flug.geschaffte"), String(f.levelGeschafft)],
+        [t("flug.richtige"), String(f.richtige)]
       ]
     });
   }
@@ -241,8 +235,8 @@
   /* Tastatur: Buchstabe tippen, wenn er unter den Antworten (ohne Vorzeichen-Noten) eindeutig ist. */
   document.addEventListener("keydown", function (ev) {
     if (!aktiv() || $("ansicht-notenflug").hidden || !zustand || !zustand.offen || ev.altKey || ev.ctrlKey || ev.metaKey) return;
-    var taste = (ev.key || "").toLowerCase();
-    if (!/^[a-h]$/.test(taste)) return;
+    var taste = window.Noten.tasteZuBuchstabe(ev.key);
+    if (!taste) return;
     var treffer = umgebung.antworten.filter(function (a) { return a.buchstabe === taste && !a.vorzeichen; });
     if (treffer.length === 1) {
       ev.preventDefault();
@@ -252,7 +246,7 @@
 
   window.Modi.registriere({
     id: "notenflug",
-    name: "Notenflug",
+    get name() { return t("modus.notenflug"); },
     symbol: "🚀",
     ansicht: "notenflug",
     starte: starte,

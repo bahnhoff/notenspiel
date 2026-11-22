@@ -25,6 +25,16 @@ Danach öffnest du `http://localhost:8000/` im Browser.
 
 Nach ein bis zwei Minuten ist das Spiel unter `https://<owner>.github.io/<repo>/` erreichbar. Alle Pfade sind relativ, deshalb funktioniert das Spiel auch in diesem Unterverzeichnis. Weitere Informationen findest du in der [Dokumentation zu GitHub Pages](https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site).
 
+## Sprache: Deutsch und Englisch
+
+Oben rechts auf der Startseite schaltet der Knopf **DE | EN** zwischen Deutsch und Englisch um. Der Wechsel übersetzt sofort alle Texte, ohne Neuladen. Den Knopf gibt es nur auf der Startseite, damit keine Runde mitten im Spiel die Sprache wechselt. Beim ersten Start gilt die Sprache des Browsers (beginnt sie mit „de“, Deutsch, sonst Englisch), danach die gemerkte Wahl. Die Sprache steht im Spielstand; ältere Spielstände bleiben gültig.
+
+Auf Englisch heißt das Spiel **Note Zoo**. Die Notennamen folgen der amerikanischen, wissenschaftlichen Schreibweise: Großbuchstabe, Vorzeichen als ♯ oder ♭, Oktave als normale Ziffer. Das mittlere C ist C4, darunter C3 und C2, darüber C5. Deutsch H heißt englisch B, deutsch B heißt B♭; fis¹ ist F♯4, es² ist E♭5. Bei **Easy** (Einfach) heißen die Knöpfe zum Beispiel C, C♯, D, E♭ bis B.
+
+Gespeicherte Notenauswahl, Rekorde und Wiederholungslisten nutzen sprachunabhängige Kennungen (`violin-c1`). Ein Sprachwechsel ändert daran nichts.
+
+Alle sichtbaren Texte beider Sprachen stehen in `js/texte.js`. HTML-Elemente tragen den Textschlüssel im Attribut `data-text` (oder `data-text-aria-label`), JavaScript holt Texte mit `Texte.t("schluessel", { platzhalter })`.
+
 ## Einstellungen
 
 Unter **Einstellungen** auf der Startseite wählst du:
@@ -45,7 +55,7 @@ Vorzeichen-Noten zeigt das Notensystem mit einem Kreuz oder B vor dem Notenkopf.
 
 Alle Anpassungen stehen in der Datei `js/noten-konfiguration.js`. Die Noten selbst musst du nicht pflegen: Das Spiel erzeugt Name, Lage im Notensystem, Hinweis und Merktier aus Schlüssel und Bereich.
 
-- Unter `bereiche` stehen die Tonumfänge je Schlüssel mit Kennung (`id`), Text auf dem Schnellwahl-Knopf (`name`) und tiefster und höchster Note (`von`, `bis`, zum Beispiel `"c1"`). Neue Einträge erscheinen automatisch als Schnellwahl. Zum Ankreuzen stehen alle Noten vom tiefsten bis zum höchsten Bereich des Schlüssels bereit.
+- Unter `bereiche` stehen die Tonumfänge je Schlüssel mit Kennung (`id`), Text auf dem Schnellwahl-Knopf (`name`, auf Englisch `nameEnglisch`) und tiefster und höchster Note (`von`, `bis`, zum Beispiel `"c1"`). Neue Einträge erscheinen automatisch als Schnellwahl. Zum Ankreuzen stehen alle Noten vom tiefsten bis zum höchsten Bereich des Schlüssels bereit.
 - Unter `merktiere` steht das Tier zu jedem Buchstaben. Mit `merktierAb` bekommt ein Buchstabe ab einer bestimmten Note ein anderes Tier.
 - Unter `standardEinstellungen` legst du fest, womit das Spiel beim ersten Start beginnt: angekreuzte Schlüssel, je Schlüssel der Bereich, dessen Noten angekreuzt sind, die Merktiere und der Antwortmodus (`"einfach"` oder `"genau"`).
 
@@ -63,6 +73,8 @@ Nach jeder Antwort zeigt das Spiel das Tier zum Buchstaben der Note, zum Beispie
 - a: Affe
 - h: Hase
 - fis: Fisch. Andere Vorzeichen-Noten bekommen das Tier des Stammtons, zum Beispiel „cis¹ – C wie Chamäleon, nur einen Halbton höher“.
+
+Auf Englisch gelten eigene Merktiere, passend zu den englischen Namen (`merktiereEnglisch` und `merktierAbEnglisch` in `js/noten-konfiguration.js`): C Cat, D Dolphin, E Elephant, F Frog (ab F5 Fox), G Giraffe, A Alligator, B Bear, F♯ Fish. Die Merkhilfe lautet dann zum Beispiel „D4 – D is for Dolphin“ oder „C♯4 – C is for Cat, just a half step higher“.
 
 ## Meine Tiere
 
@@ -98,6 +110,7 @@ Alle Mini-Spiele nutzen die Einstellungen (Schlüssel, Notenauswahl, Merktiere, 
 ## Dateien
 
 - `index.html`: die Seite mit allen Ansichten
+- `js/texte.js`: alle sichtbaren Texte auf Deutsch und Englisch
 - `css/style.css`: die Gestaltung
 - `js/noten-konfiguration.js`: Bereiche, Merktiere und Standard-Einstellungen
 - `js/noten.js`: erzeugt Noten, Namen, Positionen und Hinweise

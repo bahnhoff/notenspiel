@@ -15,6 +15,7 @@
   "use strict";
 
   var L = window.SpielLogik;
+  var T = window.Texte;
   var H = window.Modi.hilfen;
   var PAUSE_NACH_RICHTIG = 1300; // Millisekunden
   var PAUSE_BEZUGSTON = 1600;    // vom Bezugston c¹ bis zum ersten Aufgabenton
@@ -157,6 +158,9 @@
     runde = L.neueRunde(u.noten, { vorrang: u.schwierig, aufgaben: u.aufgaben });
     letzterKnopf = -1;
     FORM = u.noten.some(function (n) { return n.vorzeichen; }) ? FORM_VORZEICHEN : FORM_STAMM;
+    var mittleresC = window.Noten.anzeigeName(28, 0);
+    $("hoeren-bezug-name").textContent = mittleresC;
+    $("hoeren-bezug").setAttribute("aria-label", T.t("hoeren.bezugAria", { name: mittleresC }));
     u.zeigeTier($("hoeren-tier"), "normal");
     u.zeigeAnsicht();
     zeigeAufgabe();
@@ -164,17 +168,17 @@
     var mitTon = Ton.bereit();
     zeigeTonHinweis(mitTon);
     if (mitTon && Ton.spiele(MITTLERES_C)) {
-      $("hoeren-text").textContent = "Hör zu: Das ist c¹, das mittlere C. Gleich kommt dein Ton.";
+      $("hoeren-text").textContent = T.t("hoeren.einleitung", { name: mittleresC });
       offen = false;
       timer = setTimeout(function () {
         if (!aktiv()) return;
         offen = true;
         spieleAufgabe();
-        $("hoeren-text").textContent = "Welche Note hast du gehört?";
+        $("hoeren-text").textContent = T.t("hoeren.gehoert");
       }, PAUSE_BEZUGSTON);
     } else {
       offen = true;
-      $("hoeren-text").textContent = "Welche Note passt zum Ton?";
+      $("hoeren-text").textContent = T.t("hoeren.passt");
     }
   }
 
@@ -191,7 +195,7 @@
     var box = $("hoeren-hinweis");
     clearTimeout(hinweisTimer);
     if (!mitTon) {
-      box.textContent = "🔇 Dieser Browser kann hier keinen Ton abspielen. Du kannst trotzdem raten und spielen.";
+      box.textContent = T.t("hoeren.keinTon");
       box.hidden = false;
       return;
     }
@@ -199,7 +203,7 @@
     hinweisTimer = setTimeout(function () {
       if (!aktiv()) return;
       if (!Ton.laeuft()) {
-        box.textContent = "🔇 Kein Ton? Schalte den Ton am Gerät ein und tippe auf „Nochmal hören“.";
+        box.textContent = T.t("hoeren.stumm");
         box.hidden = false;
       }
     }, 900);
@@ -229,7 +233,7 @@
   }
 
   function zeigeStatus() {
-    $("hoeren-aufgabe").textContent = "Aufgabe " + (runde.aufgabe + 1) + " von " + runde.anzahl;
+    $("hoeren-aufgabe").textContent = H.aufgabeText(runde);
     H.zeigeSterne($("hoeren-sterne"), $("hoeren-punkte"), runde.sterne, L.REGELN.startSterne, runde.punkte);
   }
 
@@ -243,7 +247,7 @@
       var b = document.createElement("button");
       b.type = "button";
       b.className = "knopf hoer-option";
-      b.setAttribute("aria-label", "Note " + (i + 1));
+      b.setAttribute("aria-label", T.t("hoeren.note", { nr: i + 1 }));
       b.innerHTML = '<span class="hoer-marke" aria-hidden="true"></span>' +
         window.Notensystem.zeichne(n, { bereich: umgebung.bereich, breite: FORM.breite, noteX: FORM.noteX }) +
         '<span class="hoer-name" aria-hidden="true"></span>';
@@ -276,15 +280,16 @@
       if (status) {
         b.classList.add(status);
         b.querySelector(".hoer-marke").textContent = marke;
-        b.querySelector(".hoer-name").textContent = n.name;
-        b.setAttribute("aria-label", "Note " + (k + 1) + ": " + n.name + (marke === "✓" ? ", richtig" : ", falsch"));
+        b.querySelector(".hoer-name").textContent = n.anzeige;
+        b.setAttribute("aria-label", T.t(marke === "✓" ? "runde.richtig" : "runde.falsch",
+          { name: T.t("hoeren.noteName", { nr: k + 1, name: n.anzeige }) }));
       }
     });
     zeigeStatus();
     H.zeigeMerkhilfe(umgebung, a.note, "hoeren-merkhilfe");
     $("hoeren-text").textContent = a.richtig
-      ? "✓ " + (a.serie > 0 && a.serie % 3 === 0 ? a.nachricht : "Richtig, das war " + a.note.name + "!")
-      : "✗ Das war " + a.note.name + ". Hör noch einmal hin.";
+      ? "✓ " + (a.serie > 0 && a.serie % 3 === 0 ? a.nachricht : T.t("hoeren.richtig", { name: a.note.anzeige }))
+      : T.t("hoeren.falsch", { name: a.note.anzeige });
     umgebung.zeigeTier($("hoeren-tier"), a.richtig ? "froh" : "oje");
 
     if (a.richtig) {
@@ -312,7 +317,7 @@
       return;
     }
     umgebung.zeigeTier($("hoeren-tier"), "normal");
-    $("hoeren-text").textContent = "Und welcher Ton ist das?";
+    $("hoeren-text").textContent = T.t("hoeren.weiter");
     zeigeAufgabe();
     timer = setTimeout(spieleAufgabe, 250);
   }
@@ -326,7 +331,7 @@
     if (!offen) {
       // noch in der Einleitung: gleich den Aufgabenton spielen
       offen = true;
-      $("hoeren-text").textContent = "Welche Note hast du gehört?";
+      $("hoeren-text").textContent = T.t("hoeren.gehoert");
     }
     spieleAufgabe();
     if (runde.gesperrt && runde.letzteAntwort && runde.letzteAntwort.richtig) {
@@ -360,7 +365,7 @@
 
   window.Modi.registriere({
     id: "hoer-spiel",
-    name: "Hör-Spiel",
+    get name() { return T.t("modus.hoer-spiel"); },
     symbol: "👂",
     ansicht: "hoeren",
     starte: starte,

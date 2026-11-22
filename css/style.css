@@ -103,6 +103,44 @@ h1:focus { outline: none; }
   padding-top: 4vh;
 }
 
+/* Sprachumschalter oben rechts, nur auf der Startseite */
+.ansicht-start { position: relative; }
+
+.sprach-umschalter {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: flex;
+  border: 2px solid var(--rand);
+  border-radius: 999px;
+  background: var(--karte);
+  overflow: hidden;
+  z-index: 2;
+}
+
+.sprach-knopf {
+  min-width: 48px;
+  min-height: 44px;
+  padding: 0 10px;
+  border: 0;
+  background: transparent;
+  color: var(--text-leise);
+  font: inherit;
+  font-size: 1rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+}
+
+.sprach-knopf + .sprach-knopf { border-left: 2px solid var(--rand); }
+
+.sprach-knopf.ist-an {
+  background: var(--akzent-dunkel);
+  color: #fff;
+}
+
+.sprach-knopf:focus-visible { outline: 4px solid var(--fokus); outline-offset: -4px; }
+
 .start-tier {
   width: min(52vw, 230px);
   animation: wippen 2.4s ease-in-out infinite;

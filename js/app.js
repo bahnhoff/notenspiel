@@ -1,6 +1,7 @@
 /*
  * Oberfläche: Ansichten wechseln, Modi starten und verbuchen, Einstellungen,
- * Tiersammlung, Rekorde mit Namen, Spielstand speichern.
+ * Tiersammlung, Rekorde mit Namen, Spielstand speichern, Sprache umschalten.
+ * Alle Texte kommen aus js/texte.js.
  * Die Spielmodi selbst stehen in js/modi/ (Schnittstelle: js/modi.js).
  */
 (function () {
@@ -10,10 +11,13 @@
   var N = window.Noten;
   var K = window.NOTEN_KONFIGURATION || {};
   var H = window.Modi.hilfen;
+  var T = window.Texte;
+  var t = T.t;
   var SPEICHER_SCHLUESSEL = "welche-note-ist-das.spielstand.v1";
 
   var speicherVerfuegbar = true;
   var stand = ladeSpielstand();
+  T.setzeSprache(stand.sprache);
   var aktiverModus = null;   // laufender oder zuletzt gespielter Modus
   var startNr = 0;           // jede gestartete Runde bekommt eine neue Nummer
   var laufendeNr = -1;       // Nummer der Runde, die noch verbucht werden darf
@@ -51,6 +55,8 @@
     }
     // Fehlende oder alte Einstellungen werden in die aktuelle Form mit Notenlisten übersetzt.
     geladen.einstellungen = N.einstellungen(K, geladen.einstellungen);
+    // Ohne gemerkte Sprache (erster Start, ältere Spielstände) gilt die Browsersprache.
+    if (!geladen.sprache) geladen.sprache = T.browserSprache(window.navigator && window.navigator.language);
     return geladen;
   }
 
@@ -77,7 +83,7 @@
   }
 
   function sterneText(anzahl) {
-    return anzahl === 1 ? "1 Stern" : anzahl + " Sterne";
+    return H.sterneText(anzahl);
   }
 
   function element(tag, klasse, text) {
@@ -98,13 +104,13 @@
 
   /** Kurzbeschreibung der Noten eines Schlüssels, zum Beispiel „c¹ bis g¹“ oder „c¹, e¹, g¹“. */
   function notenText(noten) {
-    if (noten.length === 0) return "keine Noten";
+    if (noten.length === 0) return t("auswahl.keine");
     var erste = noten[0], letzte = noten[noten.length - 1];
-    if (noten.length === 1) return erste.name;
+    if (noten.length === 1) return erste.anzeige;
     var lueckenlos = noten.every(function (n) { return !n.vorzeichen; }) && letzte.stufe - erste.stufe === noten.length - 1;
-    if (lueckenlos) return erste.name + " bis " + letzte.name;
-    if (noten.length <= 5) return noten.map(function (n) { return n.name; }).join(", ");
-    return noten.length + " Noten von " + erste.name + " bis " + letzte.name;
+    if (lueckenlos) return t("auswahl.bis", { von: erste.anzeige, bis: letzte.anzeige });
+    if (noten.length <= 5) return noten.map(function (n) { return n.anzeige; }).join(", ");
+    return t("auswahl.viele", { n: noten.length, von: erste.anzeige, bis: letzte.anzeige });
   }
 
   function auswahlText(a) {
@@ -115,9 +121,7 @@
 
   /** Hinweis auf der Startseite, wenn die Auswahl nicht reicht. */
   function zuWenigText(a) {
-    return a.antwortmodus === "einfach"
-      ? "Wähle in den Einstellungen Noten mit mindestens " + N.MINDEST_NOTEN + " verschiedenen Buchstaben aus, zum Beispiel C, D und E. Dann kann es losgehen."
-      : "Wähle in den Einstellungen mindestens " + N.MINDEST_NOTEN + " verschiedene Noten aus, dann kann es losgehen.";
+    return t(a.antwortmodus === "einfach" ? "start.zuWenigEinfach" : "start.zuWenigGenau", { n: N.MINDEST_NOTEN });
   }
 
   /* ---------- Ansichten ---------- */
@@ -185,16 +189,20 @@
     });
   }
 
-  /** Merktier zur Note, zum Beispiel „d¹ wie Delfin“, oder null, wenn ausgeschaltet. */
+  /**
+   * Merktier zur Note, zum Beispiel „d¹ wie Delfin“ oder „D4 – D is for Dolphin“,
+   * oder null, wenn ausgeschaltet.
+   */
   function merkhilfe(note) {
     if (!stand.einstellungen.merktiere || !note || !note.tier || !window.Tiere.hat(note.tier)) return null;
-    var name = window.Tiere.NAMEN[note.tier] || note.tier;
+    var name = window.Tiere.name(note.tier);
+    var werte = { name: note.anzeige || note.name, buchstabe: N.buchstabenAnzeige(note.buchstabe, 0), tier: name };
     // Vorzeichen-Note ohne eigenes Tier: „cis¹ – C wie Chamäleon, nur einen Halbton höher“
     if (note.tierVomStamm) {
-      return { tier: note.tier, name: name, text: note.name + " – " + note.buchstabe.toUpperCase() + " wie " + name,
-        zusatz: "nur einen Halbton " + (note.vorzeichen > 0 ? "höher" : "tiefer") };
+      return { tier: note.tier, name: name, text: t("merkhilfe.stamm", werte),
+        zusatz: t(note.vorzeichen > 0 ? "merkhilfe.hoeher" : "merkhilfe.tiefer") };
     }
-    return { tier: note.tier, name: name, text: note.name + " wie " + name };
+    return { tier: note.tier, name: name, text: t("merkhilfe.text", werte) };
   }
 
   function verbuche(modus, e) {
@@ -207,9 +215,9 @@
   /* ---------- Ergebnis ---------- */
 
   function zeigeErgebnis(modus, e, v) {
-    $("titel-ergebnis").textContent = e.titel || "Geschafft!";
+    $("titel-ergebnis").textContent = e.titel || t("ende.geschafft");
     zeigeTier($("ergebnis-tier"), e.stimmung || "froh");
-    $("ergebnis-spruch").textContent = e.spruch || "Toll gemacht!";
+    $("ergebnis-spruch").textContent = e.spruch || t("ende.toll");
 
     var liste = $("ergebnis-liste");
     liste.innerHTML = "";
@@ -224,21 +232,23 @@
     (e.zeilen || []).forEach(function (z) { zeile(z[0], String(z[1])); });
     var reise = v.tagesreise;
     if (reise) {
-      zeile("Extrastern für heute", reise.extrastern ? "★ 1" : "Heute schon bekommen");
-      zeile("Tagesserie", reise.serie === 1 ? "1 Tag" : reise.serie + " Tage in Folge");
+      zeile(t("ergebnis.extrastern"), reise.extrastern ? "★ 1" : t("ergebnis.schonBekommen"));
+      zeile(t("ergebnis.serie"), t("tage", { n: reise.serie }));
     }
-    zeile("Gesamtpunktzahl", (e.gesamt || 0) + " Punkte", "ergebnis-gesamt");
+    zeile(t("ergebnis.gesamt"), H.punkteText(e.gesamt || 0), "ergebnis-gesamt");
     var sterne = element("span");
     var anzahl = (e.neueSterne || 0) + (reise && reise.extrastern ? 1 : 0);
     if (anzahl > 0) sterne.innerHTML = '<span class="sterne-reihe" aria-hidden="true">' + H.sternSymbole(anzahl, anzahl) + "</span> ";
     sterne.appendChild(document.createTextNode(String(anzahl)));
-    zeile("Neue Sterne", sterne);
+    zeile(t("ergebnis.neueSterne"), sterne);
 
     var box = $("neues-tier");
     var neuesTier = v.neueTiere.length ? v.neueTiere[v.neueTiere.length - 1] : null;
     if (neuesTier) {
       box.innerHTML = '<div class="tier-mittel">' + window.Tiere.zeichne(neuesTier.id, "froh", neuesTier.name) + "</div>" +
-        "<p><strong>Neues Tier: " + neuesTier.name + "!</strong><br>Du kannst es unter „Meine Tiere“ auswählen.</p>";
+        "<p><strong></strong><br></p>";
+      box.querySelector("strong").textContent = t("ergebnis.neuesTier", { name: neuesTier.name });
+      box.querySelector("p").appendChild(document.createTextNode(t("ergebnis.auswaehlen")));
       box.hidden = false;
     } else {
       box.hidden = true;
@@ -255,7 +265,7 @@
   function zeigeNamensabfrage(modus, rekord) {
     offenerRekord = rekord;
     $("rekord-name").hidden = false;
-    $("rekord-name-info").textContent = "Neuer Rekord: Platz " + (rekord.platz + 1) + " bei „" + modus.name + "“.";
+    $("rekord-name-info").textContent = t("rekordName.neu", { platz: rekord.platz + 1, modus: modus.name });
     $("rekord-name-fertig").textContent = "";
     $("name-formular").hidden = false;
     $("knopf-ohne-name").hidden = false;
@@ -281,7 +291,7 @@
     $("namen-schnellwahl").hidden = true;
     $("name-formular").hidden = true;
     $("knopf-ohne-name").hidden = true;
-    $("rekord-name-fertig").textContent = gesetzt ? "✓ Rekord für " + gesetzt + " gespeichert." : "✓ Rekord ohne Namen gespeichert.";
+    $("rekord-name-fertig").textContent = gesetzt ? t("rekordName.fuer", { name: gesetzt }) : t("rekordName.ohneGespeichert");
     $("knopf-nochmal").focus({ preventScroll: true });
   }
 
@@ -294,11 +304,12 @@
   /* ---------- Meine Tiere ---------- */
 
   function zeigeTiere(fokusTier) {
-    $("tiere-sterne").innerHTML = '<span class="stern stern-voll" aria-hidden="true">★</span> Gesammelte Sterne: <strong>' + stand.sterne + "</strong>";
+    $("tiere-sterne").innerHTML = '<span class="stern stern-voll" aria-hidden="true">★</span> <span></span> <strong>' + stand.sterne + "</strong>";
+    $("tiere-sterne").querySelector("span:not(.stern)").textContent = t("tiere.gesammelt");
     var naechstes = L.naechstesTier(stand);
     $("tiere-naechstes").textContent = (naechstes
-      ? "Noch " + sterneText(naechstes.fehlend) + " bis zum nächsten Tier."
-      : "Du hast alle Tiere entdeckt!") + " Entdeckt: " + stand.entdeckt.length + " von " + L.TIERE.length + ".";
+      ? t("tiere.noch", { sterne: sterneText(naechstes.fehlend) })
+      : t("tiere.alle")) + t("tiere.entdeckt", { n: stand.entdeckt.length, gesamt: L.TIERE.length });
 
     var liste = $("tier-liste");
     liste.innerHTML = "";
@@ -310,11 +321,11 @@
         var gewaehlt = stand.tier === tier.id;
         li.innerHTML = '<div class="tier-mittel">' + window.Tiere.zeichne(tier.id, gewaehlt ? "froh" : "normal", tier.name) + "</div>";
         li.appendChild(element("p", "tier-name", tier.name));
-        if (tier.selten) li.appendChild(element("p", "tier-info", "✨ Selten"));
-        var b = element("button", "knopf " + (gewaehlt ? "knopf-gewaehlt" : "knopf-neben"), gewaehlt ? "✓ Begleiter" : "Auswählen");
+        if (tier.selten) li.appendChild(element("p", "tier-info", t("tiere.selten")));
+        var b = element("button", "knopf " + (gewaehlt ? "knopf-gewaehlt" : "knopf-neben"), t(gewaehlt ? "tiere.begleiter" : "tiere.auswaehlen"));
         b.type = "button";
         b.setAttribute("aria-pressed", gewaehlt ? "true" : "false");
-        b.setAttribute("aria-label", tier.name + (gewaehlt ? " ist dein Begleiter" : " als Begleiter auswählen"));
+        b.setAttribute("aria-label", t(gewaehlt ? "tiere.istBegleiter" : "tiere.alsBegleiter", { name: tier.name }));
         b.addEventListener("click", function () {
           stand.tier = tier.id;
           speichereSpielstand();
@@ -322,9 +333,9 @@
         });
         li.appendChild(b);
       } else {
-        li.innerHTML = '<div class="tier-mittel">' + window.Tiere.zeichne(tier.id, "normal", "Noch nicht entdeckt", true) + "</div>";
+        li.innerHTML = '<div class="tier-mittel">' + window.Tiere.zeichne(tier.id, "normal", t("tiere.unentdeckt"), true) + "</div>";
         li.appendChild(element("p", "tier-name", "???"));
-        if (tier.selten) li.appendChild(element("p", "tier-info", "✨ Selten, ab " + L.SELTEN_AB_STERNEN + " Sternen"));
+        if (tier.selten) li.appendChild(element("p", "tier-info", t("tiere.seltenAb", { n: L.SELTEN_AB_STERNEN })));
       }
       liste.appendChild(li);
     });
@@ -350,22 +361,22 @@
       abschnitt.appendChild(h2);
       var rekorde = L.sortiereRekorde(stand.rekorde[modus.id] || []).slice(0, L.REGELN.maxRekorde);
       if (rekorde.length === 0) {
-        abschnitt.appendChild(element("p", "leer-hinweis", "Noch keine Rekorde. Spiel eine Runde, dann steht dein Ergebnis hier."));
+        abschnitt.appendChild(element("p", "leer-hinweis", t("rekorde.leer")));
       } else {
         var ol = element("ol", "rekord-liste");
         rekorde.forEach(function (r, i) {
           var li = element("li", "rekord");
           var datum = "";
-          try { datum = new Date(r.zeit).toLocaleDateString("de-DE"); } catch (e) { datum = ""; }
+          try { datum = new Date(r.zeit).toLocaleDateString(t("rekorde.datum")); } catch (e) { datum = ""; }
           li.appendChild(element("span", "rekord-platz", (i + 1) + "."));
-          li.appendChild(element("span", "rekord-punkte", r.gesamt + " Punkte"));
+          li.appendChild(element("span", "rekord-punkte", H.punkteText(r.gesamt)));
           var st = element("span", "rekord-sterne");
           st.innerHTML = '<span class="stern stern-voll" aria-hidden="true">★</span> ';
           st.appendChild(document.createTextNode(sterneText(r.sterne)));
           li.appendChild(st);
           // Alte Rekorde haben kein Namensfeld und zeigen keinen Namen.
           if (typeof r.name === "string") {
-            li.appendChild(element("span", "rekord-name-text" + (r.name ? "" : " ohne-name"), r.name || "Ohne Namen"));
+            li.appendChild(element("span", "rekord-name-text" + (r.name ? "" : " ohne-name"), r.name || t("rekordName.ohne")));
           }
           li.appendChild(element("span", "rekord-datum", datum));
           ol.appendChild(li);
@@ -379,7 +390,6 @@
 
   /* ---------- Einstellungen ---------- */
 
-  var OKTAVEN = ["", "", "Große Oktave", "Kleine Oktave", "Eingestrichene Oktave", "Zweigestrichene Oktave", "Dreigestrichene Oktave"];
   var einstellungsHinweis = "";
 
   /** Speichert eine Änderung, baut die Ansicht neu und setzt den Fokus wieder auf das Bedienelement. */
@@ -408,7 +418,8 @@
 
   function notenGruppe(f, sl, e) {
     var fs = element("fieldset", "einstellung");
-    fs.appendChild(element("legend", "", "Noten im " + N.SCHLUESSEL[sl].name));
+    var OKTAVEN = T.liste("einst.oktaven");
+    fs.appendChild(element("legend", "", t("einst.noten." + sl)));
     var verfuegbar = N.verfuegbareNoten(K, sl);
     var alleIds = verfuegbar.map(function (n) { return n.id; });
     var stammIds = verfuegbar.filter(function (n) { return !n.vorzeichen; }).map(function (n) { return n.id; });
@@ -422,10 +433,11 @@
     // Schnellwahl: setzt nur die Häkchen dieses Schlüssels.
     var schnell = element("div", "noten-schnellwahl");
     schnell.setAttribute("role", "group");
-    schnell.setAttribute("aria-label", "Schnellwahl " + N.SCHLUESSEL[sl].name);
+    schnell.setAttribute("aria-label", t("einst.schnellwahl", { schluessel: N.SCHLUESSEL[sl].name }));
     var wahlen = N.bereichsListe(K, sl).map(function (b) {
-      return { id: b.id, text: b.name, info: N.name(N.stufe(b.von)) + "–" + N.name(N.stufe(b.bis)), ids: N.bereichsKennungen(K, sl, b.id) };
-    }).concat([{ id: "alle", text: "Alle", ids: stammIds }, { id: "keine", text: "Keine", ids: [], alles: true }]);
+      var text = T.sprache() === "en" && b.nameEnglisch ? b.nameEnglisch : b.name;
+      return { id: b.id, text: text, info: N.anzeigeName(N.stufe(b.von), 0) + "–" + N.anzeigeName(N.stufe(b.bis), 0), ids: N.bereichsKennungen(K, sl, b.id) };
+    }).concat([{ id: "alle", text: t("einst.alle"), ids: stammIds }, { id: "keine", text: t("einst.keine"), ids: [], alles: true }]);
     wahlen.forEach(function (w) {
       var b = element("button", "knopf knopf-klein knopf-schnellwahl");
       b.type = "button";
@@ -457,10 +469,10 @@
         b.type = "button";
         b.dataset.fokus = n.id;
         b.setAttribute("aria-pressed", an ? "true" : "false");
-        b.setAttribute("aria-label", n.name);
+        b.setAttribute("aria-label", n.anzeige);
         b.style.gridColumn = String(N.BUCHSTABEN.indexOf(n.buchstabe) % 7 + 1);
         b.appendChild(element("span", "noten-wahl-haken", an ? "✓" : "")).setAttribute("aria-hidden", "true");
-        b.appendChild(element("span", "noten-wahl-name", n.name)).setAttribute("aria-hidden", "true");
+        b.appendChild(element("span", "noten-wahl-name", n.anzeige)).setAttribute("aria-hidden", "true");
         b.addEventListener("click", function () {
           aendereEinstellung(function (x) {
             if (an) x.noten = x.noten.filter(function (id) { return id !== n.id; });
@@ -473,13 +485,13 @@
       o.noten.forEach(function (n) { if (!n.vorzeichen) gitter.appendChild(wahlKnopf(n)); });
       reihe.appendChild(gitter);
       // Vorzeichen-Noten je Oktave in abgesetzten Zeilen „mit ♯“ und „mit ♭“
-      [[1, "Kreuz"], [-1, "B"]].forEach(function (art) {
+      [[1, "einst.mitKreuz"], [-1, "einst.mitB"]].forEach(function (art) {
         var noten = o.noten.filter(function (n) { return n.vorzeichen === art[0]; });
         if (noten.length === 0) return;
         var zeile = element("div", "noten-vorzeichen");
         zeile.setAttribute("role", "group");
-        zeile.setAttribute("aria-label", (OKTAVEN[o.oktave] || "") + " mit " + art[1]);
-        var titel = zeile.appendChild(element("span", "noten-vorzeichen-titel", "mit "));
+        zeile.setAttribute("aria-label", t(art[1], { oktave: OKTAVEN[o.oktave] || "" }));
+        var titel = zeile.appendChild(element("span", "noten-vorzeichen-titel", t("einst.mit")));
         titel.setAttribute("aria-hidden", "true");
         titel.insertAdjacentHTML("beforeend", window.Notensystem.symbol(art[0]));
         var g = element("div", "noten-gitter noten-gitter-vorzeichen");
@@ -495,11 +507,13 @@
   /** Umschalter „Antworten: Einfach / Genau“ als zwei große Knöpfe. */
   function antwortGruppe(f, e) {
     var fs = element("fieldset", "einstellung");
-    fs.appendChild(element("legend", "", "Antworten"));
+    fs.appendChild(element("legend", "", t("einst.antworten")));
     var schalter = element("div", "antwort-umschalter");
+    // Beispiele in der aktuellen Sprache: c¹ und d² (Stufen 28 und 36), englisch C4 und D5
+    var c1 = N.anzeigeName(28, 0), d2 = N.anzeigeName(36, 0);
     [
-      { id: "einfach", text: "Einfach", info: "C D E …" },
-      { id: "genau", text: "Genau", info: "c¹ d² …" }
+      { id: "einfach", text: t("einst.einfach"), info: "C D E …" },
+      { id: "genau", text: t("einst.genau"), info: c1 + " " + d2 + " …" }
     ].forEach(function (w) {
       var an = e.antwortmodus === w.id;
       var b = element("button", "knopf antwort-modus" + (an ? " ist-an" : ""));
@@ -515,8 +529,8 @@
     });
     fs.appendChild(schalter);
     fs.appendChild(element("p", "antwort-modus-erklaerung", e.antwortmodus === "genau"
-      ? "Genau: Buchstabe mit Oktave antippen, zum Beispiel c¹ oder d²."
-      : "Einfach: nur Buchstaben antippen. Jedes C zählt, egal wie hoch."));
+      ? t("einst.erklaerungGenau", { a: c1, b: d2 })
+      : t("einst.erklaerungEinfach")));
     f.appendChild(fs);
   }
 
@@ -528,14 +542,14 @@
     antwortGruppe(f, e);
 
     var fs = element("fieldset", "einstellung");
-    fs.appendChild(element("legend", "", "Schlüssel"));
+    fs.appendChild(element("legend", "", t("einst.schluessel")));
     ["violin", "bass"].forEach(function (sl) {
       var an = e.schluessel.indexOf(sl) !== -1;
       fs.appendChild(kaestchen(N.SCHLUESSEL[sl].name, "schluessel-" + sl, an, false, function (neu) {
         if (!neu && e.schluessel.length === 1) {
           // Mindestens ein Schlüssel bleibt angekreuzt.
           baueEinstellungen();
-          einstellungsHinweis = "Ein Schlüssel bleibt immer angekreuzt.";
+          einstellungsHinweis = t("einst.einSchluessel");
           zeigeEinstellungsHinweis();
           var el = document.querySelector('#einstellungen-formular [data-fokus="schluessel-' + sl + '"]');
           if (el) el.focus({ preventScroll: true });
@@ -556,12 +570,14 @@
     e.schluessel.forEach(function (sl) { notenGruppe(f, sl, e); });
 
     var mt = element("fieldset", "einstellung");
-    mt.appendChild(element("legend", "", "Merktiere"));
-    mt.appendChild(kaestchen("Merktier nach der Antwort, zum Beispiel „d¹ wie Delfin“", "merktiere", e.merktiere, true, function (neu) {
+    mt.appendChild(element("legend", "", t("einst.merktiere")));
+    // Beispiel „d¹ wie Delfin“ oder „D4 – D is for Dolphin“ (d¹ = Stufe 29)
+    var beispiel = t("merkhilfe.text", { name: N.anzeigeName(29, 0), buchstabe: "D", tier: window.Tiere.name("delfin") });
+    mt.appendChild(kaestchen(t("einst.merktiereText", { beispiel: beispiel }), "merktiere", e.merktiere, true, function (neu) {
       aendereEinstellung(function (x) { x.merktiere = neu; }, "merktiere");
     }));
     f.appendChild(mt);
-    f.appendChild(element("p", "einstellungen-info", "Die Einstellungen gelten für alle Spiele und werden auf diesem Gerät gespeichert."));
+    f.appendChild(element("p", "einstellungen-info", t("einst.info")));
     zeigeEinstellungsHinweis();
   }
 
@@ -573,11 +589,10 @@
     var text = einstellungsHinweis;
     if (!auswahlReicht(a)) {
       var bitte = a.antwortmodus === "einfach"
-        ? "Bei „Einfach“ zählen nur die Buchstaben: c¹ und c² sind beide ein C. Kreuze Noten mit mindestens " + N.MINDEST_NOTEN +
-          " verschiedenen Buchstaben an (Fis oder Es zählen extra), sonst können die Spiele nicht starten."
-        : "Kreuze mindestens " + N.MINDEST_NOTEN + " verschiedene Noten an, sonst können die Spiele nicht starten.";
+        ? t("einst.zuWenigEinfach", { c1: N.anzeigeName(28, 0), c2: N.anzeigeName(35, 0), n: N.MINDEST_NOTEN })
+        : t("einst.zuWenigGenau", { n: N.MINDEST_NOTEN });
       text = (text ? text + " " : "") + bitte +
-        (a.antworten.length ? " Gewählt: " + a.antworten.map(function (x) { return x.name; }).join(", ") + "." : "");
+        (a.antworten.length ? t("einst.gewaehlt", { liste: a.antworten.map(function (x) { return x.anzeige; }).join(", ") }) : "");
     }
     el.textContent = text;
     el.hidden = !text;
@@ -623,6 +638,32 @@
     });
   }
 
+  /* ---------- Sprache ---------- */
+
+  /** Überträgt die gemerkte Sprache auf alle festen Texte und den Umschalter. */
+  function wendeSpracheAn() {
+    T.setzeSprache(stand.sprache);
+    T.wendeAn(document);
+    Array.prototype.forEach.call(document.querySelectorAll(".sprach-knopf"), function (b) {
+      var an = b.dataset.sprache === T.sprache();
+      b.classList.toggle("ist-an", an);
+      b.setAttribute("aria-pressed", an ? "true" : "false");
+    });
+  }
+
+  // Wechsel nur auf der Startseite: übersetzt sofort alle Texte, ohne Neuladen.
+  Array.prototype.forEach.call(document.querySelectorAll(".sprach-knopf"), function (b) {
+    b.addEventListener("click", function () {
+      if (b.dataset.sprache === stand.sprache) return;
+      stand.sprache = b.dataset.sprache;
+      speichereSpielstand();
+      wendeSpracheAn();
+      baueStartseite();
+      zurStartseite();
+      b.focus({ preventScroll: true });
+    });
+  });
+
   var hauptspiel = window.Modi.liste().filter(function (m) { return m.hauptspiel; })[0] || window.Modi.liste()[0];
 
   $("knopf-start").addEventListener("click", function () { starteModus(hauptspiel); });
@@ -635,6 +676,7 @@
     b.addEventListener("click", zurStartseite);
   });
 
+  wendeSpracheAn();
   baueStartseite();
   speichereSpielstand(); // übernimmt eine Migration alter Spielstände sofort
   zurStartseite();
