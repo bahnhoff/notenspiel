@@ -163,8 +163,8 @@
     umgebung.beende({
       gesamt: L.memoryPunkte(s.paare, sterne),
       neueSterne: sterne,
-      titel: T.t("memory.alle"),
-      spruch: sterne === 3 ? T.t("memory.gedaechtnis") : T.t("ende.toll"),
+      titel: T.t("memory.ueberschrift", { paare: s.paare, zuege: s.zuege }),
+      spruch: T.t("memory.alle") + " " + (sterne === 3 ? T.t("memory.gedaechtnis") : T.t("ende.toll")),
       stimmung: "froh",
       zeilen: [
         [T.t("memory.zeileZuege"), String(s.zuege)],

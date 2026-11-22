@@ -10,20 +10,28 @@
  *                             // Name auf der Startseite und bei den Rekorden,
  *                             // als Getter, damit er der gewählten Sprache folgt
  *     symbol: "🚀",           // optional, Bild vor dem Namen auf der Startseite
- *     hauptspiel: false,      // true nur beim klassischen Spiel (großer Start-Knopf)
+ *                             // (die App setzt es über modusSymbol in js/app.js ein,
+ *                             // mit data-symbol = id, damit gezeichnete Symbole es
+ *                             // an einer Stelle ersetzen können)
+ *     hauptspiel: false,      // true nur beim klassischen Spiel (großer Knopf „Noten üben“)
+ *     startKarte: false,      // optional true: eigene, große Karte direkt unter dem
+ *                             // Hauptknopf statt Kachel (Tägliche Notenreise)
+ *     karteInfo: function () { … },        // optional, bei startKarte: Kurzinfo
+ *                             // wie „3 Spiele à 5 Aufgaben“
  *     ansicht: "notenflug",   // zeigt <section id="ansicht-notenflug" class="ansicht"> in index.html
  *     starte: function (umgebung) { … },  // neue Runde beginnen
  *     stoppe: function () { … },          // optional: Runde verwerfen (Timer, Animation, Ton)
  *     reise: true,            // optional: taugt als Etappe der Täglichen Notenreise,
  *                             // beachtet dann umgebung.aufgaben
- *     kachelInfo: function (status) { … }, // optional: kurzer Text unter dem Namen
- *                             // auf der Startseite; status = { tagesreise }
+ *     kachelInfo: function (status) { … }, // optional: kurzer Statustext unter dem Namen
+ *                             // auf Kachel oder Karte; status = { tagesreise }
  *     fehlerUeben: true       // optional: Nach einer Runde mit Fehlern bietet das
  *                             // Ergebnis „Fehler üben“ an (braucht `verlauf` im Ergebnis)
  *   });
  *
  * Die Datei wird in index.html vor js/app.js eingebunden. Die App zeigt den
- * Modus dann auf der Startseite und bei den Rekorden.
+ * Modus dann auf der Startseite (ohne startKarte als Kachel unter „Mehr
+ * Spiele“, in der Reihenfolge der Anmeldung) und bei den Rekorden.
  *
  * Die App ruft `starte(umgebung)` bei jedem Start und bei „Noch eine Runde“
  * auf. `umgebung` enthält:
@@ -63,14 +71,18 @@
  *   laeuft()                  false, sobald die Runde verworfen oder beendet ist
  *   beende(ergebnis)          schließt die Runde ab. Die App nimmt pro Start nur
  *                             den ersten Aufruf an, verbucht Sterne, Rekord und
- *                             neue Tiere und zeigt den Ergebnisbildschirm samt
- *                             Namensabfrage bei einem Top-5-Rekord.
+ *                             neue Tiere und zeigt den Ergebnisbildschirm: Überschrift
+ *                             (titel), Fortschritt zum nächsten Tier mit Silhouette,
+ *                             Details und bei einem Top-5-Rekord den Knopf
+ *                             „Rekord speichern“, der die Namensabfrage öffnet.
  *
  * `ergebnis` für beende():
  *   gesamt        Punkte für die Rekorde
  *   neueSterne    Sterne für die gemeinsame Sammlung
  *   rekordSterne  optional, Sterne im Rekordeintrag (sonst neueSterne)
- *   titel         Überschrift, zum Beispiel "Geschafft!"
+ *   titel         Überschrift mit der Kernzahl, zum Beispiel „9 von 10 richtig“
+ *                 (ende.richtigVon) oder bei Spielen ohne Aufgabenzahl „14 Noten
+ *                 richtig“ (Notenflug), „6 Paare in 11 Zügen“ (Memory)
  *   spruch        Satz des Begleittiers
  *   stimmung      "froh" oder "normal"
  *   zeilen        [[Bezeichnung, Wert], …] Details vor der Gesamtpunktzahl
@@ -82,10 +94,19 @@
  *                 `fehlerUeben: true` wählt die App daraus die Noten für
  *                 „Fehler üben“ (SpielLogik.uebungsNoten).
  *
- * `klassischesEnde` (unten) liefert zusätzlich `geschafft` (Runde ohne dritten
- * Fehler beendet), `richtige`, `aufgaben` und immer `verlauf`. Die Notenreise
- * wertet damit ihre Etappen aus und sammelt den Verlauf der Etappen, deren
- * Modus `fehlerUeben` hat.
+ * Klassische Wertung: Runden laufen immer bis zur letzten Aufgabe, auch nach
+ * drei Fehlern (die Sterne sinken bis 0). Nur der Notenflug endet nach drei
+ * Fehlern. `klassischesEnde` (unten) liefert zusätzlich `geschafft` (immer
+ * true), `richtige`, `aufgaben` und immer `verlauf`. Die Notenreise wertet
+ * damit ihre Etappen aus und sammelt den Verlauf der Etappen, deren Modus
+ * `fehlerUeben` hat.
+ *
+ * Buchstabentasten
+ * ----------------
+ * Modi mit Antwortknöpfen nutzen die gemeinsame Tastenlogik tastenEingabe
+ * (unten): Buchstabe, Shift + Buchstabe für ♯ oder ♭, im genauen Modus bei
+ * mehreren Oktaven die Oktavziffer. Unter den Knöpfen steht dafür ein
+ * Element mit der Klasse `tasten-zeile` (Tipp und getippter Anfang).
  *
  * Ruhige Spielfläche
  * ------------------
@@ -258,23 +279,22 @@
     var L = root.SpielLogik;
     var e = L.klassischesErgebnis(runde);
     var spruch;
-    if (e.vorzeitig) spruch = t("ende.nochmal");
-    else if (e.richtige === e.aufgaben) spruch = t("ende.profi");
+    if (e.richtige === e.aufgaben) spruch = t("ende.profi");
+    else if (e.neueSterne === 0) spruch = t("ende.nochmal");
     else spruch = t("ende.toll");
     umgebung.beende({
       gesamt: e.gesamt,
       neueSterne: e.neueSterne,
-      titel: e.vorzeitig ? t("ende.vorbei") : t("ende.geschafft"),
+      titel: t("ende.richtigVon", { richtige: e.richtige, aufgaben: e.aufgaben }),
       spruch: spruch,
-      stimmung: e.vorzeitig ? "normal" : "froh",
+      stimmung: e.neueSterne > 0 ? "froh" : "normal",
       zeilen: [
-        [t("ende.richtige"), t("ende.vonAufgaben", { richtige: e.richtige, aufgaben: e.aufgaben })],
         [t("ende.punkteDafuer"), String(e.punkte)],
         [t("ende.bonus"), e.bonus + (e.bonus > 0 ? " (" + sterneText(e.verbleibendeSterne) + " × " + L.REGELN.bonusProStern + ")" : "")]
       ],
       schwierig: e.schwierig,
       verlauf: runde.verlauf.slice(),
-      geschafft: !e.vorzeitig,
+      geschafft: true,  // Runden laufen immer bis zur letzten Aufgabe
       richtige: e.richtige,
       aufgaben: e.aufgaben
     });
@@ -300,6 +320,133 @@
     knopf.hidden = false;
     knopf.focus({ preventScroll: true });
     if (knopf.scrollIntoView) knopf.scrollIntoView({ block: "nearest" });
+  }
+
+  /* ---------- Buchstabentasten ---------- */
+
+  var WARTEN_AUF_ZIFFER = 1000; // Millisekunden, die der genaue Modus auf eine Oktavziffer wartet
+
+  /** Hat das Gerät eine Maus oder ein Touchpad (und damit meist eine Tastatur)? */
+  function tastaturGeraet() {
+    return !!(root.matchMedia && root.matchMedia("(hover: hover) and (pointer: fine)").matches);
+  }
+
+  /**
+   * Antwortknöpfe zu einer getippten Buchstabentaste (siehe tastenEingabe):
+   * ohne Shift der Stammton, mit Shift die Note mit ♯ oder, wenn es zum
+   * Buchstaben nur eine ♭-Note gibt, diese. Deutsch ist die Taste B die Note
+   * B (h mit ♭), H die Note H; englisch ist B die Note B, Shift + B dann B♭.
+   * Liefert { kandidaten, buchstabe, vorzeichen } oder null bei anderen Tasten.
+   */
+  function tastenKandidaten(antworten, taste, shift) {
+    var klein = String(taste || "").toLowerCase();
+    var buchstabe, vorzeichen = null;
+    if (root.Texte.sprache() !== "en" && klein === "b") {
+      buchstabe = "h";
+      vorzeichen = -1;
+    } else {
+      buchstabe = root.Noten.tasteZuBuchstabe(klein);
+      if (!buchstabe) return null;
+    }
+    var mitBuchstabe = antworten.filter(function (a) { return a.buchstabe === buchstabe; });
+    if (vorzeichen === null) {
+      if (!shift) vorzeichen = 0;
+      else vorzeichen = mitBuchstabe.some(function (a) { return a.vorzeichen === 1; }) ? 1 : -1;
+    }
+    return {
+      buchstabe: buchstabe,
+      vorzeichen: vorzeichen,
+      kandidaten: mitBuchstabe.filter(function (a) { return (a.vorzeichen || 0) === vorzeichen; })
+    };
+  }
+
+  /**
+   * Gemeinsame Tastenlogik für Antwortknöpfe (Notenflug, Welche Note ist das?).
+   *   Einfach: Buchstabe = Stammton, Shift + Buchstabe = ♯ (oder die einzige ♭-Note).
+   *   Genau:   Ist der Buchstabe unter den Antworten eindeutig, zählt er sofort.
+   *            Sonst wartet das Spiel bis zu 1 Sekunde auf die Oktavziffer:
+   *            deutsch die Hochzahl (1 für c¹, 0 oder keine für c; ohne Note
+   *            der kleinen Oktave zählt „keine“ für die große, also C),
+   *            englisch die Ziffer (4 für C4). Die Anzeige zeigt den Anfang („d…“).
+   * `optionen`:
+   *   antworten()      aktuelle Antwortknöpfe (umgebung.antworten)
+   *   offen()          true, solange eine Antwort angenommen wird
+   *   beiAntwort(name) wie ein Klick auf den Antwortknopf
+   *   anzeige          Element unter den Knöpfen: Tipp auf Geräten mit Tastatur,
+   *                    beim Warten auf die Ziffer der getippte Anfang
+   * Liefert { taste(ev), zuruecksetzen() }. Der Modus ruft taste(ev) im
+   * keydown-Handler auf, wenn seine Ansicht sichtbar ist, und zuruecksetzen()
+   * bei jeder neuen Aufgabe.
+   */
+  function tastenEingabe(optionen) {
+    var wartend = null;   // { kandidaten, text }
+    var timer = null;
+
+    function zeige() {
+      var el = optionen.anzeige;
+      if (!el) return;
+      el.classList.toggle("tippt", !!wartend);
+      el.classList.toggle("tasten-tipp-an", !!wartend || tastaturGeraet());
+      el.textContent = wartend ? wartend.text + "…" : (tastaturGeraet() ? t("tasten.tipp") : "");
+    }
+
+    function zuruecksetzen() {
+      clearTimeout(timer);
+      timer = null;
+      wartend = null;
+      zeige();
+    }
+
+    function antworte(a) {
+      zuruecksetzen();
+      if (a && optionen.offen()) optionen.beiAntwort(a.name);
+    }
+
+    function oktaveZurZiffer(ziffer) {
+      var z = Number(ziffer);
+      if (root.Texte.sprache() === "en") return z;
+      return z === 0 ? 3 : 3 + z;   // deutsch: c = 0 oder keine, c¹ = 1, c² = 2 …
+    }
+
+    /** Ohne Ziffer nach 1 Sekunde: deutsch die kleine Oktave (c), sonst die einzige große (C). */
+    function ohneZiffer() {
+      var w = wartend;
+      if (!w || root.Texte.sprache() === "en") { zuruecksetzen(); return; }
+      var klein = w.kandidaten.filter(function (a) { return a.oktave === 3; });
+      var gross = w.kandidaten.filter(function (a) { return a.oktave < 3; });
+      antworte(klein[0] || (gross.length === 1 ? gross[0] : null));
+    }
+
+    function taste(ev) {
+      if (ev.altKey || ev.ctrlKey || ev.metaKey || !optionen.offen()) return false;
+      if (wartend && /^[0-9]$/.test(ev.key)) {
+        var oktave = oktaveZurZiffer(ev.key);
+        var treffer = wartend.kandidaten.filter(function (a) { return a.oktave === oktave; });
+        ev.preventDefault();
+        antworte(treffer[0] || null);
+        return true;
+      }
+      var k = tastenKandidaten(optionen.antworten(), ev.key, ev.shiftKey);
+      if (!k) return false;
+      if (k.kandidaten.length === 0) { zuruecksetzen(); return false; }
+      ev.preventDefault();
+      if (k.kandidaten.length === 1) {
+        antworte(k.kandidaten[0]);
+        return true;
+      }
+      // Genau mit mehreren Oktaven: auf die Ziffer warten
+      zuruecksetzen();
+      var text = root.Texte.sprache() === "en"
+        ? root.Noten.buchstabenAnzeige(k.buchstabe, k.vorzeichen)
+        : root.Noten.buchstabenAnzeige(k.buchstabe, k.vorzeichen).toLowerCase();
+      wartend = { kandidaten: k.kandidaten, text: text };
+      timer = setTimeout(ohneZiffer, WARTEN_AUF_ZIFFER);
+      zeige();
+      return true;
+    }
+
+    zeige();
+    return { taste: taste, zuruecksetzen: zuruecksetzen };
   }
 
   /** Zufällige Reihenfolge (Fisher-Yates), ändert die Liste nicht. */
@@ -329,6 +476,9 @@
       klassischesEnde: klassischesEnde,
       namensPlatz: namensPlatz,
       zeigeWeiter: zeigeWeiter,
+      tastenKandidaten: tastenKandidaten,
+      tastenEingabe: tastenEingabe,
+      tastaturGeraet: tastaturGeraet,
       mische: mische
     }
   };

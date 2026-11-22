@@ -2,8 +2,14 @@
  * Modus „Notenflug“: Eine Note gleitet von rechts nach links über das
  * Notensystem. Das Kind tippt den Namen, bevor die Note den Schlüssel
  * erreicht. Zu spät oder falsch kostet einen von drei Sternen.
- * Level mit je 10 Noten, jedes Level etwa 15 % schneller.
- * Regeln und Wertung: js/spiel-logik.js (NOTENFLUG, flugAntwort).
+ * Level mit je 10 Noten, jedes Level etwa 15 % schneller. Punkte pro Note =
+ * Level × Anzahl der gewählten Noten.
+ * Nach einer richtigen Antwort leuchtet der Knopf kurz grün, und die nächste
+ * Note startet sofort, ohne Merktier und Sprechblase. Nur nach einem Fehler
+ * oder „zu spät“ hält das Spiel an (Lösung, Hinweis, „Weiter“). Beim
+ * Levelwechsel erscheint kurz „Level 3!“.
+ * Buchstabentasten antworten über Modi.hilfen.tastenEingabe.
+ * Regeln und Wertung: js/spiel-logik.js (NOTENFLUG, flugAntwort, flugPunkteProNote).
  * Nutzt die Ansicht #ansicht-notenflug aus index.html.
  */
 (function () {
@@ -15,8 +21,8 @@
   var START_DX = 34;          // Startversatz der Note nach rechts (SVG-Einheiten)
   var ZIEL_DX = -46;          // hier erreicht die Note den Schlüssel
   var PAUSE_VOR_START = 1400; // Millisekunden
-  var PAUSE_NACH_RICHTIG = 900;
-  var PAUSE_NACH_LEVEL = 2200;
+  var PAUSE_NACH_RICHTIG = 150;  // nur kurz grün, dann die nächste Note
+  var LEVEL_EINBLENDUNG = 1000;   // „Level 3!“
   var PAUSE_NACH_FEHLER = 4500;
 
   var umgebung = null;
@@ -28,6 +34,7 @@
   var letzteZeit = null;
   var pausiert = false;
   var wartetAufWeiter = null; // Funktion, die nach „Weiter“ läuft
+  var tasten = null;          // Buchstabentasten (Modi.hilfen.tastenEingabe)
 
   function $(id) { return document.getElementById(id); }
 
@@ -38,8 +45,15 @@
   function starte(u) {
     stoppe();
     umgebung = u;
-    flug = L.neuerFlug();
+    flug = L.neuerFlug(u.noten.length);
     knoepfe = H.antwortKnoepfe($("flug-antworten"), u.antworten, beantworte);
+    tasten = H.tastenEingabe({
+      antworten: function () { return umgebung.antworten; },
+      offen: function () { return aktiv() && !!zustand && zustand.offen && !$("ansicht-notenflug").hidden; },
+      beiAntwort: beantworte,
+      anzeige: $("flug-tasten")
+    });
+    $("flug-level-einblendung").hidden = true;
     u.zeigeTier($("flug-tier"), "normal");
     u.zeigeAnsicht();
     $("flug-merkhilfe").hidden = true;
@@ -60,6 +74,7 @@
     zustand = null;
     pausiert = false;
     wartetAufWeiter = null;
+    if (tasten) tasten.zuruecksetzen();
   }
 
   function zeigeStatus() {
@@ -100,6 +115,8 @@
     clearTimeout(timer);
     wartetAufWeiter = null;
     if (!aktiv()) return;
+    $("flug-level-einblendung").hidden = true;
+    tasten.zuruecksetzen();
     var note = waehleNote();
     zustand = { note: note, vergangen: 0, dauer: L.flugzeit(flug.level), offen: true, dx: START_DX,
       level: flug.level, nr: flug.imLevel + 1 };
@@ -167,11 +184,22 @@
     var e = L.flugAntwort(flug, richtig);
     if (!e) return;
     sperreKnoepfe(true);
+    tasten.zuruecksetzen();
 
     knoepfe.forEach(function (b) {
       if (b.dataset.name === note.antwort) H.markiereAntwort(b, richtig ? "ist-richtig" : "ist-loesung", true);
       else if (b.dataset.name === name) H.markiereAntwort(b, "ist-falsch", false);
     });
+
+    var danach = e.beendet ? beende : (e.levelGeschafft ? zeigeLevel : naechsteNote);
+
+    // Richtig: kein Halt. Punkte zählen hoch, die Note bleibt stehen, gleich kommt die nächste.
+    if (richtig) {
+      $("flug-notensystem").classList.add("ist-richtig");
+      zeigeStatus();
+      timer = setTimeout(danach, PAUSE_NACH_RICHTIG);
+      return;
+    }
 
     // Lösung an der Stelle zeigen, an der die Note gerade ist (Name passt rechts daneben).
     zeichneSystem(note, note.anzeige);
@@ -180,26 +208,30 @@
     zeigeStatus();
     H.zeigeMerkhilfe(umgebung, note, "flug-merkhilfe");
 
-    var text;
     var werte = { name: note.anzeige, hinweis: note.hinweis };
-    if (richtig) text = t("flug.super", werte);
-    else if (name === null) text = t("flug.zuSpaet", werte);
-    else text = t("flug.falsch", werte);
+    var text = t(name === null ? "flug.zuSpaet" : "flug.falsch", werte);
     if (e.levelGeschafft) text += t("flug.levelGeschafft", { level: zustand.level });
     if (e.beendet) text += t("flug.dritterFehler");
     $("flug-text").textContent = text;
-    umgebung.zeigeTier($("flug-tier"), richtig ? "froh" : "oje");
+    umgebung.zeigeTier($("flug-tier"), "oje");
 
-    var danach = e.beendet ? beende : naechsteNote;
-    if (richtig) {
-      timer = setTimeout(danach, e.levelGeschafft ? PAUSE_NACH_LEVEL : PAUSE_NACH_RICHTIG);
-    } else {
-      wartetAufWeiter = danach;
-      var weiter = $("flug-weiter");
-      weiter.textContent = e.beendet ? t("flug.zumErgebnis") : t("runde.weiter");
-      H.zeigeWeiter(weiter);
-      if (!e.beendet) timer = setTimeout(weiterNachFehler, PAUSE_NACH_FEHLER);
-    }
+    wartetAufWeiter = danach;
+    var weiter = $("flug-weiter");
+    weiter.textContent = e.beendet ? t("flug.zumErgebnis") : t("runde.weiter");
+    H.zeigeWeiter(weiter);
+    if (!e.beendet) timer = setTimeout(weiterNachFehler, PAUSE_NACH_FEHLER);
+  }
+
+  /** Kurze Einblendung „Level 3!“ ohne Knopf, danach die erste Note des neuen Levels. */
+  function zeigeLevel() {
+    clearTimeout(timer);
+    wartetAufWeiter = null;
+    if (!aktiv()) return;
+    $("flug-weiter").hidden = true;
+    var el = $("flug-level-einblendung");
+    el.textContent = t("flug.levelEinblendung", { level: flug.level });
+    el.hidden = false;
+    timer = setTimeout(naechsteNote, LEVEL_EINBLENDUNG);
   }
 
   function weiterNachFehler() {
@@ -219,29 +251,23 @@
     umgebung.beende({
       gesamt: f.punkte,
       neueSterne: sterne,
-      titel: t("flug.vorbei"),
+      titel: t("flug.ueberschrift", { n: f.richtige }),
       spruch: f.levelGeschafft >= 3 ? t("flug.wow") : (f.levelGeschafft > 0 ? t("flug.toll") : t("ende.nochmal")),
       stimmung: f.levelGeschafft > 0 ? "froh" : "normal",
       zeilen: [
         [t("flug.erreicht"), String(f.level)],
         [t("flug.geschaffte"), String(f.levelGeschafft)],
-        [t("flug.richtige"), String(f.richtige)]
+        // Rechnung zum erreichten Level, zum Beispiel „3 Noten × Level 2 = 6 Punkte pro Note“
+        [t("flug.proNote"), t("flug.rechnung", { noten: f.notenAnzahl, level: f.level, punkte: L.flugPunkteProNote(f) })]
       ]
     });
   }
 
   $("flug-weiter").addEventListener("click", weiterNachFehler);
 
-  /* Tastatur: Buchstabe tippen, wenn er unter den Antworten (ohne Vorzeichen-Noten) eindeutig ist. */
+  /* Tastatur: Buchstabe (mit Shift ♯ oder ♭, im genauen Modus mit Oktavziffer), siehe Modi.hilfen.tastenEingabe. */
   document.addEventListener("keydown", function (ev) {
-    if (!aktiv() || $("ansicht-notenflug").hidden || !zustand || !zustand.offen || ev.altKey || ev.ctrlKey || ev.metaKey) return;
-    var taste = window.Noten.tasteZuBuchstabe(ev.key);
-    if (!taste) return;
-    var treffer = umgebung.antworten.filter(function (a) { return a.buchstabe === taste && !a.vorzeichen; });
-    if (treffer.length === 1) {
-      ev.preventDefault();
-      beantworte(treffer[0].name);
-    }
+    if (tasten && aktiv() && !$("ansicht-notenflug").hidden) tasten.taste(ev);
   });
 
   window.Modi.registriere({

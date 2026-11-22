@@ -1,6 +1,8 @@
 /*
  * Modus „Welche Note ist das?“ (klassisch): Note im Notensystem, Kind tippt
- * den Namen. 10 Aufgaben, 3 Sterne, Regeln in js/spiel-logik.js.
+ * den Namen. 10 Aufgaben, 3 Sterne, Regeln in js/spiel-logik.js. Die Runde
+ * geht auch nach drei Fehlern bis zur letzten Aufgabe weiter.
+ * Buchstabentasten antworten über Modi.hilfen.tastenEingabe.
  * Nutzt die Ansicht #ansicht-runde aus index.html.
  */
 (function () {
@@ -16,6 +18,7 @@
   var weiterTimer = null;
   var knoepfe = [];
   var letzterAntwortKnopf = -1;
+  var tasten = null;   // Buchstabentasten (Modi.hilfen.tastenEingabe)
 
   function $(id) { return document.getElementById(id); }
 
@@ -25,6 +28,12 @@
     runde = L.neueRunde(u.noten, { vorrang: u.schwierig, aufgaben: u.aufgaben });
     letzterAntwortKnopf = -1;
     knoepfe = H.antwortKnoepfe($("antworten"), u.antworten, beantworte);
+    tasten = H.tastenEingabe({
+      antworten: function () { return umgebung.antworten; },
+      offen: function () { return aktiv() && !runde.gesperrt && !$("ansicht-runde").hidden; },
+      beiAntwort: beantworte,
+      anzeige: $("runde-tasten")
+    });
     u.zeigeTier($("runde-tier"), "normal");
     u.zeigeAnsicht();
     zeigeAufgabe();
@@ -34,6 +43,7 @@
   function stoppe() {
     clearTimeout(weiterTimer);
     runde = null;
+    if (tasten) tasten.zuruecksetzen();
   }
 
   function aktiv() {
@@ -47,6 +57,7 @@
 
   function zeigeAufgabe() {
     zeigeStatus();
+    tasten.zuruecksetzen();
     $("notensystem").innerHTML = window.Notensystem.zeichne(runde.aktuell.note, { bereich: umgebung.bereich, namensPlatz: H.namensPlatz(umgebung) });
     $("notensystem").classList.remove("ist-falsch", "ist-richtig");
     $("knopf-weiter").hidden = true;
@@ -70,6 +81,7 @@
     var a = L.antworte(runde, name);
     if (!a) return; // schon beantwortet: weitere Tipps zählen nicht
     letzterAntwortKnopf = -1;
+    tasten.zuruecksetzen();
     $("antworten").classList.add("gesperrt");
 
     knoepfe.forEach(function (b, i) {
@@ -116,16 +128,9 @@
     H.klassischesEnde(umgebung, r);
   }
 
-  /* Tastatur: Buchstabe tippen, wenn er unter den Antworten (ohne Vorzeichen-Noten) eindeutig ist. */
+  /* Tastatur: dieselbe Tastenlogik wie im Notenflug (Modi.hilfen.tastenEingabe). */
   document.addEventListener("keydown", function (ev) {
-    if (!aktiv() || $("ansicht-runde").hidden || runde.gesperrt || ev.altKey || ev.ctrlKey || ev.metaKey) return;
-    var taste = window.Noten.tasteZuBuchstabe(ev.key);
-    if (!taste) return;
-    var treffer = umgebung.antworten.filter(function (a) { return a.buchstabe === taste && !a.vorzeichen; });
-    if (treffer.length === 1) {
-      ev.preventDefault();
-      beantworte(treffer[0].name);
-    }
+    if (tasten && aktiv() && !$("ansicht-runde").hidden) tasten.taste(ev);
   });
 
   $("knopf-weiter").addEventListener("click", naechsteAufgabe);
