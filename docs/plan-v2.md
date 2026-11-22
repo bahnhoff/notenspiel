@@ -92,3 +92,9 @@ Startseite: großer **Start** für das klassische Spiel bleibt. Darunter eine Au
 - **Schritt B (Modi):** Punkte 7.2 bis 7.5 auf Basis von Schritt A, je Modus eine eigene Datei unter `js/modi/`.
 - **Schritt C (weitere Spiele):** Punkt 9 (Höher oder tiefer, Hör-Spiel, Tägliche Notenreise).
 - **Schritt D (Name):** Punkt 10, zusammen mit Schritt B erledigen.
+
+## 11. Rückmeldung vom 2026-11-22
+
+1. **Mehrfachauswahl statt Entweder-oder:** In den Einstellungen gibt es keine Optionsfelder (Radio-Buttons) mehr. Die Schlüssel Violin und Bass sind Kästchen zum Ankreuzen, auch beide gleichzeitig, mindestens einer bleibt aktiv. Merktiere ist ein Schalter.
+2. **Noten einzeln wählen:** Für jeden angekreuzten Schlüssel zeigt die Ansicht alle verfügbaren Noten als große Ankreuz-Knöpfe, nach Oktaven in Reihen. Dazu kommen Schnellwahl-Knöpfe: „Erste Noten“, „1 Oktave“, „2 Oktaven“, „Alle“ und „Keine“. Sie setzen nur Häkchen. Insgesamt müssen mindestens 3 Noten gewählt sein, sonst erscheint ein freundlicher Hinweis und die Spiele starten nicht. Alte Einstellungen werden in Notenlisten übersetzt.
+3. **Korrekte Schreibweise:** Die Oktavziffer steht hochgestellt rechts neben dem Buchstaben: C, c, c¹, c², c³ (Unicode-Hochzahlen ¹ ² ³). Das gilt überall, wo ein Name erscheint: Antwortknöpfe, Merkhilfe („d¹ wie Delfin“), Beschriftung im Notensystem, Klaviatur, Memory, Note setzen, Hör-Spiel, Hinweise, Einstellungen und README. Die Kennungen (`violin-c1`) bleiben ASCII, damit Spielstände gültig bleiben.
