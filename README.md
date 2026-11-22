@@ -117,6 +117,7 @@ Alle Mini-Spiele nutzen die Einstellungen (Schlüssel, Notenauswahl, Merktiere, 
 - `js/spiel-logik.js`: Regeln, Wertung, Wiederholungen, Rekorde, Tiersammlung und Spielstand
 - `js/notensystem.js`: das Notensystem mit Violin- und Bassschlüssel
 - `js/tiere.js`: die Tierzeichnungen
+- `js/klang.js`: der Klavierton für Hör-Spiel und Klaviertasten (Web Audio API, keine Audiodateien)
 - `js/modi.js`: die gemeinsame Schnittstelle für Spielmodi
 - `js/modi/klassisch.js`: das Spiel „Welche Note ist das?“
 - `js/modi/notenflug.js`, `js/modi/klaviertasten.js`, `js/modi/note-setzen.js`, `js/modi/noten-memory.js`, `js/modi/hoeher-tiefer.js`, `js/modi/hoer-spiel.js`, `js/modi/notenreise.js`: die Mini-Spiele

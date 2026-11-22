@@ -6,6 +6,7 @@
  * Schwarze Tasten sind nur für gewählte Vorzeichen-Noten tippbar, sonst
  * Dekoration, aber genauso groß. Alle Tasten liegen in einer Reihe. Für eine
  * schwarze Taste zählt die Tonhöhe: fis¹ und ges¹ sind dieselbe Taste. Das mittlere C ist markiert.
+ * Jede tippbare Taste spielt beim Drücken ihren Ton (js/klang.js).
  * Im einfachen Antwortmodus zählt jede Taste mit dem richtigen Buchstaben.
  * 10 Aufgaben, Wertung wie im klassischen Spiel (js/spiel-logik.js).
  * Nutzt die Ansicht #ansicht-klavier aus index.html.
@@ -49,6 +50,12 @@
   function stoppe() {
     clearTimeout(weiterTimer);
     runde = null;
+    window.Klang.pausiere();
+  }
+
+  /** Spielt den Ton der Taste (js/klang.js). Läuft im Tipp, darf also den Ton wecken. */
+  function klinge(nr) {
+    if (window.Klang.bereit()) window.Klang.spiele(tasten[nr].halbton);
   }
 
   /* ---------- Klaviatur ---------- */
@@ -90,7 +97,7 @@
       }
     }
     tasten.forEach(function (t, i) {
-      t.el.addEventListener("click", function () { beantworte(i); });
+      t.el.addEventListener("click", function () { klinge(i); beantworte(i); });
     });
   }
 
@@ -259,6 +266,7 @@
     // Im einfachen Modus zählt jede Taste mit dem Buchstaben, dann reicht die erste.
     if (treffer.length === 1 || (treffer.length > 1 && umgebung.antwortmodus === "einfach")) {
       ev.preventDefault();
+      klinge(treffer[0]);
       beantworte(treffer[0]);
     }
   });
