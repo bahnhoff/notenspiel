@@ -528,9 +528,9 @@ h1:focus { outline: none; }
 }
 
 .ergebnis-liste > div:last-child { border-bottom: 0; }
-.ergebnis-liste dt { color: var(--text-leise); }
+.ergebnis-liste dt { color: var(--text-leise); min-width: 0; hyphens: auto; -webkit-hyphens: auto; }
 .ergebnis-liste dd { margin: 0; font-weight: 700; text-align: right; white-space: nowrap; }
-.ergebnis-gesamt { font-size: 1.35rem; }
+.ergebnis-gesamt { font-size: clamp(1.05rem, 5vw, 1.35rem); }
 .ergebnis-gesamt dt { color: var(--text); font-weight: 700; }
 .sterne-reihe { font-size: 1.5rem; }
 
