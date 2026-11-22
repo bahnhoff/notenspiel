@@ -99,7 +99,7 @@
       gesperrt: false,
       letzteAntwort: null,
       beendet: false,
-      vorzeitig: false,
+      vorzeitig: false,        // bleibt false: Runden laufen immer bis zur letzten Aufgabe
       verbucht: false
     };
     runde.aktuell = waehleNote(runde);
@@ -209,11 +209,11 @@
       runde.serie = 0;
       runde.fehler += 1;
       runde.sterne = Math.max(0, runde.sterne - 1);
-      if (runde.fehler >= REGELN.startSterne) merkeUebertrag(runde, note.id);
-      else planeWiederholung(runde, note.id);
+      planeWiederholung(runde, note.id);
     }
 
-    var rundeVorbei = runde.fehler >= REGELN.startSterne || runde.aufgabe >= runde.anzahl - 1;
+    // Kein vorzeitiges Ende: Es werden immer alle Aufgaben gespielt, die Sterne sinken bis 0.
+    var rundeVorbei = runde.aufgabe >= runde.anzahl - 1;
     runde.letzteAntwort = {
       richtig: richtig,
       note: note,
@@ -232,7 +232,6 @@
     if (runde.beendet || !runde.gesperrt) return null;
     if (runde.letzteAntwort && runde.letzteAntwort.rundeVorbei) {
       runde.beendet = true;
-      runde.vorzeitig = runde.fehler >= REGELN.startSterne;
       runde.wiederholungen.forEach(function (w) { merkeUebertrag(runde, w.id); });
       runde.vorrang.forEach(function (id) { merkeUebertrag(runde, id); });
       runde.wiederholungen = [];
@@ -355,7 +354,6 @@
     notenProLevel: 10,
     startFlugzeit: 8000,   // Millisekunden im ersten Level
     tempoFaktor: 1.15,     // jedes Level etwa 15 % schneller
-    punkteProLevel: 10,    // Punkte pro richtiger Note = 10 × Level
     leben: 3,
     maxSterne: 3
   };
@@ -365,8 +363,21 @@
     return NOTENFLUG.startFlugzeit / Math.pow(NOTENFLUG.tempoFaktor, Math.max(1, level) - 1);
   }
 
-  function neuerFlug() {
-    return { level: 1, imLevel: 0, punkte: 0, richtige: 0, fehler: 0, levelGeschafft: 0, beendet: false };
+  /**
+   * Neuer Notenflug. `notenAnzahl` = Zahl der gewählten Noten, sie bestimmt
+   * mit dem Level die Punkte (siehe flugPunkteProNote).
+   */
+  function neuerFlug(notenAnzahl) {
+    return { level: 1, imLevel: 0, punkte: 0, richtige: 0, fehler: 0, levelGeschafft: 0, beendet: false,
+      notenAnzahl: notenAnzahl >= 1 ? Math.floor(notenAnzahl) : 1 };
+  }
+
+  /**
+   * Punkte pro richtiger Note nach Schwierigkeit: Level × Anzahl der gewählten
+   * Noten. C, D, E auf Level 1 = 3 Punkte, auf Level 3 = 9 Punkte.
+   */
+  function flugPunkteProNote(flug, level) {
+    return (level || flug.level) * flug.notenAnzahl;
   }
 
   /**
@@ -376,7 +387,7 @@
   function flugAntwort(flug, richtig) {
     if (flug.beendet) return null;
     if (richtig) {
-      flug.punkte += NOTENFLUG.punkteProLevel * flug.level;
+      flug.punkte += flugPunkteProNote(flug);
       flug.richtige += 1;
     } else {
       flug.fehler += 1;
@@ -433,6 +444,7 @@
       namen: [],
       einstellungen: null,
       sprache: null,                 // "de" oder "en"; null = beim Laden nach der Browsersprache wählen
+      naechstes: null,               // Kennung des nächsten Tiers (Silhouette im Ergebnis), null = noch nicht gewählt
       reise: { tag: "", serie: 0 }   // Tägliche Notenreise: letzter geschaffter Tag, Tagesserie
     };
   }
@@ -506,31 +518,55 @@
     return 1 + Math.floor(sterne / STERNE_PRO_TIER);
   }
 
+  /** Noch nicht entdeckte Tiere, die bei dieser Sternzahl kommen dürfen. */
+  function tierTopf(stand) {
+    return TIERE.filter(function (t) {
+      return stand.entdeckt.indexOf(t.id) === -1 && (!t.selten || stand.sterne >= SELTEN_AB_STERNEN);
+    });
+  }
+
   /**
-   * Ergänzt zufällig noch nicht entdeckte Tiere, bis die Anzahl zur
-   * Sternzahl passt. Seltene Tiere kommen erst ab 50 Sternen in den Topf.
+   * Ergänzt noch nicht entdeckte Tiere, bis die Anzahl zur Sternzahl passt.
+   * Seltene Tiere kommen erst ab 50 Sternen in den Topf. Als Nächstes kommt
+   * das vorgemerkte Tier `stand.naechstes` (seine Silhouette zeigt das
+   * Ergebnis), danach wird zufällig ein neues vorgemerkt.
    * Liefert die neu entdeckten Tiere.
    */
   function ergaenzeTiere(stand, zufall) {
     zufall = zufall || Math.random;
     var neu = [];
+    var topf;
     while (stand.entdeckt.length < sollTiere(stand.sterne)) {
-      var topf = TIERE.filter(function (t) {
-        return stand.entdeckt.indexOf(t.id) === -1 && (!t.selten || stand.sterne >= SELTEN_AB_STERNEN);
-      });
+      topf = tierTopf(stand);
       if (topf.length === 0) break;
-      var tier = topf[Math.floor(zufall() * topf.length) % topf.length];
+      var tier = topf.indexOf(tierVon(stand.naechstes)) !== -1 ? tierVon(stand.naechstes)
+        : topf[Math.floor(zufall() * topf.length) % topf.length];
       stand.entdeckt.push(tier.id);
+      stand.naechstes = null;
       neu.push(tier);
+    }
+    topf = tierTopf(stand);
+    if (topf.indexOf(tierVon(stand.naechstes)) === -1) {
+      stand.naechstes = topf.length ? topf[Math.floor(zufall() * topf.length) % topf.length].id : null;
     }
     return neu;
   }
 
-  /** Sterne bis zum nächsten Tier, oder null, wenn alle entdeckt sind. */
+  /**
+   * Weg zum nächsten Tier oder null, wenn alle entdeckt sind:
+   * { fehlend, gesammelt, schritt, id } – gesammelt von schritt Sternen
+   * (zum Beispiel 2 von 5), id = vorgemerktes Tier oder null.
+   */
   function naechstesTier(stand) {
     if (stand.entdeckt.length >= TIERE.length) return null;
     var schwelle = stand.entdeckt.length * STERNE_PRO_TIER;
-    return { fehlend: Math.max(1, schwelle - stand.sterne) };
+    var fehlend = Math.max(1, schwelle - stand.sterne);
+    return {
+      fehlend: fehlend,
+      gesammelt: Math.max(0, STERNE_PRO_TIER - fehlend),
+      schritt: STERNE_PRO_TIER,
+      id: tierVon(stand.naechstes) ? stand.naechstes : null
+    };
   }
 
   /**
@@ -568,6 +604,10 @@
       // Version 1: Häschen ab 5, Kätzchen ab 10 Sternen.
       if (stand.sterne >= 5) stand.entdeckt.push("hase");
       if (stand.sterne >= 10) stand.entdeckt.push("katze");
+    }
+    // Vorgemerktes nächstes Tier (fehlt in älteren Spielständen, ergaenzeTiere wählt dann eins).
+    if (typeof roh.naechstes === "string" && tierVon(roh.naechstes) && stand.entdeckt.indexOf(roh.naechstes) === -1) {
+      stand.naechstes = roh.naechstes;
     }
     ergaenzeTiere(stand, zufall);
 
@@ -708,6 +748,7 @@
     flugzeit: flugzeit,
     neuerFlug: neuerFlug,
     flugAntwort: flugAntwort,
+    flugPunkteProNote: flugPunkteProNote,
     flugSterne: flugSterne,
     MEMORY: MEMORY,
     memorySterne: memorySterne,

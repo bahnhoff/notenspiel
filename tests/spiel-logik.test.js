@@ -41,11 +41,10 @@ test("Wertung: 10 richtig = 130 Punkte und 3 Sterne, 9 richtig = 110 Punkte und 
   assert.equal(spiele([4]).ergebnis.neueSterne, 2);
 });
 
-test("der dritte Fehler beendet die Runde ohne Bonus und Sterne, auch bei Aufgabe 10", () => {
-  const frueh = spiele([1, 2, 4]).ergebnis;
-  assert.deepEqual([frueh.vorzeitig, frueh.gesamt, frueh.neueSterne], [true, 10, 0]);
-  const spaet = spiele([2, 5, 10]).ergebnis;
-  assert.deepEqual([spaet.vorzeitig, spaet.gesamt, spaet.neueSterne], [true, 70, 0]);
+test("nach drei Fehlern geht die Runde bis zur zehnten Aufgabe weiter, ohne Bonus und Sterne", () => {
+  const { runde, ergebnis } = spiele([1, 2, 4, 6]);
+  assert.equal(runde.verlauf.length, 10);
+  assert.deepEqual([ergebnis.vorzeitig, ergebnis.gesamt, ergebnis.neueSterne], [false, 60, 0]);
 });
 
 test("jede Aufgabe zählt nur eine Antwort", () => {
@@ -154,7 +153,12 @@ test("alle 5 Sterne ein neues Tier, seltene erst ab 50 Sternen", () => {
   v = L.verbucheErgebnis(v.stand, "klassisch", { gesamt: 130, neueSterne: 3 }, 2, zufall);
   assert.equal(v.neueTiere.length, 1);
   assert.equal(v.stand.entdeckt.length, 2);
-  assert.deepEqual(L.naechstesTier(v.stand), { fehlend: 4 });
+  const naechstes = L.naechstesTier(v.stand);
+  assert.deepEqual([naechstes.fehlend, naechstes.gesammelt, naechstes.schritt], [4, 1, 5]);
+  // Das vorgemerkte Tier (Silhouette im Ergebnis) kommt als Nächstes.
+  const vorgemerkt = naechstes.id;
+  v = L.verbucheErgebnis(v.stand, "klassisch", { gesamt: 0, neueSterne: 4 }, 2, zufall);
+  assert.deepEqual(v.neueTiere.map((t) => t.id), [vorgemerkt]);
   stand = v.stand;
   stand.sterne = 44;
   v = L.verbucheErgebnis(stand, "klassisch", { gesamt: 0, neueSterne: 3 }, 3, zufall);
@@ -193,14 +197,16 @@ test("Migration eines alten Spielstands", () => {
   assert.equal(neu.einstellungen, null);
 });
 
-test("Notenflug: jedes Level 15 % schneller, Punkte 10 × Level, Ende nach drei Fehlern", () => {
+test("Notenflug: jedes Level 15 % schneller, Punkte = Level × gewählte Noten, Ende nach drei Fehlern", () => {
   assert.equal(L.flugzeit(1), 8000);
   assert.ok(Math.abs(L.flugzeit(2) - 8000 / 1.15) < 1e-9);
-  const flug = L.neuerFlug();
+  const flug = L.neuerFlug(3);
+  assert.equal(L.flugPunkteProNote(flug), 3);
+  assert.equal(L.flugPunkteProNote(flug, 3), 9);
   for (let i = 0; i < 10; i++) L.flugAntwort(flug, true);
   assert.equal(flug.level, 2);
   L.flugAntwort(flug, true);
-  assert.equal(flug.punkte, 10 * 10 + 20);
+  assert.equal(flug.punkte, 10 * 3 + 6);
   L.flugAntwort(flug, false);
   L.flugAntwort(flug, false);
   assert.deepEqual(L.flugAntwort(flug, false), { levelGeschafft: false, beendet: true });
