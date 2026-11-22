@@ -133,3 +133,19 @@ Startseite: großer **Start** für das klassische Spiel bleibt. Darunter eine Au
   - Hör-Spiel: keine zwei gleich klingenden Karten (fis und ges) gleichzeitig.
   - Höher oder tiefer: Vergleich nach Tonhöhe, gleich klingende Paare kommen nicht vor.
   - Noten-Memory, Notenflug, Welche Note ist das?: über den zentralen Antwortvergleich.
+
+## 14. Sprache Deutsch und Englisch (2026-11-22)
+
+Ziel: Ein amerikanisches Kind kann den Notenzoo komplett auf Englisch spielen. Der Benutzer hat entschieden: amerikanische Notennamen und eigene englische Merktiere.
+
+- **Umschalter:** Kleiner Knopf oben rechts in der Ecke der Startseite, zum Beispiel „DE | EN“ mit hervorgehobener aktiver Sprache, gut tippbar (mindestens 44 px hoch). Nur auf der Startseite, damit keine Runde mitten im Spiel die Sprache wechselt. Ein Wechsel übersetzt sofort alle Texte, ohne Neuladen.
+- **Standard:** Beim ersten Start nach der Browsersprache (`navigator.language` beginnt mit „de“ → Deutsch, sonst Englisch). Danach gilt die gemerkte Wahl. Gespeichert im Spielstand, Spielstände bleiben gültig. `<html lang>` und `<title>` wechseln mit.
+- **Texte:** Alle sichtbaren Texte und `aria-label` beider Sprachen stehen in einer neuen Datei `js/texte.js` (ein Objekt je Sprache, Platzhalter für Zahlen und Namen, Einzahl und Mehrzahl, zum Beispiel „1 Punkt“ und „1 point“). HTML-Elemente bekommen ein Attribut mit dem Textschlüssel, JavaScript holt Texte über eine kleine Funktion. Keine Bibliothek.
+- **Notennamen auf Englisch (amerikanisch, wissenschaftliche Schreibweise):** Großbuchstabe, Vorzeichen als ♯ oder ♭, Oktave als normale Ziffer. c¹ = C4, c = C3, C = C2, c² = C5. Deutsch H = B, deutsch B = B♭, fis¹ = F♯4, es² = E♭5.
+  - Einfach-Modus: Knöpfe C, C♯, D, E♭, … B in chromatischer Reihenfolge.
+  - Kennungen (`violin-c1`), gespeicherte Auswahl, Rekorde und Wiederholungslisten bleiben sprachunabhängig. Der Antwortvergleich darf nicht an angezeigten Namen hängen, die sich mit der Sprache ändern.
+- **Merktiere auf Englisch:** C Cat (Katze), D Dolphin, E Elephant, tiefes F Frog, hohes F (ab F5) Fox, G Giraffe, A Alligator (neue Zeichnung im Stil von `js/tiere.js`), B Bear (Bär), F♯ Fish. Formulierung: „D4 – D is for Dolphin“, bei Vorzeichen ohne eigenes Tier „C♯4 – C is for Cat, just a half step higher“. Die Zuordnung steht in `js/noten-konfiguration.js` neben der deutschen.
+- **Übersetzt wird alles Sichtbare:** Spielnamen (Notenzoo = Note Zoo, Notenflug = Note Flight, Klaviertasten = Piano Keys, Note setzen = Place the Note, Noten-Memory = Note Memory, Höher oder tiefer = Higher or Lower, Hör-Spiel = Listening Game, Tägliche Notenreise = Daily Note Journey), Einstellungen und Schnellwahl, Hinweise zur Lage („on the second line“, „in the first space“, „sharp“, „flat“), Rückmeldungen, Sammeltiere (Little Fox, Bunny, Kitty …), Rekorde, Datumsangaben, Hinweis zum Ton im Hör-Spiel, README-Abschnitt.
+- **Bleibt gleich:** Spielernamen, Punkte, Sterne, Spielregeln.
+- **Nicht Ziel:** weitere Sprachen, britische Begriffe, Übersetzung der Code-Kommentare.
+- **Tests:** ein zusätzlicher Logiktest für die englischen Namen (C4, B3, B♭3, F♯4, C2). Kurz im Browser mit Screenshot prüfen, keine große Testsuite.
