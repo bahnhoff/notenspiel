@@ -3,10 +3,10 @@
  * den gewählten Bereich. Das Kind tippt die passende Taste. Hat die
  * Notenauswahl Lücken, zeigt die Klaviatur trotzdem alle weißen Tasten von der
  * tiefsten bis zur höchsten gewählten Note, damit sie wie ein Klavier aussieht.
- * Schwarze Tasten sind nur für gewählte Vorzeichen-Noten tippbar, sonst
- * Dekoration, aber genauso groß. Alle Tasten liegen in einer Reihe. Für eine
+ * Alle Tasten sind tippbar, auch die schwarzen. Ohne gewählte Vorzeichen-Noten
+ * zählt eine schwarze Taste als falsche Antwort. Alle Tasten liegen in einer Reihe. Für eine
  * schwarze Taste zählt die Tonhöhe: fis¹ und ges¹ sind dieselbe Taste. Das mittlere C ist markiert.
- * Jede tippbare Taste spielt beim Drücken ihren Ton (js/klang.js).
+ * Jede Taste spielt beim Drücken ihren Ton (js/klang.js).
  * Im einfachen Antwortmodus zählt jede Taste mit dem richtigen Buchstaben.
  * 10 Aufgaben, Wertung wie im klassischen Spiel (js/spiel-logik.js).
  * Nutzt die Ansicht #ansicht-klavier aus index.html.
@@ -63,9 +63,7 @@
   /**
    * Baut die Tasten von der tiefsten bis zur höchsten Note, ohne Lücken.
    * Jede Taste kennt ihre Töne (`toene`, Noten.ton): eine weiße Taste einen,
-   * eine schwarze zwei gleich klingende (fis¹ und ges¹). Schwarze Tasten
-   * werden nur für gewählte Vorzeichen-Noten zu Knöpfen, sonst bleiben sie
-   * Dekoration (ordneTasten zeichnet sie).
+   * eine schwarze zwei gleich klingende (fis¹ und ges¹). Alle Tasten sind Knöpfe.
    */
   function baueKlaviatur(namen) {
     var N = window.Noten;
@@ -88,11 +86,9 @@
       if (SCHWARZ_NACH[ton.buchstabe] && s < hoch) {
         var kreuz = N.ton(s, 1);
         var schwarz = { art: "schwarz", toene: [kreuz, N.ton(s + 1, -1)], halbton: kreuz.halbton,
-          name: hoehen[kreuz.halbton] || kreuz.name, anzeige: hoehenAnzeige[kreuz.halbton] || kreuz.anzeige, waehlbar: hoehen[kreuz.halbton] !== undefined };
-        if (schwarz.waehlbar) {
-          schwarz.el = schwarzeTaste(schwarz);
-          tasten.push(schwarz);
-        }
+          name: hoehen[kreuz.halbton] || kreuz.name, anzeige: hoehenAnzeige[kreuz.halbton] || kreuz.anzeige };
+        schwarz.el = schwarzeTaste(schwarz);
+        tasten.push(schwarz);
         weiss.schwarz = schwarz;
       }
     }
@@ -126,9 +122,8 @@
   /**
    * Legt alle Tasten in eine einzige Reihe wie bei einem echten Klavier. Die
    * weißen Tasten teilen sich die volle Breite gleichmäßig (CSS-Raster mit
-   * --tasten Spalten), die Höhe regelt das CSS. Jede schwarze Taste, ob
-   * wählbar oder Dekoration, liegt gleich breit über der Fuge zur nächsten
-   * weißen Taste.
+   * --tasten Spalten), die Höhe regelt das CSS. Jede schwarze Taste liegt
+   * gleich breit über der Fuge zur nächsten weißen Taste.
    */
   function ordneTasten() {
     var box = $("klaviatur");
@@ -142,11 +137,7 @@
       div.appendChild(t.el);
       var schwarz = i < anzahl - 1 ? t.schwarz : null;
       if (!schwarz) return;
-      var el = schwarz.waehlbar ? schwarz.el : document.createElement("span");
-      if (!schwarz.waehlbar) {
-        el.className = "taste-schwarz";
-        el.setAttribute("aria-hidden", "true");
-      }
+      var el = schwarz.el;
       el.style.left = ((i + 1) * 100 / anzahl) + "%";
       div.appendChild(el);
     });

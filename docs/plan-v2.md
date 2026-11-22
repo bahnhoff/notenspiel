@@ -149,3 +149,8 @@ Ziel: Ein amerikanisches Kind kann den Notenzoo komplett auf Englisch spielen. D
 - **Bleibt gleich:** Spielernamen, Punkte, Sterne, Spielregeln.
 - **Nicht Ziel:** weitere Sprachen, britische Begriffe, Übersetzung der Code-Kommentare.
 - **Tests:** ein zusätzlicher Logiktest für die englischen Namen (C4, B3, B♭3, F♯4, C2). Kurz im Browser mit Screenshot prüfen, keine große Testsuite.
+
+## 15. Klaviertasten mit Ton (2026-11-22)
+
+- Jede Taste spielt beim Drücken ihren Klavierton (gemeinsamer Ton aus `js/klang.js`, auch vom Hör-Spiel genutzt).
+- Alle schwarzen Tasten sind tippbar und klingen, nicht nur die gewählten Vorzeichen-Noten (ersetzt „schwarze nur Dekoration“ aus Abschnitt 7). Ohne gewählte Vorzeichen-Noten zählt eine schwarze Taste als falsche Antwort, der Hinweis „Welche weiße Taste …“ bleibt.

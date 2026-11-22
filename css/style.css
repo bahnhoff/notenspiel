@@ -994,9 +994,8 @@ h1:focus { outline: none; }
 /*
  * Schwarze Tasten: alle gleich breit (58 % einer weißen Taste) und gleich hoch,
  * mittig über der Fuge zur nächsten weißen Taste (left setzt das Skript).
- * Dekorative sind reine Flächen, Tippen geht an die weiße Taste darunter.
+ * Alle sind Knöpfe und spielen ihren Ton.
  */
-.taste-schwarz,
 .taste-schwarz-knopf {
   position: absolute;
   top: 0;
@@ -1009,9 +1008,6 @@ h1:focus { outline: none; }
   border: 2px solid #2a1d14;
   border-radius: 0 0 6px 6px;
 }
-.taste-schwarz { pointer-events: none; }
-
-/* Wählbare schwarze Taste: gleich groß, nur der orange Rand unten zeigt, dass man sie antippen kann. */
 .taste-schwarz-knopf {
   padding: 0 0 8px;
   font: inherit;
@@ -1021,7 +1017,6 @@ h1:focus { outline: none; }
   line-height: 1.1;
   white-space: nowrap;
   color: #fff;
-  box-shadow: inset 0 -7px 0 var(--akzent), inset 0 0 0 1px var(--akzent);
   display: flex;
   flex-direction: column;
   align-items: center;
