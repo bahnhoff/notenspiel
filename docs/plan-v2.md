@@ -218,3 +218,8 @@ Umfang der ersten Überarbeitung, wie in der Rückmeldung empfohlen. Die übrige
 - Sterne nach Zügen: Normal wie bisher (bis 9 Züge 3, bis 13 Züge 2, sonst 1). Schwer: bis 16 Züge 3, bis 22 Züge 2, sonst 1.
 - Punkte: Normal 10 pro Paar plus 10 pro Stern (höchstens 90). Schwer 15 pro Paar plus 20 pro Stern (höchstens 210). Gemeinsame Rekordliste, die Punkte spiegeln die Schwierigkeit; in der Rekordzeile steht „Schwer“ dabei.
 - Das Raster 4 × 5 muss bei 340 px Breite ohne Scrollen nach der Seite passen, Karten bleiben gut tippbar.
+
+## 22. Bekannte Lücken geschlossen (2026-11-22)
+
+- **Große Oktave per Tastatur (Genau, deutsch):** Steht ein Buchstabe in mehreren Oktaven zur Wahl, wählt derselbe Buchstabe zweimal hintereinander die große Oktave (dd = D, Shift + F zweimal = Fis). Hochzahl und „keine Ziffer“ bleiben wie bisher.
+- **Melodie als Etappe der Notenreise:** „Spiel eine Melodie“ kommt jetzt auch als Etappe infrage. Als Etappe sind es 2 statt 5 Melodien; als richtig zählt jede Note, die beim ersten Versuch stimmt.

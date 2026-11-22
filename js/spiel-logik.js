@@ -445,7 +445,7 @@
 
   /* ---------- Spiel eine Melodie ---------- */
 
-  var MELODIE = { melodienProRunde: 5, minLaenge: 4, maxLaenge: 7, punkteProMelodie: 10, punkteProStern: 10 };
+  var MELODIE = { melodienProRunde: 5, melodienProEtappe: 2, minLaenge: 4, maxLaenge: 7, punkteProMelodie: 10, punkteProStern: 10 };
 
   /*
    * Anfänge bekannter, gemeinfreier Kinderlieder in Dur. `toene` sind Halbtöne
@@ -536,9 +536,11 @@
    * Melodien für eine Runde: zuerst verschiedene passende Lieder (in zufälliger
    * Lage), fehlende Plätze füllen zufällige Folgen aus kleinen Schritten.
    * Jede Melodie: { lied (Kennung oder null), noten, dauern }.
+   * `anzahl` ist ohne Angabe MELODIE.melodienProRunde.
    */
-  function neueMelodien(noten, zufall) {
+  function neueMelodien(noten, zufall, anzahl) {
     zufall = zufall || Math.random;
+    anzahl = anzahl || MELODIE.melodienProRunde;
     var nachLied = {};
     passendeLieder(noten).forEach(function (m) { (nachLied[m.lied] = nachLied[m.lied] || []).push(m); });
     var lieder = Object.keys(nachLied).map(function (id) { return zufallsElement(nachLied[id], zufall); });
@@ -547,8 +549,8 @@
       var j = Math.floor(zufall() * (i + 1));
       var t = lieder[i]; lieder[i] = lieder[j]; lieder[j] = t;
     }
-    var melodien = lieder.slice(0, MELODIE.melodienProRunde);
-    while (melodien.length < MELODIE.melodienProRunde) melodien.push(zufallsMelodie(noten, zufall));
+    var melodien = lieder.slice(0, anzahl);
+    while (melodien.length < anzahl) melodien.push(zufallsMelodie(noten, zufall));
     return melodien;
   }
 

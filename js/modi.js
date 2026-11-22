@@ -383,6 +383,7 @@
    *            Sonst wartet das Spiel bis zu 1 Sekunde auf die Oktavziffer:
    *            deutsch die Hochzahl (1 für c¹, 0 oder keine für c; ohne Note
    *            der kleinen Oktave zählt „keine“ für die große, also C),
+   *            derselbe Buchstabe zweimal wählt die große Oktave (dd für D),
    *            englisch die Ziffer (4 für C4). Die Anzeige zeigt den Anfang („d…“).
    * `optionen`:
    *   antworten()      aktuelle Antwortknöpfe (umgebung.antworten)
@@ -444,6 +445,13 @@
       }
       var k = tastenKandidaten(optionen.antworten(), ev.key, ev.shiftKey);
       if (!k) return false;
+      // Deutsch: derselbe Buchstabe zweimal = große Oktave (dd = D, wie der Großbuchstabe)
+      if (wartend && root.Texte.sprache() !== "en" &&
+          k.buchstabe === wartend.buchstabe && k.vorzeichen === wartend.vorzeichen) {
+        ev.preventDefault();
+        antworte(wartend.kandidaten.filter(function (a) { return a.oktave === 2; })[0] || null);
+        return true;
+      }
       if (k.kandidaten.length === 0) { zuruecksetzen(); return false; }
       ev.preventDefault();
       if (k.kandidaten.length === 1) {
@@ -455,7 +463,7 @@
       var text = root.Texte.sprache() === "en"
         ? root.Noten.buchstabenAnzeige(k.buchstabe, k.vorzeichen)
         : root.Noten.buchstabenAnzeige(k.buchstabe, k.vorzeichen).toLowerCase();
-      wartend = { kandidaten: k.kandidaten, text: text };
+      wartend = { kandidaten: k.kandidaten, text: text, buchstabe: k.buchstabe, vorzeichen: k.vorzeichen };
       timer = setTimeout(ohneZiffer, WARTEN_AUF_ZIFFER);
       zeige();
       return true;

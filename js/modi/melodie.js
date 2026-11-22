@@ -13,6 +13,8 @@
  * Modus jede Taste mit dem richtigen Buchstaben, im genauen die Tonhöhe.
  * 5 Melodien pro Runde, Sterne nach falschen Tasten (SpielLogik.melodieSterne),
  * 10 Punkte pro Melodie plus 10 pro Stern.
+ * Als Etappe der Notenreise (`umgebung.etappe`) sind es 2 Melodien; als
+ * „richtig“ zählt dort jede Note, die beim ersten Versuch getroffen wurde.
  *
  * Ruhige Spielfläche: Das System wird pro Melodie einmal gezeichnet, danach
  * wechseln nur Klassen (aktuell, gespielt, leuchtet). Seine Breite ist für
@@ -37,6 +39,8 @@
   var pos = 0;                // aktuelle Note der Melodie
   var fehler = 0;             // falsche Tasten in der ganzen Runde
   var fehlerHier = 0;         // falsche Tasten an der aktuellen Note
+  var notenRichtig = 0;       // Noten, die beim ersten Versuch stimmten
+  var notenGesamt = 0;
   var zustand = "spielen";    // "spielen", "hoeren" (Melodie erklingt), "fertig"
   var klaviatur = null;
   var timer = [];
@@ -60,9 +64,11 @@
   function starte(u) {
     stoppe();
     umgebung = u;
-    melodien = L.neueMelodien(u.noten);
+    melodien = L.neueMelodien(u.noten, null, u.etappe ? L.MELODIE.melodienProEtappe : 0);
     nr = 0;
     fehler = 0;
+    notenRichtig = 0;
+    notenGesamt = 0;
     // Mit Vorzeichen-Noten brauchen ♯ und ♭ vor jeder Note mehr Platz.
     var mitVorzeichen = u.noten.some(function (n) { return n.vorzeichen; });
     var abstand = mitVorzeichen ? 33 : 28;
@@ -183,6 +189,8 @@
       return;
     }
     pos++;
+    notenGesamt++;
+    if (fehlerHier === 0) notenRichtig++;
     fehlerHier = 0;
     umgebung.zeigeTier($("melodie-tier"), "froh");
     if (pos < m.noten.length) {
@@ -247,6 +255,8 @@
     melodien = null;
     umgebung.beende({
       gesamt: L.melodiePunkte(anzahl, sterne),
+      richtige: notenRichtig,
+      aufgaben: notenGesamt,
       neueSterne: sterne,
       titel: T.t("melodie.ueberschrift", { n: anzahl }),
       spruch: f === 0 ? T.t("melodie.ohneFehler") : (sterne >= 2 ? T.t("ende.toll") : T.t("ende.geschafft")),
@@ -280,6 +290,7 @@
     get name() { return T.t("modus.melodie"); },
     symbol: "🎶",
     ansicht: "melodie",
+    reise: true,
     starte: starte,
     stoppe: stoppe
   });

@@ -130,6 +130,7 @@
     var u = {};
     Object.keys(umgebung).forEach(function (k) { u[k] = umgebung[k]; });
     u.aufgaben = AUFGABEN;
+    u.etappe = true;   // für Modi ohne Aufgabenzahl (Melodie: 2 statt 5 Melodien)
     u.zeigeAnsicht = function (name) { umgebung.zeigeAnsicht(name || modus.ansicht || modus.id); };
     u.laeuft = function () { return laufendeTeilNr === nr && umgebung.laeuft(); };
     u.beende = function (e) {
