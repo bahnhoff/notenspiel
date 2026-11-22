@@ -99,8 +99,10 @@ h1:focus { outline: none; }
   flex-direction: column;
   align-items: center;
   text-align: center;
-  gap: 18px;
-  padding-top: 4vh;
+  gap: 14px;
+  padding-top: 2vh;
+  /* Eine Spalte: Hauptknopf, Reise-Karte, Spiele und Menü sind gleich breit */
+  --start-breite: 440px;
 }
 
 /* Sprachumschalter oben rechts, nur auf der Startseite */
@@ -142,7 +144,7 @@ h1:focus { outline: none; }
 .sprach-knopf:focus-visible { outline: 4px solid var(--fokus); outline-offset: -4px; }
 
 .start-tier {
-  width: min(52vw, 230px);
+  width: min(40vw, 160px);
   animation: wippen 2.4s ease-in-out infinite;
 }
 
@@ -153,28 +155,36 @@ h1:focus { outline: none; }
 }
 
 .knopf-start {
-  font-size: clamp(1.8rem, 7vw, 2.4rem);
-  min-width: min(80vw, 320px);
-  min-height: 80px;
+  font-size: clamp(1.7rem, 7vw, 2.2rem);
+  width: 100%;
+  max-width: var(--start-breite);
+  min-height: 76px;
   border-radius: 999px;
 }
 
+/* Meine Tiere, Rekorde, Einstellungen: drei gleich breite, flache Knöpfe in einer Reihe */
 .start-menue {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 12px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
   width: 100%;
+  max-width: var(--start-breite);
+  margin-top: 4px;
 }
 
 .start-menue .knopf {
-  font-size: 1.1rem;
-  padding: 10px 12px;
-  white-space: nowrap;
-  flex: 1 1 150px;
-  max-width: 260px;
-  min-height: 56px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  font-size: 0.95rem;
+  line-height: 1.15;
+  padding: 8px 4px;
+  min-height: 64px;
 }
+
+.start-menue .knopf-symbol .symbol-svg { width: 1.8rem; height: 1.8rem; margin: 0; }
 
 .start-auswahl {
   margin: -6px 0 0;
@@ -194,38 +204,45 @@ h1:focus { outline: none; }
 .start-unterzeile { font-size: 1.05rem; font-weight: 600; }
 
 .start-modi-titel {
-  margin: 6px 0 -6px;
-  font-size: 1.3rem;
+  width: 100%;
+  max-width: var(--start-breite);
+  margin: 8px 0 -4px;
+  font-size: 1.1rem;
+  text-align: left;
+  color: var(--text-leise);
 }
 
-/* Kacheln der Mini-Spiele: 2 Spalten auf dem Handy, 4 auf dem Tablet.
-   Bei 7 Spielen bleibt es bei höchstens zwei Reihen auf dem Tablet. */
+/* Kacheln der Mini-Spiele: immer 2 Spalten in der Startspalte, flach mit
+   Symbol links und Name rechts. So sind alle Reihen gleich breit. */
 .start-modi {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
+  gap: 10px;
   width: 100%;
-  max-width: 760px;
+  max-width: var(--start-breite);
 }
 
 .knopf-modus {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 4px;
-  min-height: 112px;
-  padding: 10px 6px;
-  font-size: 1.15rem;
+  gap: 10px;
+  min-height: 64px;
+  padding: 8px 10px;
+  font-size: 1.05rem;
   line-height: 1.15;
+  text-align: left;
 }
 
-.modus-symbol { font-size: 2.6rem; line-height: 1; }
-.modus-symbol .symbol-svg { width: 3.2rem; height: 3.2rem; }
-.modus-name { overflow-wrap: anywhere; }
+.modus-symbol { flex: 0 0 auto; font-size: 2rem; line-height: 1; }
+.modus-symbol .symbol-svg { width: 2.4rem; height: 2.4rem; }
+.modus-name { min-width: 0; }
 
-@media (min-width: 700px) {
-  .start-modi { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+/* Schmale Handys: etwas kleiner, damit „Klaviertasten“ und „Einstellungen“ ganz in eine Zeile passen */
+@media (max-width: 400px) {
+  .start-modi, .start-menue { gap: 8px; }
+  .knopf-modus { gap: 7px; padding: 8px 7px; font-size: 0.98rem; }
+  .knopf-modus .modus-symbol .symbol-svg { width: 2rem; height: 2rem; }
+  .start-menue .knopf { font-size: 0.85rem; }
 }
 
 .hinweis-speicher {
@@ -1246,11 +1263,9 @@ h1:focus { outline: none; }
 }
 
 /* Auf dem Handy über die ganze Breite, damit der Zusatztext Platz hat */
-.knopf-modus-info { grid-column: 1 / -1; min-height: 96px; }
+.knopf-modus-info { grid-column: 1 / -1; }
 
-@media (min-width: 700px) {
-  .knopf-modus-info { grid-column: auto; }
-}
+
 
 /* ---------- Hör-Spiel ---------- */
 
@@ -1400,7 +1415,7 @@ h1:focus { outline: none; }
   .knopf-antwort { min-height: 56px; font-size: 1.6rem; }
   .tier-klein { width: 64px; flex-basis: 64px; }
   .ansicht-start { padding-top: 0; gap: 10px; }
-  .start-tier { width: 120px; }
+  .start-tier { width: 100px; }
   .klaviatur { --taste-min: 90px; --taste-max: 120px; }
 }
 
@@ -1414,7 +1429,7 @@ h1:focus { outline: none; }
   flex-direction: column;
   gap: 12px;
   width: 100%;
-  max-width: 520px;
+  max-width: var(--start-breite);
 }
 
 /* Eigene Karte (Modus mit startKarte), deutlich abgesetzt von den Kacheln */
@@ -1423,8 +1438,8 @@ h1:focus { outline: none; }
   align-items: center;
   gap: 14px;
   width: 100%;
-  min-height: 96px;
-  padding: 12px 18px;
+  min-height: 84px;
+  padding: 10px 16px;
   text-align: left;
   background: #fff3c4;
   border: 3px solid var(--gelb);
@@ -1432,7 +1447,7 @@ h1:focus { outline: none; }
 }
 
 .start-karte .modus-symbol { flex: 0 0 auto; font-size: 2.8rem; }
-.start-karte .modus-symbol .symbol-svg { width: 3.6rem; height: 3.6rem; }
+.start-karte .modus-symbol .symbol-svg { width: 3.2rem; height: 3.2rem; }
 .karte-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .karte-name { font-size: 1.3rem; line-height: 1.15; }
 .karte-info { font-size: 1rem; font-weight: 600; color: var(--text); }
