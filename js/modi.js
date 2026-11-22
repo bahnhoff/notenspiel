@@ -25,12 +25,15 @@
  * auf. `umgebung` enthält:
  *   noten          erzeugte Noten der aktuellen Einstellungen (siehe js/noten.js).
  *                  `note.antwort` ist das, was als Antwort zählt: im einfachen
- *                  Modus der Buchstabe ("D"), im genauen der Name ("d²").
- *   antworten      die Antwortknöpfe { name, stufe, oktave, buchstabe }, `name`
- *                  ist die Beschriftung und wird an SpielLogik.antworte gegeben.
+ *                  Modus der Buchstabe ("D", "Fis", "Es"), im genauen der Name
+ *                  ("d²", "fis¹"). `note.vorzeichen` ist 0, 1 (♯) oder -1 (♭),
+ *                  `note.halbton` die Tonhöhe (fis und ges gleich), `note.stufe`
+ *                  die Stufe des Stammtons (fis¹ steht wie f¹ im System).
+ *   antworten      die Antwortknöpfe { name, stufe, oktave, buchstabe, vorzeichen },
+ *                  `name` ist die Beschriftung und wird an SpielLogik.antworte gegeben.
  *                  Genau: eindeutige Notennamen, tief nach hoch. Einfach: nur die
- *                  vorkommenden Buchstaben C D E F G A H (stufe und oktave null).
- *   namen          eindeutige genaue Notennamen, tief nach hoch, in beiden Modi
+ *                  vorkommenden Antworten C Cis D Es … H (stufe und oktave null).
+ *   namen          eindeutige genaue Notennamen (Noten.ton), tief nach hoch, in beiden Modi
  *   antwortmodus   "einfach" oder "genau". Für andere Antworten (Klaviertaste,
  *                  gesetzte Position) liefert Noten.antwortSchluessel(note,
  *                  antwortmodus) den Schlüssel zum Vergleich. Rückmeldungen
@@ -46,7 +49,8 @@
  *   zeigeAnsicht(name)        blendet die Ansicht des Modus ein, mit `name`
  *                             eine andere Ansicht (für die Notenreise)
  *   zeigeTier(el, stimmung)   zeichnet das gewählte Begleittier ("normal", "froh", "oje")
- *   merkhilfe(note)           { tier, name, text } oder null, wenn Merktiere aus sind
+ *   merkhilfe(note)           { tier, name, text, zusatz } oder null, wenn Merktiere aus sind.
+ *                             zusatz (optional): „nur einen Halbton höher“ bei Vorzeichen-Noten
  *   laeuft()                  false, sobald die Runde verworfen oder beendet ist
  *   beende(ergebnis)          schließt die Runde ab. Die App nimmt pro Start nur
  *                             den ersten Aufruf an, verbucht Sterne, Rekord und
@@ -108,29 +112,44 @@
 
   /**
    * Baut Antwortschaltflächen für Notennamen in `box`. Bei mehr als einer
-   * Oktave steht jede Oktave in einer eigenen Reihe (tief unten, hoch oben),
-   * gleiche Buchstaben stehen untereinander. `beiKlick(name)` wird beim
-   * Antippen aufgerufen. Liefert die Schaltflächen in aufsteigender Reihenfolge.
+   * Oktave (oder Vorzeichen im genauen Modus) steht jede Oktave in einer
+   * eigenen Reihe (tief unten, hoch oben), gleiche Buchstaben stehen
+   * untereinander. Vorzeichen-Noten einer Oktave stehen in einer eigenen Reihe
+   * darüber (fis¹ über f¹), bei Platzkonflikt (dis¹ und des¹) Kreuz und B
+   * getrennt. `beiKlick(name)` wird beim Antippen aufgerufen.
    */
   function antwortKnoepfe(box, antworten, beiKlick) {
     box.innerHTML = "";
     var reihen = {};
-    var oktaven = [];
+    var oktaven = {};
     antworten.forEach(function (a) {
-      if (!reihen[a.oktave]) { reihen[a.oktave] = []; oktaven.push(a.oktave); }
-      reihen[a.oktave].push(a);
+      oktaven[a.oktave] = true;
+      var vz = a.vorzeichen && a.oktave !== null ? a.vorzeichen : 0;
+      var k = a.oktave + ":" + vz;
+      if (!reihen[k]) reihen[k] = [];
+      reihen[k].push(a);
     });
-    var einfach = oktaven.length === 1;
+    // Kreuz und B einer Oktave in eine Reihe, wenn kein Buchstabe doppelt vorkommt.
+    var liste = [];
+    // Object.keys liefert ganzzahlige Oktaven aufsteigend, tief zuerst.
+    Object.keys(oktaven).forEach(function (o) {
+      var stamm = reihen[o + ":0"], kreuz = reihen[o + ":1"] || [], b = reihen[o + ":-1"] || [];
+      if (stamm) liste.push(stamm);
+      var doppelt = kreuz.some(function (x) { return b.some(function (y) { return y.buchstabe === x.buchstabe; }); });
+      if (doppelt) { liste.push(kreuz); liste.push(b); }
+      else if (kreuz.length + b.length) liste.push(kreuz.concat(b));
+    });
+    var einfach = liste.length === 1;
     box.classList.toggle("antworten-einfach", einfach);
     box.classList.toggle("antworten-oktaven", !einfach);
     var knoepfe = [];
-    oktaven.forEach(function (oktave) {
+    liste.forEach(function (eintraege) {
       var reihe = document.createElement("div");
       reihe.className = "antwort-reihe";
-      reihen[oktave].forEach(function (a) {
+      eintraege.forEach(function (a) {
         var b = document.createElement("button");
         b.type = "button";
-        b.className = "knopf knopf-antwort";
+        b.className = "knopf knopf-antwort" + (a.vorzeichen ? " knopf-antwort-vorzeichen" : "");
         b.dataset.name = a.name;
         if (!einfach) b.style.gridColumn = String(root.Noten.BUCHSTABEN.indexOf(a.buchstabe) + 1);
         b.innerHTML = '<span class="antwort-name"></span><span class="antwort-marke" aria-hidden="true"></span>';
@@ -166,7 +185,16 @@
       return;
     }
     document.getElementById(id + "-bild").innerHTML = root.Tiere.zeichne(hilfe.tier, "froh", hilfe.name);
-    document.getElementById(id + "-text").textContent = hilfe.text;
+    var text = document.getElementById(id + "-text");
+    text.textContent = hilfe.text;
+    if (hilfe.zusatz) {
+      // Vorzeichen-Note mit dem Tier des Stammtons: „nur einen Halbton höher“ etwas kleiner darunter
+      var zusatz = document.createElement("span");
+      zusatz.className = "merkhilfe-zusatz";
+      zusatz.textContent = hilfe.zusatz;
+      text.appendChild(document.createTextNode(" "));
+      text.appendChild(zusatz);
+    }
     box.hidden = false;
   }
 

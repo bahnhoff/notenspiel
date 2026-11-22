@@ -112,6 +112,25 @@ test("Antwortmodus Einfach: nur Buchstaben, jede Oktave zählt", () => {
   assert.equal(L.istRichtig(genau.noten.find((n) => n.id === "violin-d2"), "d¹"), false);
 });
 
+test("Vorzeichen-Noten: Namen, Positionen und Antworten in beiden Schlüsseln", () => {
+  const lage = (sl, ids) => N.verfuegbareNoten(K, sl).filter((n) => ids.includes(n.id)).map((n) => n.name + "@" + n.position).join(" ");
+  assert.equal(lage("violin", ["violin-fis1", "violin-ges1", "violin-es2", "violin-b1"]), "fis¹@1 ges¹@2 b¹@4 es²@7");
+  assert.equal(lage("bass", ["bass-B", "bass-Fis", "bass-cis"]), "Fis@-1 B@2 cis@3");
+  const a = N.fuerEinstellungen(K, L.bereinigeSpielstand({ einstellungen: { schluessel: ["violin"], noten: ["violin-f1", "violin-fis1", "violin-ges1", "violin-b1", "violin-h1"] } }).einstellungen);
+  assert.equal(a.antworten.map((x) => x.name).join(" "), "F Fis Ges B H");
+  const fis = a.noten.find((n) => n.id === "violin-fis1");
+  assert.equal(fis.hinweis, "Die Note liegt im ersten Zwischenraum von unten und hat ein Kreuz.");
+  assert.equal(fis.tier, "fisch");
+  assert.deepEqual([L.istRichtig(fis, "Fis"), L.istRichtig(fis, "Ges"), L.istRichtig(fis, "F")], [true, false, false]);
+});
+
+test("Mindestauswahl: 3 verschiedene Antworten, im einfachen Modus Buchstaben", () => {
+  const noten = ["violin-c1", "violin-c2", "violin-d1"];
+  assert.equal(N.auswahlReicht(N.fuerEinstellungen(K, { schluessel: ["violin"], noten, antwortmodus: "einfach" })), false);
+  assert.equal(N.auswahlReicht(N.fuerEinstellungen(K, { schluessel: ["violin"], noten, antwortmodus: "genau" })), true);
+  assert.equal(N.auswahlReicht(N.fuerEinstellungen(K, { schluessel: ["violin"], noten: noten.concat(["violin-cis1"]) })), true);
+});
+
 test("alle 5 Sterne ein neues Tier, seltene erst ab 50 Sternen", () => {
   let stand = L.leererSpielstand();
   const zufall = festerZufall();

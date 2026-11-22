@@ -18,10 +18,12 @@
   var H = window.Modi.hilfen;
   var PAUSE_NACH_RICHTIG = 1300; // Millisekunden
   var PAUSE_BEZUGSTON = 1600;    // vom Bezugston c¹ bis zum ersten Aufgabenton
-  var MITTLERES_C = 28;          // Stufe von c¹ (js/noten.js)
+  var MITTLERES_C = 60;          // Tonhöhe von c¹ (MIDI-Nummer, siehe Noten.halbton)
   var OPTIONEN = 3;
-  // Schmales System für die drei Notenkarten
-  var FORM = { breite: 92, noteX: 70 };
+  // Schmales System für die drei Notenkarten, mit Vorzeichen etwas breiter
+  var FORM_STAMM = { breite: 92, noteX: 70 };
+  var FORM_VORZEICHEN = { breite: 100, noteX: 78 };
+  var FORM = FORM_STAMM;
 
   /* ---------- Klavierton ---------- */
 
@@ -29,7 +31,6 @@
     var Kontext = window.AudioContext || window.webkitAudioContext;
     var ctx = null;
     var aktive = [];
-    var HALBTOENE = [0, 2, 4, 5, 7, 9, 11];
     // Teiltöne: [Vielfaches, Lautstärke]. Höhere klingen schneller ab.
     var TEILTOENE = [[1, 1], [2, 0.5], [3, 0.28], [4, 0.16], [5, 0.1], [6, 0.06], [7, 0.035]];
 
@@ -38,8 +39,7 @@
       if (versprechen && versprechen.catch) versprechen.catch(function () { /* egal */ });
     }
 
-    function frequenz(stufe) {
-      var midi = (Math.floor(stufe / 7) + 1) * 12 + HALBTOENE[stufe % 7];
+    function frequenz(midi) {
       return 440 * Math.pow(2, (midi - 69) / 12);
     }
 
@@ -73,11 +73,11 @@
       aktive = [];
     }
 
-    /** Spielt eine Note (Stufe wie in js/noten.js). */
-    function spiele(stufe) {
+    /** Spielt einen Ton (Tonhöhe als MIDI-Nummer, siehe Noten.halbton). */
+    function spiele(halbton) {
       if (!ctx) return false;
       stoppeAlle();
-      var f = frequenz(stufe);
+      var f = frequenz(halbton);
       var start = ctx.currentTime + 0.03;
       // Tiefe Töne klingen länger nach als hohe.
       var dauer = Math.max(1.2, Math.min(2.8, 3.2 - f / 400));
@@ -156,6 +156,7 @@
     umgebung = u;
     runde = L.neueRunde(u.noten, { vorrang: u.schwierig, aufgaben: u.aufgaben });
     letzterKnopf = -1;
+    FORM = u.noten.some(function (n) { return n.vorzeichen; }) ? FORM_VORZEICHEN : FORM_STAMM;
     u.zeigeTier($("hoeren-tier"), "normal");
     u.zeigeAnsicht();
     zeigeAufgabe();
@@ -206,17 +207,20 @@
 
   function spieleAufgabe() {
     if (!aktiv() || !runde.aktuell) return;
-    Ton.spiele(runde.aktuell.note.stufe);
+    Ton.spiele(runde.aktuell.note.halbton);
   }
 
-  /* Wählt zwei andere Noten mit anderem Namen, möglichst nicht direkt benachbart. */
+  /*
+   * Wählt zwei andere Noten mit anderer Tonhöhe (fis und ges nie zusammen),
+   * möglichst mindestens eine kleine Terz entfernt.
+   */
   function waehleOptionen(ziel) {
-    var andere = H.mische(umgebung.noten.filter(function (n) { return n.stufe !== ziel.stufe; }));
+    var andere = H.mische(umgebung.noten.filter(function (n) { return n.halbton !== ziel.halbton; }));
     var gewaehlt = [ziel];
     function passt(n, mindestens) {
-      return gewaehlt.every(function (g) { return Math.abs(g.stufe - n.stufe) >= mindestens; });
+      return gewaehlt.every(function (g) { return Math.abs(g.halbton - n.halbton) >= mindestens; });
     }
-    [2, 1].forEach(function (mindestens) {
+    [3, 1].forEach(function (mindestens) {
       andere.forEach(function (n) {
         if (gewaehlt.length < OPTIONEN && passt(n, mindestens)) gewaehlt.push(n);
       });

@@ -43,17 +43,75 @@
       '<circle cx="49" cy="' + (F_LINIE + 5) + '" r="2.4" fill="currentColor"/>' +
     "</g>";
 
+  function r2(x) { return Math.round(x * 100) / 100; }
+
   /**
-   * note:     { position, schluessel } oder null für ein leeres System
+   * Versetzungszeichen links vor einem Notenkopf mit x-Mitte x und Höhe y:
+   * Kreuz (1) aus zwei Strichen und zwei schrägen Balken, B (-1) mit Bauch.
+   * Abstand zum Kopf so, dass auch Hilfslinien frei bleiben.
+   */
+  var VORZEICHEN_ABSTAND = 20;
+  function versetzungszeichen(vorzeichen, x, y) {
+    var cx = x - VORZEICHEN_ABSTAND;
+    if (vorzeichen > 0) {
+      var balken = function (by) {
+        return "M" + r2(cx - 5) + " " + r2(by + 2.5) + " L" + r2(cx + 5) + " " + r2(by - 0.1) +
+          " L" + r2(cx + 5) + " " + r2(by - 2.7) + " L" + r2(cx - 5) + " " + r2(by - 0.1) + " Z";
+      };
+      return '<g class="vorzeichen vorzeichen-kreuz">' +
+        '<path d="' + balken(y - 3.3) + " " + balken(y + 3.5) + '" fill="currentColor"/>' +
+        '<path d="M' + r2(cx - 2.2) + " " + r2(y - 11) + " L" + r2(cx - 2.2) + " " + r2(y + 12.5) +
+          " M" + r2(cx + 2.2) + " " + r2(y - 12.5) + " L" + r2(cx + 2.2) + " " + r2(y + 11) +
+          '" stroke="currentColor" stroke-width="1.3" fill="none"/></g>';
+    }
+    if (vorzeichen < 0) {
+      var sx = cx - 2.6;
+      return '<g class="vorzeichen vorzeichen-b">' +
+        '<path d="M' + r2(sx) + " " + r2(y - 15) + " L" + r2(sx) + " " + r2(y + 5) +
+          '" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/>' +
+        '<path d="M' + r2(sx) + " " + r2(y + 5) + " C" + r2(sx + 4) + " " + r2(y + 2.6) + " " + r2(sx + 8.2) + " " + r2(y - 0.4) + " " + r2(sx + 7.2) + " " + r2(y - 3.2) +
+          " C" + r2(sx + 6.2) + " " + r2(y - 5.8) + " " + r2(sx + 2.4) + " " + r2(y - 4.6) + " " + r2(sx) + " " + r2(y - 1.6) +
+          " L" + r2(sx) + " " + r2(y + 0.6) +
+          " C" + r2(sx + 1.8) + " " + r2(y - 2) + " " + r2(sx + 4.6) + " " + r2(y - 2.8) + " " + r2(sx + 4.8) + " " + r2(y - 1.2) +
+          " C" + r2(sx + 5) + " " + r2(y + 0.6) + " " + r2(sx + 2.6) + " " + r2(y + 2.8) + " " + r2(sx) + " " + r2(y + 3.6) +
+          ' Z" fill="currentColor"/></g>';
+    }
+    return "";
+  }
+
+  /** Auflösungszeichen ♮ (nur für Knöpfe, im System gibt es keine Auflösung). */
+  function aufloesungszeichen(x, y) {
+    var cx = x - VORZEICHEN_ABSTAND;
+    var balken = function (by) {
+      return "M" + r2(cx - 3) + " " + r2(by + 1.9) + " L" + r2(cx + 3) + " " + r2(by + 0.3) +
+        " L" + r2(cx + 3) + " " + r2(by - 2.3) + " L" + r2(cx - 3) + " " + r2(by - 0.7) + " Z";
+    };
+    return '<path d="' + balken(y - 3.3) + " " + balken(y + 3.5) + '" fill="currentColor"/>' +
+      '<path d="M' + r2(cx - 3) + " " + r2(y - 12) + " L" + r2(cx - 3) + " " + r2(y + 5.5) +
+      " M" + r2(cx + 3) + " " + r2(y - 5.5) + " L" + r2(cx + 3) + " " + r2(y + 12) +
+      '" stroke="currentColor" stroke-width="1.4" fill="none"/>';
+  }
+
+  /** Versetzungszeichen als eigenes kleines SVG für Knöpfe: 1 = ♯, -1 = ♭, 0 = ♮. */
+  function symbol(vorzeichen) {
+    var x = VORZEICHEN_ABSTAND + 10;
+    return '<svg class="vorzeichen-symbol" viewBox="0 0 20 30" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">' +
+      (vorzeichen ? versetzungszeichen(vorzeichen, x, vorzeichen < 0 ? 18 : 15) : aufloesungszeichen(x, 15)) + "</svg>";
+  }
+
+  /**
+   * note:     { position, schluessel, vorzeichen } oder null für ein leeres System.
+   *           vorzeichen 1 (♯) oder -1 (♭) zeichnet ein Versetzungszeichen vor den Kopf.
    * optionen: bereich      [tiefste, höchste Position] für einen festen Ausschnitt
    *           beschriftung Text neben der Note (zum Beispiel nach der Antwort)
    *           schluessel   "violin" oder "bass", sonst der Schlüssel der Note
    *           breite       Ende der Linien rechts (Standard 146), für schmale Systeme
    *           noteX        x-Mitte der Note (Standard 98)
    *           falsch       Position einer zusätzlichen, falsch gesetzten Note (mit ✗)
+   *           falschVorzeichen  Vorzeichen dieser Note (0, 1 oder -1)
    *           falschX      x-Mitte dieser Note (Standard noteX − 24)
    *           klasse       zusätzliche CSS-Klasse für das SVG
- *           weitere      [{ position, x }]: weitere Noten im selben System,
+ *           weitere      [{ position, x, vorzeichen }]: weitere Noten im selben System,
  *                        je in <g class="note-weitere"> (Höher oder tiefer)
    * Die Note samt Hilfslinien liegt in <g class="note-gruppe">, damit ein Modus
    * sie verschieben kann (Notenflug).
@@ -87,18 +145,19 @@
     var schluessel = optionen.schluessel || (note && note.schluessel) || "violin";
     teile.push(schluessel === "bass" ? BASSSCHLUESSEL : VIOLINSCHLUESSEL);
 
-    if (typeof optionen.falsch === "number" && (!note || optionen.falsch !== note.position)) {
+    var falschVz = optionen.falschVorzeichen || 0;
+    if (typeof optionen.falsch === "number" && (!note || optionen.falsch !== note.position || falschVz !== (note.vorzeichen || 0))) {
       var fy = yVon(optionen.falsch);
       var fx = optionen.falschX || NOTE_X - 24;
-      teile.push('<g class="note-falsch">' + hilfslinien(optionen.falsch, fx) +
+      teile.push('<g class="note-falsch">' + hilfslinien(optionen.falsch, fx) + versetzungszeichen(falschVz, fx, fy) +
         '<ellipse cx="' + fx + '" cy="' + fy + '" rx="6.6" ry="4.6" transform="rotate(-20 ' + fx + " " + fy + ')" fill="none" stroke="currentColor" stroke-width="1.6" stroke-dasharray="2.4 1.6"/>' +
         '<text x="' + (fx + 8) + '" y="' + (fy - 3) + '" font-size="11" font-weight="700" fill="currentColor">✗</text></g>');
     }
 
-    // Viertelnote samt Hilfslinien an Position p und x-Mitte x
-    function viertelnote(p, x) {
+    // Viertelnote samt Hilfslinien und Versetzungszeichen an Position p und x-Mitte x
+    function viertelnote(p, x, vorzeichen) {
       var ny = yVon(p);
-      var t = hilfslinien(p, x);
+      var t = hilfslinien(p, x) + versetzungszeichen(vorzeichen, x, ny);
       // Notenhals: unterhalb der Mittellinie nach oben rechts, sonst nach unten links
       var halsLaenge = 35;
       if (p < 4) {
@@ -112,14 +171,14 @@
     }
 
     (optionen.weitere || []).forEach(function (w) {
-      teile.push('<g class="note-weitere">' + viertelnote(w.position, w.x) + "</g>");
+      teile.push('<g class="note-weitere">' + viertelnote(w.position, w.x, w.vorzeichen) + "</g>");
     });
 
     if (note) {
       var p = note.position;
       var ny = yVon(p);
       teile.push('<g class="note-gruppe">');
-      teile.push(viertelnote(p, NOTE_X));
+      teile.push(viertelnote(p, NOTE_X, note.vorzeichen));
 
       if (optionen.beschriftung) {
         teile.push('<text class="notenname" x="' + (NOTE_X + 22) + '" y="' + (ny + 5.5) + '" font-size="18" font-weight="700" fill="currentColor">' + optionen.beschriftung + "</text>");
@@ -132,7 +191,8 @@
     var bereich = optionen.bereich || [-3, 11];
     var oben = Math.min(10, yVon(bereich[1]) - (bereich[1] < 4 ? 38 : 8));
     var unten = Math.max(94, yVon(bereich[0]) + (bereich[0] >= 4 ? 38 : 8));
-    var breiteGesamt = Math.max(RECHTS + 4, optionen.beschriftung ? NOTE_X + 52 : 0);
+    // Platz für den Namen rechts neben der Note, auch für längere wie „fis¹“
+    var breiteGesamt = Math.max(RECHTS + 4, optionen.beschriftung ? NOTE_X + 30 + String(optionen.beschriftung).length * 10 : 0);
     return '<svg class="notensystem-svg' + (optionen.klasse ? " " + optionen.klasse : "") + '" viewBox="0 ' + oben + " " + breiteGesamt + " " + (unten - oben) + '" role="img" aria-label="' +
       ((schluessel === "bass" ? "Bassschlüssel" : "Violinschlüssel") + (optionen.beschriftung ? " mit der Note " + optionen.beschriftung : (note ? " mit einer Note" : ""))) +
       '" xmlns="http://www.w3.org/2000/svg">' + teile.join("") + "</svg>";
@@ -143,5 +203,5 @@
     return Math.round((UNTERSTE_LINIE - y) / (ABSTAND / 2));
   }
 
-  root.Notensystem = { zeichne: zeichne, yVon: yVon, positionVon: positionVon, NOTE_X: NOTE_X_STANDARD };
+  root.Notensystem = { zeichne: zeichne, yVon: yVon, positionVon: positionVon, NOTE_X: NOTE_X_STANDARD, symbol: symbol };
 })(this);

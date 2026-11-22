@@ -10,6 +10,10 @@
  *   c d e f g a h         kleine Oktave
  *   c¹ d¹ … h¹            eingestrichene Oktave (c¹ = mittleres C)
  *   c² … h², c³           zwei- und dreigestrichene Oktave
+ * Noten mit Vorzeichen: cis dis fis gis ais (Kreuz) und des es ges as b
+ * (B-Vorzeichen; „b“ ist das h mit B, H bleibt H). Große Oktave mit großem
+ * Anfangsbuchstaben: Fis, Es, B. In den Einstellungen stehen sie je Oktave
+ * in eigenen Zeilen „mit ♯“ und „mit ♭“ und sind zu Beginn nicht gewählt.
  * Das Spiel zeigt die Oktavziffer hochgestellt (c¹). In dieser Datei
  * schreibst du sie als normale Ziffer: "c1", "c2", "c3".
  *
@@ -28,8 +32,10 @@
  *    Nach der Antwort erscheint ein Tier zum Buchstaben der Note, zum Beispiel
  *    „d¹ wie Delfin“. Die Oktave spielt keine Rolle. Mit `merktierAb` bekommt
  *    ein Buchstabe ab einer bestimmten Note ein anderes Tier (hohes F = Fuchs).
+ *    Eine Vorzeichen-Note kann ein eigenes Tier haben (fis = Fisch), sonst
+ *    gilt das Tier des Stammtons: „cis¹ – C wie Chamäleon, nur einen Halbton höher“.
  *    Verfügbare Merktiere: chamaeleon, delfin, elefant, frosch, fuchs,
- *    giraffe, affe, hase.
+ *    giraffe, affe, hase, fisch.
  *
  * 3. STANDARD-EINSTELLUNGEN
  *    Gelten beim ersten Start. Danach merkt sich das Spiel die Auswahl aus
@@ -64,7 +70,8 @@ window.NOTEN_KONFIGURATION = {
     f: "frosch",
     g: "giraffe",
     a: "affe",
-    h: "hase"
+    h: "hase",
+    fis: "fisch"
   },
 
   merktierAb: {

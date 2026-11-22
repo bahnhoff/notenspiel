@@ -6,7 +6,8 @@
  * beschreibt nur ihre Unterschiede.
  *
  * Sammeltiere: siehe SpielLogik.TIERE (fuchs, hase, katze, hund, baer, panda …)
- * Merktiere:   chamaeleon, delfin, elefant, frosch, fuchs, giraffe, affe, hase
+ * Merktiere:   chamaeleon, delfin, elefant, frosch, fuchs, giraffe, affe, hase,
+ *              fisch (für fis, kein Sammeltier)
  */
 (function (root) {
   "use strict";
@@ -20,7 +21,7 @@
   // Namen der Merktiere („d¹ wie Delfin“).
   var NAMEN = {
     chamaeleon: "Chamäleon", delfin: "Delfin", elefant: "Elefant", frosch: "Frosch",
-    fuchs: "Fuchs", giraffe: "Giraffe", affe: "Affe", hase: "Hase"
+    fuchs: "Fuchs", giraffe: "Giraffe", affe: "Affe", hase: "Hase", fisch: "Fisch"
   };
 
   function r1(x) { return Math.round(x * 10) / 10; }
@@ -118,6 +119,31 @@
       kopf: function (f) {
         return oval(60, 72, 17, 10, f.hell) + kreis(60, 36, 2.2, f.innen);
       }
+    },
+
+    fisch: {
+      farben: { fell: "#ff9f43", hell: "#fff0d9", innen: "#f76707" },
+      // Schwanzflosse rechts hinter dem Körper, zwei Luftblasen
+      hinten: function (f) {
+        return form("M80 98 C90 92 100 82 112 78 C106 90 106 100 113 112 C100 110 90 106 80 104 Z", f.innen) +
+          strich("M96 88 L104 85 M97 100 L105 103", "#ffc078", 2) +
+          kreis(100, 26, 5, "#e2f3ff", true) + kreis(108, 13, 3, "#e2f3ff", true);
+      },
+      // Seitenflossen und Schuppenbögen auf dem Bauch
+      koerper: function (f) {
+        return oval(34, 96, 9, 5, f.innen, true, -35) + oval(86, 96, 9, 5, f.innen, true, 35) +
+          strich("M52 98 Q56 102 60 98 Q64 102 68 98 M56 106 Q60 110 64 106", "#ffc078", 1.8);
+      },
+      // Rückenflosse mit Wellenkante
+      vorKopf: function (f) {
+        return form("M40 40 C40 26 48 16 58 12 C60 18 64 20 68 16 C70 22 74 24 80 22 C82 30 82 36 80 42 Z", f.innen);
+      },
+      kopf: function (f) {
+        return strich("M36 46 Q60 36 84 46", "#ffc078", 3) + oval(60, 74, 15, 9, f.hell);
+      },
+      nase: function () { return ""; },
+      mundY: 72,
+      fuss: "#f76707"
     },
 
     elefant: {

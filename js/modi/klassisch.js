@@ -125,12 +125,12 @@
     H.klassischesEnde(umgebung, r);
   }
 
-  /* Tastatur: Buchstabe tippen, wenn er unter den Antworten eindeutig ist. */
+  /* Tastatur: Buchstabe tippen, wenn er unter den Antworten (ohne Vorzeichen-Noten) eindeutig ist. */
   document.addEventListener("keydown", function (ev) {
     if (!aktiv() || $("ansicht-runde").hidden || runde.gesperrt || ev.altKey || ev.ctrlKey || ev.metaKey) return;
     var taste = (ev.key || "").toLowerCase();
     if (!/^[a-h]$/.test(taste)) return;
-    var treffer = umgebung.antworten.filter(function (a) { return a.buchstabe === taste; });
+    var treffer = umgebung.antworten.filter(function (a) { return a.buchstabe === taste && !a.vorzeichen; });
     if (treffer.length === 1) {
       ev.preventDefault();
       beantworte(treffer[0].name);

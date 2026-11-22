@@ -1,9 +1,11 @@
 /*
  * Modus „Klaviertasten“: Note im Notensystem, darunter eine Klaviatur über
- * den gewählten Bereich. Das Kind tippt die passende weiße Taste. Hat die
+ * den gewählten Bereich. Das Kind tippt die passende Taste. Hat die
  * Notenauswahl Lücken, zeigt die Klaviatur trotzdem alle weißen Tasten von der
  * tiefsten bis zur höchsten gewählten Note, damit sie wie ein Klavier aussieht.
- * Die schwarzen Tasten sind nur Dekoration. Das mittlere C ist markiert.
+ * Schwarze Tasten sind nur für gewählte Vorzeichen-Noten tippbar, sonst
+ * Dekoration. Für eine schwarze Taste zählt die Tonhöhe: fis¹ und ges¹ sind
+ * dieselbe Taste. Das mittlere C ist markiert.
  * Im einfachen Antwortmodus zählt jede Taste mit dem richtigen Buchstaben.
  * 10 Aufgaben, Wertung wie im klassischen Spiel (js/spiel-logik.js).
  * Nutzt die Ansicht #ansicht-klavier aus index.html.
@@ -21,8 +23,8 @@
   var umgebung = null;
   var runde = null;
   var weiterTimer = null;
-  var tasten = [];
-  var tastenNoten = [];          // alle Tasten der Klaviatur, auch die Lücken
+  var tasten = [];               // alle Tasten: { art, el, toene, halbton, name, … }
+  var weisse = [];               // nur die weißen Tasten, tief nach hoch
   var tastenProReihe = 0;
   var letzteTaste = -1;
 
@@ -37,13 +39,13 @@
     umgebung = u;
     runde = L.neueRunde(u.noten, { vorrang: u.schwierig, aufgaben: u.aufgaben });
     letzteTaste = -1;
-    tastenNoten = lueckenlos(u.namen, u.antwortmodus);
-    baueTasten(tastenNoten);
+    baueKlaviatur(u.namen);
     u.zeigeTier($("klavier-tier"), "normal");
     u.zeigeAnsicht();
     ordneTasten(true);
     zeigeAufgabe();
-    $("klavier-text").textContent = "Welche weiße Taste passt zu dieser Note?";
+    var mitSchwarz = tasten.some(function (t) { return t.art === "schwarz"; });
+    $("klavier-text").textContent = mitSchwarz ? "Welche Taste passt zu dieser Note?" : "Welche weiße Taste passt zu dieser Note?";
   }
 
   function stoppe() {
@@ -54,45 +56,76 @@
   /* ---------- Klaviatur ---------- */
 
   /**
-   * Weiße Tasten von der tiefsten bis zur höchsten Note, ohne Lücken.
-   * `antwort` ist das, was die Taste als Antwort meldet (Noten.antwortSchluessel).
+   * Baut die Tasten von der tiefsten bis zur höchsten Note, ohne Lücken.
+   * Jede Taste kennt ihre Töne (`toene`, Noten.ton): eine weiße Taste einen,
+   * eine schwarze zwei gleich klingende (fis¹ und ges¹). Schwarze Tasten
+   * werden nur für gewählte Vorzeichen-Noten zu Knöpfen, sonst bleiben sie
+   * Dekoration an der weißen Taste davor.
    */
-  function lueckenlos(namen, antwortmodus) {
-    if (namen.length === 0) return [];
+  function baueKlaviatur(namen) {
     var N = window.Noten;
-    var liste = [];
-    for (var s = namen[0].stufe; s <= namen[namen.length - 1].stufe; s++) {
-      var t = { name: N.name(s), stufe: s, oktave: Math.floor(s / 7), buchstabe: N.BUCHSTABEN[s % 7] };
-      t.antwort = N.antwortSchluessel(t, antwortmodus);
-      liste.push(t);
+    tasten = [];
+    weisse = [];
+    if (namen.length === 0) return;
+    // Vorzeichen-Noten brauchen die weiße Nachbartaste, damit ihre schwarze Taste Platz hat.
+    var tief = Infinity, hoch = -Infinity, hoehen = {};
+    namen.forEach(function (n) {
+      tief = Math.min(tief, n.vorzeichen < 0 ? n.stufe - 1 : n.stufe);
+      hoch = Math.max(hoch, n.vorzeichen > 0 ? n.stufe + 1 : n.stufe);
+      if (n.vorzeichen) hoehen[n.halbton] = n.name;
+    });
+    for (var s = tief; s <= hoch; s++) {
+      var ton = N.ton(s, 0);
+      var weiss = { art: "weiss", toene: [ton], halbton: ton.halbton, buchstabe: ton.buchstabe, name: ton.name, schwarz: null };
+      weiss.el = weisseTaste(weiss);
+      tasten.push(weiss);
+      weisse.push(weiss);
+      if (SCHWARZ_NACH[ton.buchstabe] && s < hoch) {
+        var kreuz = N.ton(s, 1);
+        var schwarz = { art: "schwarz", toene: [kreuz, N.ton(s + 1, -1)], halbton: kreuz.halbton,
+          name: hoehen[kreuz.halbton] || kreuz.name, waehlbar: hoehen[kreuz.halbton] !== undefined };
+        if (schwarz.waehlbar) {
+          schwarz.el = schwarzeTaste(schwarz);
+          tasten.push(schwarz);
+        }
+        weiss.schwarz = schwarz;
+      }
     }
-    return liste;
-  }
-
-  function baueTasten(antworten) {
-    tasten = antworten.map(function (a, i) {
-      var b = document.createElement("button");
-      b.type = "button";
-      b.className = "taste";
-      b.dataset.name = a.name;
-      b.dataset.buchstabe = a.buchstabe;
-      var mitte = a.stufe === 28; // c¹, das mittlere C
-      if (mitte) b.classList.add("taste-mitte");
-      b.innerHTML = '<span class="taste-schwarz" aria-hidden="true"></span>' +
-        '<span class="taste-marke" aria-hidden="true"></span>' +
-        '<span class="taste-name" aria-hidden="true"></span>' +
-        (mitte ? '<span class="taste-mitte-zeichen" aria-hidden="true">c¹</span>' : "");
-      b.setAttribute("aria-label", "Taste " + a.name + (mitte ? ", mittleres C" : ""));
-      b.addEventListener("click", function () { beantworte(i); });
-      return b;
+    tasten.forEach(function (t, i) {
+      t.el.addEventListener("click", function () { beantworte(i); });
     });
   }
 
+  function weisseTaste(t) {
+    var b = document.createElement("button");
+    b.type = "button";
+    b.className = "taste";
+    var mitte = t.toene[0].stufe === 28; // c¹, das mittlere C
+    if (mitte) b.classList.add("taste-mitte");
+    b.innerHTML = '<span class="taste-schwarz" aria-hidden="true"></span>' +
+      '<span class="taste-marke" aria-hidden="true"></span>' +
+      '<span class="taste-name" aria-hidden="true"></span>' +
+      (mitte ? '<span class="taste-mitte-zeichen" aria-hidden="true">c¹</span>' : "");
+    b.setAttribute("aria-label", "Taste " + t.name + (mitte ? ", mittleres C" : ""));
+    return b;
+  }
+
+  function schwarzeTaste(t) {
+    var b = document.createElement("button");
+    b.type = "button";
+    b.className = "taste-schwarz-knopf";
+    b.innerHTML = '<span class="taste-marke" aria-hidden="true"></span><span class="taste-name" aria-hidden="true"></span>';
+    b.setAttribute("aria-label", "Schwarze Taste " + t.name);
+    return b;
+  }
+
   /**
-   * Verteilt die Tasten auf Reihen, damit jede weiße Taste mindestens
-   * 48 px breit ist und nichts seitlich scrollt. Passt alles in eine Reihe,
-   * bleibt es bei einer. Sonst kommen ganze Oktaven (ab c) in eine Reihe,
-   * solange sie hineinpassen; tiefe Reihen stehen unten, hohe oben.
+   * Verteilt die weißen Tasten auf Reihen, damit jede mindestens 48 px breit
+   * ist und nichts seitlich scrollt. Passt alles in eine Reihe, bleibt es bei
+   * einer. Sonst kommen ganze Oktaven (ab c) in eine Reihe, solange sie
+   * hineinpassen; zu lange Oktaven werden zwischen e und f geteilt, wo keine
+   * schwarze Taste liegt. Tiefe Reihen stehen unten, hohe oben. Wählbare
+   * schwarze Tasten liegen als eigene Knöpfe über der Fuge zur nächsten Taste.
    */
   function ordneTasten(erzwingen) {
     var box = $("klaviatur");
@@ -101,15 +134,23 @@
     if (!erzwingen && proReihe === tastenProReihe) return;
     tastenProReihe = proReihe;
 
-    // Oktaven bilden, zu lange Oktaven (nur bei sehr schmalen Bildschirmen) teilen
     var oktaven = [];
-    tasten.forEach(function (t) {
+    weisse.forEach(function (t) {
       var letzte = oktaven[oktaven.length - 1];
-      if (!letzte || t.dataset.buchstabe === "c" || letzte.length >= proReihe) oktaven.push([t]);
+      if (!letzte || t.buchstabe === "c") oktaven.push([t]);
       else letzte.push(t);
     });
-    var reihen = [];
+    var teile = [];
     oktaven.forEach(function (o) {
+      if (o.length <= proReihe) { teile.push(o); return; }
+      var f = -1;
+      o.forEach(function (t, i) { if (t.buchstabe === "f") f = i; });
+      (f > 0 ? [o.slice(0, f), o.slice(f)] : [o]).forEach(function (stueck) {
+        for (var k = 0; k < stueck.length; k += proReihe) teile.push(stueck.slice(k, k + proReihe));
+      });
+    });
+    var reihen = [];
+    teile.forEach(function (o) {
       var letzte = reihen[reihen.length - 1];
       if (letzte && letzte.length + o.length <= proReihe) reihen[reihen.length - 1] = letzte.concat(o);
       else reihen.push(o);
@@ -123,10 +164,15 @@
       var div = document.createElement("div");
       div.className = "klavier-reihe";
       div.style.gridTemplateColumns = "repeat(" + spalten + ", minmax(0, 1fr))";
+      div.style.setProperty("--spalten", String(spalten));
       reihe.forEach(function (t, i) {
-        var naechste = reihe[i + 1];
-        t.classList.toggle("mit-schwarz", !!naechste && !!SCHWARZ_NACH[t.dataset.buchstabe]);
-        div.appendChild(t);
+        var schwarz = reihe[i + 1] ? t.schwarz : null;
+        t.el.classList.toggle("mit-schwarz", !!schwarz && !schwarz.waehlbar);
+        div.appendChild(t.el);
+        if (schwarz && schwarz.waehlbar) {
+          schwarz.el.style.left = ((i + 1) * 100 / spalten) + "%";
+          div.appendChild(schwarz.el);
+        }
       });
       box.appendChild(div);
     });
@@ -152,44 +198,54 @@
     $("klavier-merkhilfe").hidden = true;
     $("klaviatur").classList.remove("gesperrt");
     tasten.forEach(function (t) {
-      t.classList.remove("ist-richtig", "ist-falsch", "ist-loesung");
-      t.setAttribute("aria-disabled", "false");
-      t.querySelector(".taste-marke").textContent = "";
-      t.querySelector(".taste-name").textContent = "";
+      t.el.classList.remove("ist-richtig", "ist-falsch", "ist-loesung");
+      t.el.setAttribute("aria-disabled", "false");
+      t.el.querySelector(".taste-marke").textContent = "";
+      t.el.querySelector(".taste-name").textContent = "";
     });
     var fokus = document.activeElement;
-    if (letzteTaste >= 0 && tasten[letzteTaste] &&
-        (fokus === document.body || fokus === $("klavier-weiter") || (fokus && fokus.classList.contains("taste")))) {
-      tasten[letzteTaste].focus({ preventScroll: true });
+    if (letzteTaste >= 0 && tasten[letzteTaste] && (fokus === document.body || fokus === $("klavier-weiter") ||
+        (fokus && (fokus.classList.contains("taste") || fokus.classList.contains("taste-schwarz-knopf"))))) {
+      tasten[letzteTaste].el.focus({ preventScroll: true });
     }
+  }
+
+  /**
+   * Antwort einer Taste: Von ihren Tönen zählt der, der zur Note passt
+   * (SpielLogik.istRichtig mit Noten.antwortSchluessel), sonst der gewählte.
+   */
+  function tastenTon(taste, note) {
+    var N = window.Noten;
+    var modus = umgebung.antwortmodus;
+    var passend = taste.toene.filter(function (t) { return L.istRichtig(note, N.antwortSchluessel(t, modus)); })[0];
+    return passend || taste.toene.filter(function (t) { return t.name === taste.name; })[0] || taste.toene[0];
+  }
+
+  function beschrifte(t, klasse, marke, name) {
+    if (klasse) t.el.classList.add(klasse);
+    if (marke) t.el.querySelector(".taste-marke").textContent = marke;
+    t.el.querySelector(".taste-name").textContent = name;
   }
 
   /** `nr` = Nummer der getippten Taste. */
   function beantworte(nr) {
     if (!aktiv()) return;
-    var getippt = tastenNoten[nr];
-    var a = L.antworte(runde, getippt.antwort);
+    var getippt = tasten[nr];
+    var ton = tastenTon(getippt, runde.aktuell.note);
+    var a = L.antworte(runde, window.Noten.antwortSchluessel(ton, umgebung.antwortmodus));
     if (!a) return; // schon beantwortet: weitere Tipps zählen nicht
     letzteTaste = nr;
     $("klaviatur").classList.add("gesperrt");
     tasten.forEach(function (t, i) {
-      t.setAttribute("aria-disabled", "true");
+      t.el.setAttribute("aria-disabled", "true");
       if (i === nr && a.richtig) {
         // Richtig, im einfachen Modus auch in einer anderen Oktave.
-        t.classList.add("ist-richtig");
-        t.querySelector(".taste-marke").textContent = "✓";
-        t.querySelector(".taste-name").textContent = t.dataset.name;
-      } else if (tastenNoten[i].stufe === a.note.stufe) {
+        beschrifte(t, "ist-richtig", "✓", ton.name);
+      } else if (t.halbton === a.note.halbton) {
         // Genau die gezeigte Note: bei falscher Antwort als Lösung, sonst nur beschriftet.
-        if (!a.richtig) {
-          t.classList.add("ist-loesung");
-          t.querySelector(".taste-marke").textContent = "✓";
-        }
-        t.querySelector(".taste-name").textContent = t.dataset.name;
+        beschrifte(t, a.richtig ? "" : "ist-loesung", a.richtig ? "" : "✓", a.note.name);
       } else if (i === nr) {
-        t.classList.add("ist-falsch");
-        t.querySelector(".taste-marke").textContent = "✗";
-        t.querySelector(".taste-name").textContent = t.dataset.name;
+        beschrifte(t, "ist-falsch", "✗", ton.name);
       }
     });
 
@@ -229,13 +285,13 @@
 
   $("klavier-weiter").addEventListener("click", naechsteAufgabe);
 
-  /* Tastatur: Buchstabe tippen, wenn er auf der Klaviatur eindeutig ist. */
+  /* Tastatur: Buchstabe tippen, wenn er auf der Klaviatur eindeutig ist (nur weiße Tasten). */
   document.addEventListener("keydown", function (ev) {
     if (!aktiv() || $("ansicht-klavier").hidden || runde.gesperrt || ev.altKey || ev.ctrlKey || ev.metaKey) return;
     var taste = (ev.key || "").toLowerCase();
     if (!/^[a-h]$/.test(taste)) return;
     var treffer = [];
-    tastenNoten.forEach(function (a, i) { if (a.buchstabe === taste) treffer.push(i); });
+    tasten.forEach(function (t, i) { if (t.art === "weiss" && t.buchstabe === taste) treffer.push(i); });
     // Im einfachen Modus zählt jede Taste mit dem Buchstaben, dann reicht die erste.
     if (treffer.length === 1 || (treffer.length > 1 && umgebung.antwortmodus === "einfach")) {
       ev.preventDefault();

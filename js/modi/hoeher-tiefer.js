@@ -1,8 +1,9 @@
 /*
  * Modus „Höher oder tiefer“: Zwei Noten stehen nebeneinander im selben
  * System. Das Kind tippt die höhere an, in manchen Aufgaben die tiefere.
- * Gleich hohe Noten kommen nicht vor. Am Anfang liegen die Noten eine Terz
- * oder mehr auseinander, später nur noch eine Sekunde.
+ * Gleich hohe Noten kommen nicht vor, auch keine gleich klingenden (fis und
+ * ges): Verglichen wird die Tonhöhe. Am Anfang liegen die Noten eine Terz
+ * oder mehr auseinander, später nur noch eine Sekunde (oder f und fis).
  * 10 Aufgaben, Wertung wie im klassischen Spiel (js/spiel-logik.js): Die
  * gesuchte Note ist die Aufgabe, die andere Note wird passend dazu gewählt.
  * Tastatur: Pfeil links und rechts, oder Tab und Eingabe.
@@ -16,7 +17,7 @@
   var PAUSE_NACH_RICHTIG = 1300; // Millisekunden
   var ANTEIL_TIEFER = 0.35;      // so oft lautet die Frage „Welche ist tiefer?“
   // Breites System mit zwei Notenplätzen; Trefferflächen links und rechts.
-  var FORM = { breite: 190, links: 82, rechts: 146, start: 54, mitte: 114 };
+  var FORM = { breite: 196, links: 82, rechts: 154, start: 54, mitte: 118 };
   var SVG_NS = "http://www.w3.org/2000/svg";
 
   var umgebung = null;
@@ -37,12 +38,12 @@
    * Notenauswahl, zum Beispiel nur eine Bassnote neben mehreren Violinnoten).
    */
   function paarfaehig(noten) {
-    var stufen = {};
+    var hoehen = {};
     noten.forEach(function (n) {
-      stufen[n.schluessel] = stufen[n.schluessel] || {};
-      stufen[n.schluessel][n.stufe] = true;
+      hoehen[n.schluessel] = hoehen[n.schluessel] || {};
+      hoehen[n.schluessel][n.halbton] = true;
     });
-    var liste = noten.filter(function (n) { return Object.keys(stufen[n.schluessel]).length >= 2; });
+    var liste = noten.filter(function (n) { return Object.keys(hoehen[n.schluessel]).length >= 2; });
     return liste.length ? liste : noten;
   }
 
@@ -68,15 +69,16 @@
 
   /**
    * Andere Note im selben Schlüssel: bei „höher“ tiefer als das Ziel, bei
-   * „tiefer“ höher. Abstand in Stufen je nach Fortschritt (0 bis 1):
+   * „tiefer“ höher (nach Tonhöhe). Abstand in Stufen je nach Fortschritt (0 bis 1):
    * erst 2 und mehr (Terz und größer), dann 2 bis 3, am Ende 1 (Sekunde).
+   * f und fis (gleiche Stufe) zählen wie eine Sekunde.
    */
   function partnerFuer(ziel, frage, fortschritt, streng) {
     var kandidaten = umgebung.noten.filter(function (n) {
-      return n.schluessel === ziel.schluessel && (frage === "hoeher" ? n.stufe < ziel.stufe : n.stufe > ziel.stufe);
+      return n.schluessel === ziel.schluessel && (frage === "hoeher" ? n.halbton < ziel.halbton : n.halbton > ziel.halbton);
     });
     if (kandidaten.length === 0) return null;
-    function abstand(n) { return Math.abs(n.stufe - ziel.stufe); }
+    function abstand(n) { return Math.max(1, Math.abs(n.stufe - ziel.stufe)); }
     var wunsch;
     if (fortschritt < 0.4) wunsch = kandidaten.filter(function (n) { return abstand(n) >= 2; });
     else if (fortschritt < 0.7) wunsch = kandidaten.filter(function (n) { return abstand(n) === 2 || abstand(n) === 3; });
@@ -122,7 +124,7 @@
       breite: FORM.breite,
       noteX: FORM.links,
       schluessel: aufgabe.ziel.schluessel,
-      weitere: [{ position: rechts.position, x: FORM.rechts }]
+      weitere: [{ position: rechts.position, x: FORM.rechts, vorzeichen: rechts.vorzeichen }]
     });
     var svg = box.querySelector("svg");
     var vb = svg.viewBox.baseVal;
@@ -217,7 +219,9 @@
       if (a.serie > 0 && a.serie % 3 === 0) text += " " + a.nachricht;
     } else {
       text = "✗ Die " + (aufgabe.zielLinks ? "linke" : "rechte") + " Note " + ziel.name + " ist " + wort(aufgabe.frage) +
-        ", " + partner.name + " ist " + gegen + ". Höhere Noten stehen weiter oben.";
+        ", " + partner.name + " ist " + gegen + "." + (ziel.position === partner.position
+          ? " Ein Kreuz macht eine Note einen Halbton höher, ein B einen Halbton tiefer."
+          : " Höhere Noten stehen weiter oben.");
     }
     $("ht-text").textContent = text;
     umgebung.zeigeTier($("ht-tier"), a.richtig ? "froh" : "oje");

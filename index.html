@@ -173,6 +173,11 @@
                aria-label="Notensystem: Tippe auf eine Linie oder einen Zwischenraum" aria-valuemin="-20" aria-valuemax="20" aria-valuenow="0"></div>
         </div>
         <div class="runde-antworten">
+          <div class="setzen-vorzeichen" id="setzen-vorzeichen" role="group" aria-label="Vorzeichen" hidden>
+            <button type="button" class="knopf knopf-neben knopf-vorzeichen" data-vorzeichen="0" aria-pressed="true" aria-label="Ohne Vorzeichen">♮</button>
+            <button type="button" class="knopf knopf-neben knopf-vorzeichen" data-vorzeichen="1" aria-pressed="false" aria-label="Kreuz">♯</button>
+            <button type="button" class="knopf knopf-neben knopf-vorzeichen" data-vorzeichen="-1" aria-pressed="false" aria-label="B">♭</button>
+          </div>
           <div class="setzen-steuerung">
             <button type="button" class="knopf knopf-neben knopf-schritt" id="setzen-tiefer" aria-label="Note eine Stufe tiefer">▼</button>
             <button type="button" class="knopf knopf-neben knopf-schritt" id="setzen-hoeher" aria-label="Note eine Stufe höher">▲</button>

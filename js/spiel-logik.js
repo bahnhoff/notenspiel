@@ -179,8 +179,9 @@
 
   /**
    * Passt die getippte Antwort zur Note? Zählt der Antwortschlüssel der Note
-   * (`note.antwort`, im einfachen Modus der Buchstabe "C", im genauen der
-   * Name "c¹", siehe Noten.antwortSchluessel). Der genaue Name zählt immer.
+   * (`note.antwort`, im einfachen Modus der Buchstabe "C" oder "Fis", im
+   * genauen der Name "c¹" oder "fis¹", siehe Noten.antwortSchluessel). Der
+   * genaue Name zählt immer. Es zählt der Name, nicht die Tonhöhe.
    */
   function istRichtig(note, antwort) {
     return antwort === note.name || (note.antwort !== undefined && antwort === note.antwort);
@@ -414,7 +415,7 @@
     }
     if (Array.isArray(roh.noten)) {
       e.noten = roh.noten.filter(function (id) {
-        return typeof id === "string" && /^(violin|bass)-[a-hA-H]\d?$/.test(id);
+        return typeof id === "string" && /^(violin|bass)-[a-hA-H](?:is|es|s)?\d?$/.test(id);
       }).slice(0, 100);
     } else if (roh.bereich && typeof roh.bereich === "object") {
       e.bereich = {};

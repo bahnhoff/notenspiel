@@ -5,7 +5,7 @@
  * Hat der gewählte Bereich weniger als 6 Noten, gibt es entsprechend
  * weniger Paare (Regeln: js/spiel-logik.js, memorySterne).
  * Namenskarten zeigen den Antwortschlüssel (note.antwort): im einfachen Modus
- * nur den Buchstaben, dann kommt jeder Buchstabe höchstens einmal vor.
+ * nur den Buchstaben („F“, „Fis“), dann kommt jeder höchstens einmal vor.
  * Nutzt die Ansicht #ansicht-memory aus index.html.
  */
 (function () {
@@ -75,7 +75,9 @@
         '<span class="karte-marke" aria-hidden="true"></span>';
       var vorne = b.querySelector(".karte-vorderseite");
       if (k.art === "note") {
-        vorne.innerHTML = window.Notensystem.zeichne(k.note, { bereich: umgebung.bereich, breite: 94, noteX: 74 });
+        // Mit Vorzeichen-Noten etwas breiter, damit ♯ und ♭ nicht am Schlüssel kleben.
+        var vz = umgebung.noten.some(function (n) { return n.vorzeichen; });
+        vorne.innerHTML = window.Notensystem.zeichne(k.note, { bereich: umgebung.bereich, breite: vz ? 100 : 94, noteX: vz ? 80 : 74 });
       } else {
         vorne.textContent = k.note.antwort;
         vorne.classList.add("karte-name");
