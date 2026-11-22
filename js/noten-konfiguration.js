@@ -38,6 +38,8 @@
  *    - bereich     Kennung des Bereichs je Schlüssel, dessen Noten zu Beginn
  *                  angekreuzt sind
  *    - merktiere   true (an) oder false (aus)
+ *    - antwortmodus  "einfach" (Antwortknöpfe nur mit Buchstaben, jede Oktave
+ *                  zählt) oder "genau" (Knöpfe mit Oktave, zum Beispiel c¹)
  *
  * Nach dem Speichern dieser Datei lädst du die Seite neu.
  */
@@ -72,6 +74,7 @@ window.NOTEN_KONFIGURATION = {
   standardEinstellungen: {
     schluessel: ["violin"],
     bereich: { violin: "erste", bass: "erste" },
-    merktiere: true
+    merktiere: true,
+    antwortmodus: "einfach"
   }
 };

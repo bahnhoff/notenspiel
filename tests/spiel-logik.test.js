@@ -83,7 +83,7 @@ test("alte Einstellungen werden in Notenlisten übersetzt", () => {
   const roh = L.bereinigeSpielstand({ einstellungen: { schluessel: "beide", bereich: { violin: "oktave1", bass: "oktave1" }, merktiere: false } }).einstellungen;
   const e = N.einstellungen(K, roh);
   assert.deepEqual([e.schluessel, e.merktiere, e.noten.length], [["violin", "bass"], false, 16]);
-  assert.equal(N.fuerEinstellungen(K, e).antworten.map((a) => a.name).join(" "), "c d e f g a h c¹ d¹ e¹ f¹ g¹ a¹ h¹ c²");
+  assert.equal(N.fuerEinstellungen(K, e).namen.map((a) => a.name).join(" "), "c d e f g a h c¹ d¹ e¹ f¹ g¹ a¹ h¹ c²");
   assert.deepEqual(N.einstellungen(K, null).noten, ["violin-c1", "violin-d1", "violin-e1", "violin-f1", "violin-g1", "bass-c", "bass-d", "bass-e", "bass-f", "bass-g"]);
 });
 
@@ -91,9 +91,25 @@ test("freie Notenauswahl mit Lücken und gemischten Schlüsseln", () => {
   const e = { schluessel: ["violin", "bass"], noten: ["violin-c1", "violin-e1", "violin-g1", "bass-c1", "bass-G", "bass-x9", "violin-c1"], merktiere: true };
   const a = N.fuerEinstellungen(K, L.bereinigeSpielstand({ einstellungen: e }).einstellungen);
   assert.deepEqual(a.noten.map((n) => n.id), ["violin-c1", "violin-e1", "violin-g1", "bass-G", "bass-c1"]);
-  assert.equal(a.antworten.map((x) => x.name).join(" "), "G c¹ e¹ g¹");
+  assert.equal(a.namen.map((x) => x.name).join(" "), "G c¹ e¹ g¹");
   assert.equal(N.stufe("c¹"), N.stufe("c1"));
   assert.equal(N.fuerEinstellungen(K, { schluessel: ["bass"], noten: e.noten }).noten.length, 2);
+});
+
+test("Antwortmodus: alte Spielstände bekommen Einfach, Genau bleibt erhalten", () => {
+  const alt = L.bereinigeSpielstand({ einstellungen: { schluessel: ["violin"], noten: ["violin-c1"], merktiere: true } }).einstellungen;
+  assert.equal(N.einstellungen(K, alt).antwortmodus, "einfach");
+  const genau = L.bereinigeSpielstand({ einstellungen: { schluessel: ["violin"], noten: [], antwortmodus: "genau" } }).einstellungen;
+  assert.equal(N.einstellungen(K, genau).antwortmodus, "genau");
+});
+
+test("Antwortmodus Einfach: nur Buchstaben, jede Oktave zählt", () => {
+  const a = N.fuerEinstellungen(K, { schluessel: ["violin"], noten: ["violin-c1", "violin-d1", "violin-g1", "violin-c2", "violin-d2"] });
+  assert.equal(a.antworten.map((x) => x.name).join(" "), "C D G");
+  const runde = L.neueRunde(a.noten.filter((n) => n.id === "violin-d2"));
+  assert.equal(L.antworte(runde, "D").richtig, true);
+  const genau = N.fuerEinstellungen(K, { schluessel: ["violin"], noten: ["violin-d1", "violin-d2", "violin-e1"], antwortmodus: "genau" });
+  assert.equal(L.istRichtig(genau.noten.find((n) => n.id === "violin-d2"), "d¹"), false);
 });
 
 test("alle 5 Sterne ein neues Tier, seltene erst ab 50 Sternen", () => {

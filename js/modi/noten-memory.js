@@ -4,6 +4,8 @@
  * bis 13 Züge 2, sonst 1. Punkte: 10 pro Paar plus 10 pro Stern.
  * Hat der gewählte Bereich weniger als 6 Noten, gibt es entsprechend
  * weniger Paare (Regeln: js/spiel-logik.js, memorySterne).
+ * Namenskarten zeigen den Antwortschlüssel (note.antwort): im einfachen Modus
+ * nur den Buchstaben, dann kommt jeder Buchstabe höchstens einmal vor.
  * Nutzt die Ansicht #ansicht-memory aus index.html.
  */
 (function () {
@@ -27,11 +29,12 @@
   function starte(u) {
     stoppe();
     umgebung = u;
-    // Noten mit verschiedenen Namen wählen (bei beiden Schlüsseln gibt es c¹ zweimal).
+    // Noten mit verschiedenen Namenskarten wählen (bei beiden Schlüsseln gibt es c¹
+    // zweimal, im einfachen Modus zählt nur der Buchstabe), damit Paare eindeutig sind.
     var namen = {};
     var auswahl = H.mische(u.noten).filter(function (n) {
-      if (namen[n.name]) return false;
-      namen[n.name] = true;
+      if (namen[n.antwort]) return false;
+      namen[n.antwort] = true;
       return true;
     }).slice(0, L.MEMORY.paare);
     var karten = [];
@@ -74,7 +77,7 @@
       if (k.art === "note") {
         vorne.innerHTML = window.Notensystem.zeichne(k.note, { bereich: umgebung.bereich, breite: 94, noteX: 74 });
       } else {
-        vorne.textContent = k.note.name;
+        vorne.textContent = k.note.antwort;
         vorne.classList.add("karte-name");
       }
       b.addEventListener("click", function () { decke(i); });
@@ -88,7 +91,7 @@
   function beschrifte(k, i) {
     var text = "Karte " + (i + 1);
     if (k.zustand === "zu") text += ", verdeckt";
-    else text += k.art === "note" ? ", Notenkarte" : ", Name " + k.note.name;
+    else text += k.art === "note" ? ", Notenkarte" : ", Name " + k.note.antwort;
     if (k.zustand === "gefunden") text += ", gefunden";
     k.knopf.setAttribute("aria-label", text);
     k.knopf.classList.toggle("ist-offen", k.zustand !== "zu");
@@ -122,7 +125,7 @@
     spiel.zuege += 1;
     var a = spiel.karten[spiel.offen[0]];
     var b = spiel.karten[spiel.offen[1]];
-    if (a.note.name === b.note.name && a.art !== b.art) {
+    if (a.note.antwort === b.note.antwort && a.art !== b.art) {
       a.zustand = b.zustand = "gefunden";
       beschrifte(a, spiel.offen[0]);
       beschrifte(b, spiel.offen[1]);

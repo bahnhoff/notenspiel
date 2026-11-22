@@ -29,6 +29,7 @@ Nach ein bis zwei Minuten ist das Spiel unter `https://<owner>.github.io/<repo>/
 
 Unter **Einstellungen** auf der Startseite wählst du:
 
+- die Antworten mit zwei großen Knöpfen: **Einfach** (Standard) zeigt als Antwortknöpfe nur die Buchstaben C D E F G A H, die in der Notenauswahl vorkommen, und jede Oktave des richtigen Buchstabens zählt. Die Rückmeldung nennt danach den genauen Namen, zum Beispiel „Genau, das ist d²!“. **Genau** zeigt die Knöpfe mit Oktave (c¹, d² …). Bei „Klaviertasten“ zählt im einfachen Modus jede Taste mit dem richtigen Buchstaben, bei „Note setzen“ steht nur der Buchstabe da und jede passende Stelle zählt, beim „Noten-Memory“ zeigen die Namenskarten nur Buchstaben, jeder Buchstabe kommt höchstens einmal vor. „Höher oder tiefer“ und das „Hör-Spiel“ bleiben gleich. Ältere Spielstände starten mit **Einfach**.
 - die Schlüssel: Kästchen für Violinschlüssel und Bassschlüssel, auch beide gleichzeitig. Ein Schlüssel bleibt immer angekreuzt.
 - die Noten je Schlüssel: Jede Note ist ein großer Ankreuz-Knopf, eine Reihe pro Oktave. Die Schnellwahl-Knöpfe „Erste Noten“, „1 Oktave“, „2 Oktaven“, „Alle“ und „Keine“ setzen die Häkchen auf einmal; danach kannst du einzelne Noten an- oder abwählen, auch mit Lücken (zum Beispiel nur c¹, e¹ und g¹).
 - mit einem Schalter, ob nach der Antwort ein Merktier erscheint
@@ -43,7 +44,7 @@ Alle Anpassungen stehen in der Datei `js/noten-konfiguration.js`. Die Noten selb
 
 - Unter `bereiche` stehen die Tonumfänge je Schlüssel mit Kennung (`id`), Text auf dem Schnellwahl-Knopf (`name`) und tiefster und höchster Note (`von`, `bis`, zum Beispiel `"c1"`). Neue Einträge erscheinen automatisch als Schnellwahl. Zum Ankreuzen stehen alle Noten vom tiefsten bis zum höchsten Bereich des Schlüssels bereit.
 - Unter `merktiere` steht das Tier zu jedem Buchstaben. Mit `merktierAb` bekommt ein Buchstabe ab einer bestimmten Note ein anderes Tier.
-- Unter `standardEinstellungen` legst du fest, womit das Spiel beim ersten Start beginnt: angekreuzte Schlüssel, je Schlüssel der Bereich, dessen Noten angekreuzt sind, und die Merktiere.
+- Unter `standardEinstellungen` legst du fest, womit das Spiel beim ersten Start beginnt: angekreuzte Schlüssel, je Schlüssel der Bereich, dessen Noten angekreuzt sind, die Merktiere und der Antwortmodus (`"einfach"` oder `"genau"`).
 
 Nach dem Speichern lädst du die Seite neu.
 
@@ -78,7 +79,7 @@ Das Spiel führt für jedes Spiel die fünf besten Ergebnisse. Schafft ein Ergeb
 
 ## Mini-Spiele
 
-Alle Mini-Spiele nutzen die Einstellungen (Schlüssel, Notenauswahl, Merktiere), sammeln Sterne in dieselbe Sammlung und haben eigene Rekorde.
+Alle Mini-Spiele nutzen die Einstellungen (Schlüssel, Notenauswahl, Merktiere, Antworten), sammeln Sterne in dieselbe Sammlung und haben eigene Rekorde.
 
 - **Notenflug:** Eine Note fliegt von rechts nach links über das Notensystem. Tippe ihren Namen, bevor sie den Schlüssel erreicht. Zu spät oder falsch kostet einen von drei Sternen, nach dem dritten Fehler ist das Spiel vorbei. Jedes Level hat 10 Noten und ist etwa 15 % schneller als das vorige. Eine richtige Note bringt 10 Punkte mal Level, jedes geschaffte Level einen neuen Stern (höchstens 3).
 - **Klaviertasten:** Unter der Note liegt eine Klaviatur von der tiefsten bis zur höchsten gewählten Note (bei Lücken mit allen weißen Tasten dazwischen), das mittlere C ist markiert. Tippe die passende weiße Taste. 10 Aufgaben, Wertung wie bei „Welche Note ist das?“.

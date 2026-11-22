@@ -178,15 +178,23 @@
   }
 
   /**
-   * Nimmt genau eine Antwort pro Aufgabe an. `name` ist der getippte
-   * Notenname, zum Beispiel "c¹". Weitere Antworten liefern null,
-   * bis `weiter()` die nächste Aufgabe öffnet.
+   * Passt die getippte Antwort zur Note? Zählt der Antwortschlüssel der Note
+   * (`note.antwort`, im einfachen Modus der Buchstabe "C", im genauen der
+   * Name "c¹", siehe Noten.antwortSchluessel). Der genaue Name zählt immer.
+   */
+  function istRichtig(note, antwort) {
+    return antwort === note.name || (note.antwort !== undefined && antwort === note.antwort);
+  }
+
+  /**
+   * Nimmt genau eine Antwort pro Aufgabe an. `name` ist die getippte
+   * Antwort (siehe istRichtig). Weitere Antworten liefern null, bis `weiter()` die nächste Aufgabe öffnet.
    */
   function antworte(runde, name) {
     if (runde.beendet || runde.gesperrt || !runde.aktuell) return null;
     runde.gesperrt = true;
     var note = runde.aktuell.note;
-    var richtig = name === note.name;
+    var richtig = istRichtig(note, name);
     runde.verlauf.push({ note: note, antwort: name, richtig: richtig, wiederholung: runde.aktuell.wiederholung });
 
     if (richtig) {
@@ -414,6 +422,7 @@
       if (typeof roh.bereich.bass === "string") e.bereich.bass = roh.bereich.bass;
     }
     if (typeof roh.merktiere === "boolean") e.merktiere = roh.merktiere;
+    if (roh.antwortmodus === "einfach" || roh.antwortmodus === "genau") e.antwortmodus = roh.antwortmodus;
     return e;
   }
 
@@ -612,6 +621,7 @@
     NAME_LAENGE: NAME_LAENGE,
     positionsSchluessel: positionsSchluessel,
     neueRunde: neueRunde,
+    istRichtig: istRichtig,
     antworte: antworte,
     weiter: weiter,
     ergebnis: ergebnis,

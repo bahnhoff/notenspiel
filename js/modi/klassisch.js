@@ -75,7 +75,7 @@
     knoepfe.forEach(function (b, i) {
       b.setAttribute("aria-disabled", "true");
       if (b.dataset.name === name) letzterAntwortKnopf = i;
-      if (b.dataset.name === a.note.name) {
+      if (b.dataset.name === a.note.antwort) {
         b.classList.add(a.richtig ? "ist-richtig" : "ist-loesung");
         b.querySelector(".antwort-marke").textContent = "✓";
         b.setAttribute("aria-label", b.dataset.name + ", richtig");

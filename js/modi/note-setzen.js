@@ -4,6 +4,8 @@
  * erscheint dort und lässt sich mit ▲ und ▼ verschieben, „Prüfen“ wertet.
  * Jeder Tipp ins System zählt zur nächstgelegenen Linie oder zum nächsten
  * Zwischenraum, auch auf Hilfslinien. Tastatur: Pfeiltasten und Eingabe.
+ * Im einfachen Antwortmodus steht nur der Buchstabe da („F“), und jede
+ * Position mit diesem Buchstaben zählt. Danach steht der genaue Name dabei.
  * 10 Aufgaben, Wertung wie im klassischen Spiel (js/spiel-logik.js).
  * Nutzt die Ansicht #ansicht-setzen aus index.html.
  */
@@ -67,7 +69,7 @@
   function zeigeAufgabe() {
     gewaehlt = null;
     zeigeStatus();
-    $("setzen-name").textContent = note().name;
+    $("setzen-name").textContent = note().antwort || note().name;
     var system = $("setzen-notensystem");
     system.classList.remove("ist-falsch", "ist-richtig", "hat-vorschau");
     system.classList.add("ist-offen");
@@ -81,7 +83,9 @@
     $("setzen-pruefen").disabled = true;
     $("setzen-hoeher").disabled = false;
     $("setzen-tiefer").disabled = false;
-    $("setzen-text").textContent = "Tippe ins Notensystem, wo " + note().name + " hingehört. Dann tippe auf Prüfen.";
+    $("setzen-text").textContent = umgebung.antwortmodus === "einfach"
+      ? "Tippe ins Notensystem, wo ein " + note().antwort + " hingehört. Dann tippe auf Prüfen."
+      : "Tippe ins Notensystem, wo " + note().name + " hingehört. Dann tippe auf Prüfen.";
   }
 
   /** Setzt die Vorschau-Note an eine Position. */
@@ -118,20 +122,27 @@
 
   function pruefe() {
     if (!aktiv() || runde.gesperrt || gewaehlt === null) return;
-    var gesetzt = N.name(stufeVon(gewaehlt));
-    var a = L.antworte(runde, gesetzt);
+    var s = stufeVon(gewaehlt);
+    var gesetzt = N.name(s);
+    var a = L.antworte(runde, N.antwortSchluessel({ name: gesetzt, buchstabe: N.BUCHSTABEN[s % 7] }, umgebung.antwortmodus));
     if (!a) return; // schon geprüft
+    // Im einfachen Modus kann eine andere Oktave richtig sein: dann die gesetzte Note zeigen.
+    var gezeigt = a.note;
+    if (a.richtig && s !== a.note.stufe) {
+      gezeigt = N.notenImBereich(window.NOTEN_KONFIGURATION, a.note.schluessel, gesetzt, gesetzt)[0] || a.note;
+    }
     $("setzen-pruefen").disabled = true;
     $("setzen-hoeher").disabled = true;
     $("setzen-tiefer").disabled = true;
     var system = $("setzen-notensystem");
     system.classList.remove("ist-offen", "hat-vorschau");
     system.classList.add(a.richtig ? "ist-richtig" : "ist-falsch");
-    zeichne({ note: a.note, beschriftung: a.note.name, falsch: a.richtig ? undefined : gewaehlt });
+    zeichne({ note: gezeigt, beschriftung: gezeigt.name, falsch: a.richtig ? undefined : gewaehlt });
+    $("setzen-name").textContent = gezeigt.name;
     zeigeStatus();
-    H.zeigeMerkhilfe(umgebung, a.note, "setzen-merkhilfe");
+    H.zeigeMerkhilfe(umgebung, gezeigt, "setzen-merkhilfe");
     $("setzen-text").textContent = a.richtig
-      ? "✓ " + a.nachricht
+      ? "✓ " + (gezeigt === a.note ? a.nachricht : "Genau, das ist " + gezeigt.name + "!")
       : "✗ Du hast " + gesetzt + " gesetzt. So sieht " + a.note.name + " aus. " + a.note.hinweis;
     umgebung.zeigeTier($("setzen-tier"), a.richtig ? "froh" : "oje");
 

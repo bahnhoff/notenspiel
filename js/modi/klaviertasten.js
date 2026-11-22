@@ -4,6 +4,7 @@
  * Notenauswahl Lücken, zeigt die Klaviatur trotzdem alle weißen Tasten von der
  * tiefsten bis zur höchsten gewählten Note, damit sie wie ein Klavier aussieht.
  * Die schwarzen Tasten sind nur Dekoration. Das mittlere C ist markiert.
+ * Im einfachen Antwortmodus zählt jede Taste mit dem richtigen Buchstaben.
  * 10 Aufgaben, Wertung wie im klassischen Spiel (js/spiel-logik.js).
  * Nutzt die Ansicht #ansicht-klavier aus index.html.
  */
@@ -36,7 +37,7 @@
     umgebung = u;
     runde = L.neueRunde(u.noten, { vorrang: u.schwierig, aufgaben: u.aufgaben });
     letzteTaste = -1;
-    tastenNoten = lueckenlos(u.antworten);
+    tastenNoten = lueckenlos(u.namen, u.antwortmodus);
     baueTasten(tastenNoten);
     u.zeigeTier($("klavier-tier"), "normal");
     u.zeigeAnsicht();
@@ -52,19 +53,24 @@
 
   /* ---------- Klaviatur ---------- */
 
-  /** Weiße Tasten von der tiefsten bis zur höchsten Antwort, ohne Lücken. */
-  function lueckenlos(antworten) {
-    if (antworten.length === 0) return [];
+  /**
+   * Weiße Tasten von der tiefsten bis zur höchsten Note, ohne Lücken.
+   * `antwort` ist das, was die Taste als Antwort meldet (Noten.antwortSchluessel).
+   */
+  function lueckenlos(namen, antwortmodus) {
+    if (namen.length === 0) return [];
     var N = window.Noten;
     var liste = [];
-    for (var s = antworten[0].stufe; s <= antworten[antworten.length - 1].stufe; s++) {
-      liste.push({ name: N.name(s), stufe: s, oktave: Math.floor(s / 7), buchstabe: N.BUCHSTABEN[s % 7] });
+    for (var s = namen[0].stufe; s <= namen[namen.length - 1].stufe; s++) {
+      var t = { name: N.name(s), stufe: s, oktave: Math.floor(s / 7), buchstabe: N.BUCHSTABEN[s % 7] };
+      t.antwort = N.antwortSchluessel(t, antwortmodus);
+      liste.push(t);
     }
     return liste;
   }
 
   function baueTasten(antworten) {
-    tasten = antworten.map(function (a) {
+    tasten = antworten.map(function (a, i) {
       var b = document.createElement("button");
       b.type = "button";
       b.className = "taste";
@@ -77,7 +83,7 @@
         '<span class="taste-name" aria-hidden="true"></span>' +
         (mitte ? '<span class="taste-mitte-zeichen" aria-hidden="true">c¹</span>' : "");
       b.setAttribute("aria-label", "Taste " + a.name + (mitte ? ", mittleres C" : ""));
-      b.addEventListener("click", function () { beantworte(a.name); });
+      b.addEventListener("click", function () { beantworte(i); });
       return b;
     });
   }
@@ -158,19 +164,29 @@
     }
   }
 
-  function beantworte(name) {
+  /** `nr` = Nummer der getippten Taste. */
+  function beantworte(nr) {
     if (!aktiv()) return;
-    var a = L.antworte(runde, name);
+    var getippt = tastenNoten[nr];
+    var a = L.antworte(runde, getippt.antwort);
     if (!a) return; // schon beantwortet: weitere Tipps zählen nicht
+    letzteTaste = nr;
     $("klaviatur").classList.add("gesperrt");
     tasten.forEach(function (t, i) {
       t.setAttribute("aria-disabled", "true");
-      if (t.dataset.name === name) letzteTaste = i;
-      if (t.dataset.name === a.note.name) {
-        t.classList.add(a.richtig ? "ist-richtig" : "ist-loesung");
+      if (i === nr && a.richtig) {
+        // Richtig, im einfachen Modus auch in einer anderen Oktave.
+        t.classList.add("ist-richtig");
         t.querySelector(".taste-marke").textContent = "✓";
         t.querySelector(".taste-name").textContent = t.dataset.name;
-      } else if (t.dataset.name === name) {
+      } else if (tastenNoten[i].stufe === a.note.stufe) {
+        // Genau die gezeigte Note: bei falscher Antwort als Lösung, sonst nur beschriftet.
+        if (!a.richtig) {
+          t.classList.add("ist-loesung");
+          t.querySelector(".taste-marke").textContent = "✓";
+        }
+        t.querySelector(".taste-name").textContent = t.dataset.name;
+      } else if (i === nr) {
         t.classList.add("ist-falsch");
         t.querySelector(".taste-marke").textContent = "✗";
         t.querySelector(".taste-name").textContent = t.dataset.name;
@@ -218,10 +234,12 @@
     if (!aktiv() || $("ansicht-klavier").hidden || runde.gesperrt || ev.altKey || ev.ctrlKey || ev.metaKey) return;
     var taste = (ev.key || "").toLowerCase();
     if (!/^[a-h]$/.test(taste)) return;
-    var treffer = tastenNoten.filter(function (a) { return a.buchstabe === taste; });
-    if (treffer.length === 1) {
+    var treffer = [];
+    tastenNoten.forEach(function (a, i) { if (a.buchstabe === taste) treffer.push(i); });
+    // Im einfachen Modus zählt jede Taste mit dem Buchstaben, dann reicht die erste.
+    if (treffer.length === 1 || (treffer.length > 1 && umgebung.antwortmodus === "einfach")) {
       ev.preventDefault();
-      beantworte(treffer[0].name);
+      beantworte(treffer[0]);
     }
   });
 

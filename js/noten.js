@@ -140,6 +140,16 @@
     return notenImBereich(konfiguration, schluessel, kennung(Math.min.apply(null, stufen)), kennung(Math.max.apply(null, stufen)));
   }
 
+  var ANTWORTMODI = ["einfach", "genau"];
+
+  /**
+   * Was als Antwort auf eine Note zählt. Einfach: nur der Buchstabe ("D"),
+   * jede Oktave ist richtig. Genau: der volle Name mit Oktave ("d²").
+   */
+  function antwortSchluessel(note, antwortmodus) {
+    return antwortmodus === "genau" ? note.name : note.buchstabe.toUpperCase();
+  }
+
   /** Kennungen der Noten eines Bereichs, zum Beispiel ["violin-c1", …]. */
   function bereichsKennungen(konfiguration, schluessel, bereichId) {
     var b = bereichVon(konfiguration, schluessel, bereichId);
@@ -148,15 +158,18 @@
 
   /**
    * Bringt Einstellungen in die aktuelle Form und übersetzt alte Einstellungen:
-   *   { schluessel: ["violin", "bass"], noten: ["violin-c1", "bass-G", …], merktiere: true }
+   *   { schluessel: ["violin", "bass"], noten: ["violin-c1", "bass-G", …], merktiere: true,
+   *     antwortmodus: "einfach" | "genau" }
    * `noten` enthält die gewählten Noten beider Schlüssel. Abgefragt werden nur
    * die Noten der angekreuzten Schlüssel; die Auswahl des anderen bleibt erhalten.
    * Alte Form { schluessel: "violin" | "bass" | "beide", bereich: { violin, bass } }
    * wird in Notenlisten übersetzt. Fehlt etwas, gilt `standardEinstellungen`.
+   * Fehlt der Antwortmodus in gespeicherten Einstellungen, gilt „einfach“.
    */
   function einstellungen(konfiguration, roh) {
     var standard = konfiguration.standardEinstellungen || {};
-    if (!roh || typeof roh !== "object") roh = standard;
+    var ersterStart = !roh || typeof roh !== "object";
+    if (ersterStart) roh = standard;
     function schluesselAus(wert) {
       if (wert === "beide") return ["violin", "bass"];
       if (typeof wert === "string") wert = [wert];
@@ -180,14 +193,22 @@
       ["violin", "bass"].forEach(function (s) { noten = noten.concat(bereichsKennungen(konfiguration, s, bereich[s])); });
     }
     var merktiere = typeof roh.merktiere === "boolean" ? roh.merktiere : standard.merktiere !== false;
-    return { schluessel: sl, noten: noten, merktiere: merktiere };
+    // Gespeicherte Einstellungen ohne Antwortmodus (ältere Spielstände) bekommen „einfach“.
+    var antwortmodus = ANTWORTMODI.indexOf(roh.antwortmodus) !== -1 ? roh.antwortmodus
+      : (ersterStart && standard.antwortmodus === "genau" ? "genau" : "einfach");
+    return { schluessel: sl, noten: noten, merktiere: merktiere, antwortmodus: antwortmodus };
   }
 
   /**
    * Alles, was ein Spielmodus für die aktuellen Einstellungen braucht:
-   * - noten:     alle abgefragten Noten der angekreuzten Schlüssel, je Schlüssel tief nach hoch
-   * - antworten: eindeutige Namen, tief nach hoch
-   * - bereich:   [tiefste, höchste Position] für einen festen Ausschnitt
+   * - noten:        alle abgefragten Noten der angekreuzten Schlüssel, je Schlüssel tief nach hoch.
+   *                  Jede Note hat `antwort` (siehe antwortSchluessel), damit vergleicht
+   *                  SpielLogik.antworte die getippte Antwort.
+   * - antworten:    die Antwortknöpfe. Genau: eindeutige Namen tief nach hoch.
+   *                  Einfach: die vorkommenden Buchstaben C D E F G A H, alle in einer Reihe.
+   * - namen:        eindeutige genaue Namen, tief nach hoch, in beiden Modi
+   * - antwortmodus: "einfach" oder "genau"
+   * - bereich:      [tiefste, höchste Position] für einen festen Ausschnitt
    */
   function fuerEinstellungen(konfiguration, roh) {
     var e = einstellungen(konfiguration, roh);
@@ -196,13 +217,22 @@
       noten = noten.concat(verfuegbareNoten(konfiguration, sl).filter(function (n) { return e.noten.indexOf(n.id) !== -1; }));
     });
     var gesehen = {};
-    var antworten = noten.slice().sort(function (x, y) { return x.stufe - y.stufe; })
+    var namen = noten.slice().sort(function (x, y) { return x.stufe - y.stufe; })
       .filter(function (n) { if (gesehen[n.name]) return false; gesehen[n.name] = true; return true; })
       .map(function (n) { return { name: n.name, stufe: n.stufe, oktave: n.oktave, buchstabe: n.buchstabe }; });
+    noten.forEach(function (n) { n.antwort = antwortSchluessel(n, e.antwortmodus); });
+    var antworten = namen;
+    if (e.antwortmodus === "einfach") {
+      antworten = BUCHSTABEN.filter(function (b) {
+        return namen.some(function (n) { return n.buchstabe === b; });
+      }).map(function (b) { return { name: b.toUpperCase(), stufe: null, oktave: null, buchstabe: b }; });
+    }
     var positionen = noten.map(function (n) { return n.position; });
     return {
       noten: noten,
       antworten: antworten,
+      namen: namen,
+      antwortmodus: e.antwortmodus,
       bereich: noten.length ? [Math.min.apply(null, positionen), Math.max.apply(null, positionen)] : [0, 8]
     };
   }
@@ -221,6 +251,8 @@
     bereichVon: bereichVon,
     verfuegbareNoten: verfuegbareNoten,
     bereichsKennungen: bereichsKennungen,
+    ANTWORTMODI: ANTWORTMODI,
+    antwortSchluessel: antwortSchluessel,
     einstellungen: einstellungen,
     fuerEinstellungen: fuerEinstellungen
   };

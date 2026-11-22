@@ -93,7 +93,7 @@
 
   /** Reicht die Auswahl zum Spielen? Mindestens 3 verschiedene Notennamen. */
   function auswahlReicht(a) {
-    return a.antworten.length >= N.MINDEST_NOTEN;
+    return a.namen.length >= N.MINDEST_NOTEN;
   }
 
   /** Kurzbeschreibung der Noten eines Schlüssels, zum Beispiel „c¹ bis g¹“ oder „c¹, e¹, g¹“. */
@@ -160,6 +160,8 @@
     modus.starte({
       noten: a.noten,
       antworten: a.antworten,
+      namen: a.namen,
+      antwortmodus: a.antwortmodus,
       bereich: a.bereich,
       einstellungen: JSON.parse(JSON.stringify(stand.einstellungen)),
       schwierig: stand.schwierig.slice(),
@@ -461,10 +463,40 @@
     f.appendChild(fs);
   }
 
+  /** Umschalter „Antworten: Einfach / Genau“ als zwei große Knöpfe. */
+  function antwortGruppe(f, e) {
+    var fs = element("fieldset", "einstellung");
+    fs.appendChild(element("legend", "", "Antworten"));
+    var schalter = element("div", "antwort-umschalter");
+    [
+      { id: "einfach", text: "Einfach", info: "C D E …" },
+      { id: "genau", text: "Genau", info: "c¹ d² …" }
+    ].forEach(function (w) {
+      var an = e.antwortmodus === w.id;
+      var b = element("button", "knopf antwort-modus" + (an ? " ist-an" : ""));
+      b.type = "button";
+      b.dataset.fokus = "antwortmodus-" + w.id;
+      b.setAttribute("aria-pressed", an ? "true" : "false");
+      b.appendChild(element("span", "antwort-modus-name", (an ? "✓ " : "") + w.text));
+      b.appendChild(element("span", "antwort-modus-info", w.info)).setAttribute("aria-hidden", "true");
+      b.addEventListener("click", function () {
+        aendereEinstellung(function (x) { x.antwortmodus = w.id; }, b.dataset.fokus);
+      });
+      schalter.appendChild(b);
+    });
+    fs.appendChild(schalter);
+    fs.appendChild(element("p", "antwort-modus-erklaerung", e.antwortmodus === "genau"
+      ? "Genau: Buchstabe mit Oktave antippen, zum Beispiel c¹ oder d²."
+      : "Einfach: nur Buchstaben antippen. Jedes C zählt, egal wie hoch."));
+    f.appendChild(fs);
+  }
+
   function baueEinstellungen() {
     var f = $("einstellungen-formular");
     var e = stand.einstellungen;
     f.innerHTML = "";
+
+    antwortGruppe(f, e);
 
     var fs = element("fieldset", "einstellung");
     fs.appendChild(element("legend", "", "Schlüssel"));
@@ -512,7 +544,7 @@
     var text = einstellungsHinweis;
     if (!auswahlReicht(a)) {
       text = (text ? text + " " : "") + "Kreuze mindestens " + N.MINDEST_NOTEN + " verschiedene Noten an, sonst können die Spiele nicht starten." +
-        (a.antworten.length ? " Gewählt: " + a.antworten.map(function (x) { return x.name; }).join(", ") + "." : "");
+        (a.namen.length ? " Gewählt: " + a.namen.map(function (x) { return x.name; }).join(", ") + "." : "");
     }
     el.textContent = text;
     el.hidden = !text;

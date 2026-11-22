@@ -23,10 +23,20 @@
  *
  * Die App ruft `starte(umgebung)` bei jedem Start und bei „Noch eine Runde“
  * auf. `umgebung` enthält:
- *   noten          erzeugte Noten der aktuellen Einstellungen (siehe js/noten.js)
- *   antworten      eindeutige Notennamen, tief nach hoch: { name, stufe, oktave, buchstabe }
+ *   noten          erzeugte Noten der aktuellen Einstellungen (siehe js/noten.js).
+ *                  `note.antwort` ist das, was als Antwort zählt: im einfachen
+ *                  Modus der Buchstabe ("D"), im genauen der Name ("d²").
+ *   antworten      die Antwortknöpfe { name, stufe, oktave, buchstabe }, `name`
+ *                  ist die Beschriftung und wird an SpielLogik.antworte gegeben.
+ *                  Genau: eindeutige Notennamen, tief nach hoch. Einfach: nur die
+ *                  vorkommenden Buchstaben C D E F G A H (stufe und oktave null).
+ *   namen          eindeutige genaue Notennamen, tief nach hoch, in beiden Modi
+ *   antwortmodus   "einfach" oder "genau". Für andere Antworten (Klaviertaste,
+ *                  gesetzte Position) liefert Noten.antwortSchluessel(note,
+ *                  antwortmodus) den Schlüssel zum Vergleich. Rückmeldungen
+ *                  nennen immer den genauen Namen (note.name).
  *   bereich        [tiefste, höchste Position] für Notensystem.zeichne(…, { bereich })
- *   einstellungen  { schluessel: ["violin", "bass"], noten: [Kennungen], merktiere }
+ *   einstellungen  { schluessel: ["violin", "bass"], noten: [Kennungen], merktiere, antwortmodus }
  *   schwierig      Notenkennungen, die zuletzt Mühe gemacht haben
  *   aufgaben       optional: Zahl der Aufgaben, zum Beispiel 5 in der Notenreise.
  *                  Fehlt sie, gilt die normale Rundenlänge (10). Modi mit

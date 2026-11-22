@@ -161,13 +161,13 @@
     if (raf) cancelAnimationFrame(raf);
     raf = null;
     var note = zustand.note;
-    var richtig = name === note.name;
+    var richtig = name !== null && L.istRichtig(note, name);
     var e = L.flugAntwort(flug, richtig);
     if (!e) return;
     sperreKnoepfe(true);
 
     knoepfe.forEach(function (b) {
-      if (b.dataset.name === note.name) {
+      if (b.dataset.name === note.antwort) {
         b.classList.add(richtig ? "ist-richtig" : "ist-loesung");
         b.querySelector(".antwort-marke").textContent = "✓";
         b.setAttribute("aria-label", b.dataset.name + ", richtig");
