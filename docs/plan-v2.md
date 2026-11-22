@@ -112,3 +112,24 @@ Startseite: großer **Start** für das klassische Spiel bleibt. Darunter eine Au
   - Noten-Memory: Im einfachen Modus zeigen Namenskarten nur den Buchstaben. Pro Spiel kommt jeder Buchstabe höchstens einmal vor, damit Paare eindeutig sind.
   - Höher oder tiefer, Hör-Spiel: unverändert.
 - Wiederholung falsch beantworteter Noten bleibt pro Note (Kennung), nicht pro Buchstabe.
+
+## 13. Noten mit Vorzeichen (2026-11-22)
+
+- Die Notenauswahl bietet zusätzlich Noten mit Vorzeichen an, deutsch benannt:
+  - Kreuz: cis, dis, fis, gis, ais
+  - B: des, es, ges, as, b (deutsch „b“ = B mit B-Vorzeichen; H bleibt H)
+  - Mit Oktave wie gewohnt: fis¹, es², B (große Oktave, deutsch „B“).
+- In den Einstellungen stehen die Vorzeichen-Noten je Oktave als eigene, zuklappbare oder deutlich abgesetzte Zeile „mit ♯“ und „mit ♭“ unter den Stammtönen. Voreingestellt ist keine Vorzeichen-Note ausgewählt. Bestehende Spielstände bekommen keine dazu.
+- Darstellung im Notensystem: Ein gut erkennbares Versetzungszeichen (♯ oder ♭) steht links vor dem Notenkopf auf derselben Höhe, gezeichnet als SVG-Pfad im Stil des Systems, keine Schrift. Keine Tonart-Vorzeichnung.
+- Antworten:
+  - Genau: Knöpfe wie „fis¹“ oder „es²“.
+  - Einfach: Buchstabenknöpfe in chromatischer Reihenfolge, zum Beispiel C, D, E, F, Fis, G, A, H. Bei Vorzeichen-Noten mit großem Anfangsbuchstaben, also „Fis“, „Es“ und „B“.
+  - Enharmonik: fis und ges sind verschiedene Antworten (Name zählt, nicht Tonhöhe), außer in den Modi, in denen nur die Taste oder der Klang zählt.
+- Merktiere: fis wie Fisch (neues Tier im Stil von `js/tiere.js`). Für andere Vorzeichen-Noten gibt es das Merktier des Stammtons, zum Beispiel „cis¹ – C wie Chamäleon, nur einen Halbton höher“, oder eine kurze, kindgerechte Formulierung.
+- Hinweise nach falscher Antwort nennen das Vorzeichen: „Das ist fis¹. Die Note liegt im ersten Zwischenraum und hat ein Kreuz.“
+- Auswirkung je Modus:
+  - Klaviertasten: Die schwarzen Tasten werden für gewählte Vorzeichen-Noten tippbar, Trefferfläche ausreichend groß. Für die Taste zählt die Tonhöhe, fis und ges sind also dieselbe Taste.
+  - Note setzen: Bei Vorzeichen-Noten gibt es zusätzlich Knöpfe ♮, ♯ und ♭ zum Setzen des Vorzeichens.
+  - Hör-Spiel: keine zwei gleich klingenden Karten (fis und ges) gleichzeitig.
+  - Höher oder tiefer: Vergleich nach Tonhöhe, gleich klingende Paare kommen nicht vor.
+  - Noten-Memory, Notenflug, Welche Note ist das?: über den zentralen Antwortvergleich.
