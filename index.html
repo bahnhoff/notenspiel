@@ -217,25 +217,44 @@
         <button type="button" class="knopf knopf-klein knopf-zurueck" aria-label="Zurück zur Startseite" data-text-aria-label="zurueck.aria">
           <span aria-hidden="true">←</span> <span class="knopf-text" data-text="zurueck.startseite">Startseite</span>
         </button>
-        <div class="runde-status">
+        <div class="runde-status" id="memory-status">
           <span class="punkte-anzeige" id="memory-zuege"></span>
           <span class="punkte-anzeige" id="memory-paare"></span>
         </div>
       </header>
       <h1 id="titel-memory" class="frage" tabindex="-1" data-text="modus.noten-memory">Noten-Memory</h1>
-      <div class="memory-karten" id="memory-karten" role="group" aria-label="Karten" data-text-aria-label="memory.kartenAria"></div>
-          <div class="tier-zeile">
-            <div class="tier-klein" id="memory-tier"></div>
-            <div class="sprechblase">
-              <div aria-live="polite">
-                <div class="merkhilfe" id="memory-merkhilfe" hidden>
-                  <div class="merkhilfe-bild" id="memory-merkhilfe-bild"></div>
-                  <p class="merkhilfe-text" id="memory-merkhilfe-text"></p>
-                </div>
-                <p id="memory-text"></p>
+      <!-- Wahl vor dem Spiel: Normal (6 Paare) oder Schwer (10 Paare), Antippen startet -->
+      <div class="memory-wahl" id="memory-wahl" hidden>
+        <p class="memory-wahl-frage" data-text="memory.wahlFrage">Wie schwer soll es sein?</p>
+        <div class="memory-wahl-knoepfe">
+          <button type="button" class="knopf memory-stufe" id="memory-stufe-normal" data-stufe="normal">
+            <span class="stufe-raster" aria-hidden="true"></span>
+            <span class="stufe-name" data-text="memory.normal">Normal</span>
+            <span class="stufe-info"></span>
+          </button>
+          <button type="button" class="knopf memory-stufe" id="memory-stufe-schwer" data-stufe="schwer">
+            <span class="stufe-raster" aria-hidden="true"></span>
+            <span class="stufe-name" data-text="memory.schwer">Schwer</span>
+            <span class="stufe-info"></span>
+          </button>
+        </div>
+        <p class="memory-zu-wenig" id="memory-zu-wenig" data-text="memory.zuWenig" hidden>Wähle in den Einstellungen mehr Noten.</p>
+      </div>
+      <div class="memory-spiel" id="memory-spiel">
+        <div class="memory-karten" id="memory-karten" role="group" aria-label="Karten" data-text-aria-label="memory.kartenAria"></div>
+        <div class="tier-zeile">
+          <div class="tier-klein" id="memory-tier"></div>
+          <div class="sprechblase">
+            <div aria-live="polite">
+              <div class="merkhilfe" id="memory-merkhilfe" hidden>
+                <div class="merkhilfe-bild" id="memory-merkhilfe-bild"></div>
+                <p class="merkhilfe-text" id="memory-merkhilfe-text"></p>
               </div>
+              <p id="memory-text"></p>
             </div>
           </div>
+        </div>
+      </div>
     </section>
 
     <!-- Hör-Spiel -->
@@ -256,10 +275,10 @@
           <h1 id="titel-hoeren" class="frage" tabindex="-1" data-text="hoeren.frage">Welche Note hörst du?</h1>
           <div class="hoeren-steuerung">
             <button type="button" class="knopf knopf-haupt knopf-hoeren" id="hoeren-nochmal">
-              <span aria-hidden="true">🔊</span> <span data-text="hoeren.nochmal">Nochmal hören</span>
+              <span class="knopf-symbol" data-symbol="lautsprecher" aria-hidden="true">🔊</span> <span data-text="hoeren.nochmal">Nochmal hören</span>
             </button>
             <button type="button" class="knopf knopf-neben knopf-bezug" id="hoeren-bezug">
-              <span aria-hidden="true">🎹</span> <span id="hoeren-bezug-name"></span>
+              <span class="knopf-symbol" data-symbol="klaviertasten" aria-hidden="true">🎹</span> <span id="hoeren-bezug-name"></span>
             </button>
           </div>
           <p class="hoeren-hinweis" id="hoeren-hinweis" role="status" hidden></p>

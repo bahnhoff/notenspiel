@@ -413,21 +413,34 @@
 
   /* ---------- Noten-Memory ---------- */
 
-  var MEMORY = { paare: 6, punkteProPaar: 10, punkteProStern: 10 };
+  /**
+   * Zwei Stufen: Normal (6 Paare, Raster 3 × 4) und Schwer (10 Paare, Raster 4 × 5).
+   * sterne3/sterne2: so viele Züge über der Paarzahl gibt es noch 3 bzw. 2 Sterne.
+   */
+  var MEMORY = {
+    normal: { paare: 6, punkteProPaar: 10, punkteProStern: 10, sterne3: 3, sterne2: 7 },
+    schwer: { paare: 10, punkteProPaar: 15, punkteProStern: 20, sterne3: 6, sterne2: 12 }
+  };
+
+  function memoryStufe(stufe) { return MEMORY[stufe] || MEMORY.normal; }
 
   /**
-   * Sterne nach Zügen. Bei 6 Paaren: bis 9 Züge 3, bis 13 Züge 2, sonst 1.
+   * Sterne nach Zügen. Normal mit 6 Paaren: bis 9 Züge 3, bis 13 Züge 2, sonst 1.
+   * Schwer mit 10 Paaren: bis 16 Züge 3, bis 22 Züge 2, sonst 1.
    * Bei weniger Paaren (kleiner Tonumfang) verschieben sich die Grenzen mit.
    */
-  function memorySterne(zuege, paare) {
-    paare = paare || MEMORY.paare;
-    if (zuege <= paare + 3) return 3;
-    if (zuege <= paare + 7) return 2;
+  function memorySterne(zuege, paare, stufe) {
+    var s = memoryStufe(stufe);
+    paare = paare || s.paare;
+    if (zuege <= paare + s.sterne3) return 3;
+    if (zuege <= paare + s.sterne2) return 2;
     return 1;
   }
 
-  function memoryPunkte(paare, sterne) {
-    return paare * MEMORY.punkteProPaar + sterne * MEMORY.punkteProStern;
+  /** Normal 10 pro Paar plus 10 pro Stern (höchstens 90), Schwer 15 plus 20 (höchstens 210). */
+  function memoryPunkte(paare, sterne, stufe) {
+    var s = memoryStufe(stufe);
+    return paare * s.punkteProPaar + sterne * s.punkteProStern;
   }
 
   /* ---------- Spiel eine Melodie ---------- */
@@ -565,6 +578,7 @@
       einstellungen: null,
       sprache: null,                 // "de" oder "en"; null = beim Laden nach der Browsersprache wählen
       naechstes: null,               // Kennung des nächsten Tiers (Silhouette im Ergebnis), null = noch nicht gewählt
+      memoryStufe: "normal",         // zuletzt gewählte Stufe im Noten-Memory: "normal" oder "schwer"
       reise: { tag: "", serie: 0 }   // Tägliche Notenreise: letzter geschaffter Tag, Tagesserie
     };
   }
@@ -585,6 +599,8 @@
       var e = { gesamt: r.gesamt, sterne: r.sterne, zeit: r.zeit, nr: istZahl(r.nr) ? r.nr : 0 };
       // Alte Rekorde haben kein Feld `name` und zeigen keinen Namen.
       if (typeof r.name === "string") e.name = bereinigeName(r.name);
+      // Variante des Spiels, zum Beispiel Noten-Memory „Schwer“ (fehlt bei allen anderen).
+      if (r.variante === "schwer") e.variante = r.variante;
       return e;
     });
     return sortiereRekorde(ergebnis).slice(0, REGELN.maxRekorde);
@@ -742,6 +758,8 @@
     stand.einstellungen = bereinigeEinstellungen(roh.einstellungen);
     // Ältere Spielstände haben keine Sprache; die App wählt sie dann nach der Browsersprache.
     if (roh.sprache === "de" || roh.sprache === "en") stand.sprache = roh.sprache;
+    // Ältere Spielstände haben keine Memory-Stufe und beginnen mit „normal“.
+    if (roh.memoryStufe === "schwer") stand.memoryStufe = "schwer";
     // Ältere Spielstände haben kein Feld `reise` und beginnen ohne Tagesserie.
     if (roh.reise && typeof roh.reise.tag === "string" && /^\d{4}-\d{2}-\d{2}$/.test(roh.reise.tag) && istZahl(roh.reise.serie)) {
       stand.reise = { tag: roh.reise.tag, serie: Math.floor(roh.reise.serie) };
@@ -813,6 +831,7 @@
       nr: neu.zaehler,
       name: ""
     };
+    if (e.variante === "schwer") eintrag.variante = e.variante;
     var liste = sortiereRekorde((neu.rekorde[modus] || []).concat([eintrag]));
     var platz = liste.indexOf(eintrag);
     neu.rekorde[modus] = liste.slice(0, REGELN.maxRekorde);
@@ -871,6 +890,7 @@
     flugPunkteProNote: flugPunkteProNote,
     flugSterne: flugSterne,
     MEMORY: MEMORY,
+    memoryStufe: memoryStufe,
     memorySterne: memorySterne,
     memoryPunkte: memoryPunkte,
     MELODIE: MELODIE,

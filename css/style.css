@@ -926,6 +926,17 @@ h1:focus { outline: none; }
 .rekord-datum { grid-area: datum; color: var(--text-leise); font-size: 0.95rem; text-align: right; white-space: nowrap; }
 .rekord-name-text { grid-area: name; font-weight: 700; overflow-wrap: anywhere; min-width: 0; }
 .rekord-name-text.ohne-name { font-weight: 400; font-style: italic; color: var(--text-leise); }
+.rekord-variante {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 0 8px;
+  border-radius: 999px;
+  background: var(--akzent);
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 800;
+  vertical-align: 2px;
+}
 
 .leer-hinweis {
   text-align: center;
@@ -1170,8 +1181,59 @@ h1:focus { outline: none; }
 .memory-karte.ist-gefunden .karte-marke { color: var(--gruen); }
 .memory-karte.ist-kein-paar .karte-marke { color: var(--rot); }
 
+/* Schwer: 20 Karten, auf dem Handy 4 Spalten × 5 Reihen (passt ab 340 px Breite) */
+.memory-schwer { gap: 6px; }
+.memory-schwer .memory-karte {
+  flex-basis: calc((100% - 18px) / 4);
+  height: clamp(76px, 12vh, 120px);
+  padding: 2px;
+  border-radius: 12px;
+}
+.memory-schwer .karte-rueckseite { font-size: 1.9rem; }
+.memory-schwer .karte-name { font-size: 1.6rem; }
+.memory-schwer .karte-marke { font-size: 1rem; right: 4px; }
+
+/* Wahl vor dem Spiel: zwei große Knöpfe mit kleinem Bild des Rasters */
+.memory-wahl { text-align: center; }
+.memory-wahl-frage { margin: 0 0 12px; font-size: 1.2rem; font-weight: 700; }
+.memory-wahl-knoepfe {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  max-width: 520px;
+  margin: 0 auto;
+}
+.memory-stufe {
+  min-height: 150px;
+  padding: 14px 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end; /* Namen auf gleicher Höhe, auch bei verschieden hohen Rastern */
+  gap: 6px;
+  line-height: 1.15;
+}
+.stufe-name { font-size: 1.5rem; font-weight: 800; }
+.stufe-info { font-size: 1rem; font-weight: 600; }
+.stufe-raster {
+  display: grid;
+  grid-template-columns: repeat(var(--spalten, 3), 12px);
+  gap: 3px;
+  margin-bottom: 4px;
+}
+.stufe-raster i {
+  width: 12px;
+  height: 15px;
+  border-radius: 3px;
+  background: currentColor;
+  opacity: 0.55;
+}
+.memory-stufe:disabled { opacity: 0.45; cursor: not-allowed; box-shadow: none; }
+.memory-zu-wenig { margin: 12px auto 0; max-width: 520px; font-weight: 600; color: var(--text-leise); }
+
 @media (min-width: 700px) {
   .memory-karte { flex-basis: calc((100% - 24px) / 4); height: clamp(110px, 20vh, 170px); }
+  .memory-schwer .memory-karte { flex-basis: calc((100% - 24px) / 5); height: clamp(84px, 15vh, 140px); }
   .klaviatur { --taste-min: 150px; --taste-max: 220px; }
 }
 

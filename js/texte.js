@@ -217,6 +217,13 @@
       "memory.gedaechtnis": "Was für ein Gedächtnis!",
       "memory.zeileZuege": "Züge",
       "memory.zeilePunkte": "Punkte für {n} Paare",
+      "memory.wahlFrage": "Wie schwer soll es sein?",
+      "memory.normal": "Normal",
+      "memory.schwer": "Schwer",
+      "memory.paareInfo": "{n} Paare",
+      "memory.zuWenig": "Wähle in den Einstellungen mehr Noten.",
+      "memory.zeileStufe": "Stufe",
+      "variante.schwer": "Schwer",
 
       /* Hör-Spiel */
       "hoeren.frage": "Welche Note hörst du?",
@@ -541,6 +548,13 @@
       "memory.gedaechtnis": "What a great memory!",
       "memory.zeileZuege": "Moves",
       "memory.zeilePunkte": "Points for {n} pairs",
+      "memory.wahlFrage": "How hard should it be?",
+      "memory.normal": "Normal",
+      "memory.schwer": "Hard",
+      "memory.paareInfo": "{n} pairs",
+      "memory.zuWenig": "Pick more notes in Settings.",
+      "memory.zeileStufe": "Level",
+      "variante.schwer": "Hard",
 
       "hoeren.frage": "Which note do you hear?",
       "hoeren.nochmal": "Play again",

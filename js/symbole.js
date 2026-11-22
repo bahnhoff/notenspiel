@@ -9,7 +9,8 @@
  *
  * Kennungen: die Kennung des Spielmodus (klassisch, notenflug, klaviertasten,
  * note-setzen, noten-memory, hoer-spiel, notenreise, melodie)
- * und die Menüknöpfe tiere, rekorde, einstellungen, ueben.
+ * die Menüknöpfe tiere, rekorde, einstellungen, ueben und lautsprecher für
+ * „Nochmal hören“ im Hör-Spiel (dessen Bezugston-Knopf nutzt klaviertasten).
  * Alle Symbole liegen in einem Feld von 48 × 48 und sind nur Schmuck
  * (aria-hidden), der Text daneben trägt die Bedeutung.
  */
@@ -127,6 +128,13 @@
         linie("M29 18 C32 21 32 27 29 30", 2.6) +
         linie("M34 13 C40 19 40 29 34 35", 2.6) +
         linie("M39 8 C47 17 47 31 39 40", 2.6, F.orangeDunkel);
+    },
+
+    // Lautsprecher für den orangen Knopf „Nochmal hören“: helle Fläche, braune Wellen
+    lautsprecher: function () {
+      return form("M6 19 L13 19 L23 10 L23 38 L13 29 L6 29 Z", F.creme) +
+        linie("M29 18 C32 21 32 27 29 30", 2.8) +
+        linie("M34 13 C40 19 40 29 34 35", 2.8);
     },
 
     // Tägliche Notenreise: Kompass

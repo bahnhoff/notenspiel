@@ -214,9 +214,16 @@ test("Notenflug: jedes Level 15 % schneller, Punkte = Level × gewählte Noten, 
   assert.equal(L.flugSterne(flug), 1);
 });
 
-test("Noten-Memory: Sterne nach Zügen und Punkte", () => {
+test("Noten-Memory: Sterne nach Zügen und Punkte, Normal und Schwer", () => {
   assert.deepEqual([6, 9, 10, 13, 14].map((z) => L.memorySterne(z)), [3, 3, 2, 2, 1]);
   assert.equal(L.memoryPunkte(6, 3), 90);
+  assert.deepEqual([10, 16, 17, 22, 23].map((z) => L.memorySterne(z, 10, "schwer")), [3, 3, 2, 2, 1]);
+  assert.equal(L.memoryPunkte(10, 3, "schwer"), 210);
+  // Variante im Rekord und gemerkte Stufe überstehen Speichern und Laden; alte Stände starten mit „normal“.
+  const v = L.verbucheErgebnis(Object.assign(L.leererSpielstand(), { memoryStufe: "schwer" }), "noten-memory", { gesamt: 210, neueSterne: 3, variante: "schwer" }, 1);
+  const geladen = L.bereinigeSpielstand(JSON.parse(JSON.stringify(v.stand)));
+  assert.deepEqual([geladen.rekorde["noten-memory"][0].variante, geladen.memoryStufe], ["schwer", "schwer"]);
+  assert.equal(L.bereinigeSpielstand({ sterne: 3 }).memoryStufe, "normal");
 });
 
 test("Notenreise: Extrastern höchstens einmal pro Kalendertag", () => {

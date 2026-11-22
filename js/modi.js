@@ -65,6 +65,8 @@
  *                  `reise: true` geben sie an SpielLogik.neueRunde weiter.
  *   tagesreise     { heute, serie }: Notenreise heute schon geschafft?
  *                  Tage in Folge (siehe SpielLogik.tagesreiseStatus)
+ *   memoryStufe    zuletzt gewählte Stufe im Noten-Memory ("normal" oder "schwer")
+ *   merkeMemoryStufe(stufe)   speichert die gewählte Stufe im Spielstand
  *   zeigeAnsicht(name)        blendet die Ansicht des Modus ein, mit `name`
  *                             eine andere Ansicht (für die Notenreise)
  *   zeigeTier(el, stimmung)   zeichnet das gewählte Begleittier ("normal", "froh", "oje")
@@ -82,6 +84,9 @@
  *   gesamt        Punkte für die Rekorde
  *   neueSterne    Sterne für die gemeinsame Sammlung
  *   rekordSterne  optional, Sterne im Rekordeintrag (sonst neueSterne)
+ *   variante      optional "schwer": steht im Rekordeintrag und als Schild in der
+ *                 Rekordliste und der Rekordzeile (Noten-Memory „Schwer“). Alle
+ *                 Varianten eines Modus teilen sich eine Rekordliste.
  *   titel         Überschrift mit der Kernzahl, zum Beispiel „9 von 10 richtig“
  *                 (ende.richtigVon) oder bei Spielen ohne Aufgabenzahl „14 Noten
  *                 richtig“ (Notenflug), „6 Paare in 11 Zügen“ (Memory)

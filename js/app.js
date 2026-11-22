@@ -182,6 +182,12 @@
       einstellungen: JSON.parse(JSON.stringify(stand.einstellungen)),
       schwierig: stand.schwierig.slice(),
       tagesreise: L.tagesreiseStatus(stand, Date.now()),
+      memoryStufe: stand.memoryStufe,
+      merkeMemoryStufe: function (stufe) {
+        if (stufe !== "normal" && stufe !== "schwer") return;
+        stand.memoryStufe = stufe;
+        speichereSpielstand();
+      },
       zeigeAnsicht: function (name) { zeigeAnsicht(name || modus.ansicht || modus.id); },
       zeigeTier: zeigeTier,
       merkhilfe: merkhilfe,
@@ -273,9 +279,10 @@
     // Top-5-Rekord: erst ein Knopf „Rekord speichern“, die Namensabfrage öffnet sich beim Antippen.
     $("rekord-name").hidden = true;
     offenerRekord = v.rekord || null;
+    if (offenerRekord && e.variante) offenerRekord.variante = e.variante;
     rekordModus = v.rekord ? modus : null;
     $("rekord-zeile").hidden = !v.rekord;
-    if (v.rekord) $("rekord-zeile-info").textContent = t("rekordName.neu", { platz: v.rekord.platz + 1, modus: modus.name });
+    if (v.rekord) $("rekord-zeile-info").textContent = t("rekordName.neu", { platz: v.rekord.platz + 1, modus: rekordTitel(modus, offenerRekord) });
 
     zeigeAnsicht("ergebnis");
   }
@@ -320,10 +327,15 @@
 
   /* ---------- Namen in den Rekorden ---------- */
 
+  /** Name des Modus für die Rekordzeile, mit Variante: „Noten-Memory · Schwer“. */
+  function rekordTitel(modus, rekord) {
+    return modus.name + (rekord && rekord.variante ? " · " + t("variante." + rekord.variante) : "");
+  }
+
   function zeigeNamensabfrage(modus, rekord) {
     offenerRekord = rekord;
     $("rekord-name").hidden = false;
-    $("rekord-name-info").textContent = t("rekordName.neu", { platz: rekord.platz + 1, modus: modus.name });
+    $("rekord-name-info").textContent = t("rekordName.neu", { platz: rekord.platz + 1, modus: rekordTitel(modus, rekord) });
     $("rekord-name-fertig").textContent = "";
     $("name-formular").hidden = false;
     $("knopf-ohne-name").hidden = false;
@@ -437,7 +449,9 @@
           var datum = "";
           try { datum = new Date(r.zeit).toLocaleDateString(t("rekorde.datum")); } catch (e) { datum = ""; }
           li.appendChild(element("span", "rekord-platz", (i + 1) + "."));
-          li.appendChild(element("span", "rekord-punkte", H.punkteText(r.gesamt)));
+          var punkte = li.appendChild(element("span", "rekord-punkte", H.punkteText(r.gesamt)));
+          // Variante als kleines Schild hinter den Punkten, zum Beispiel „Schwer“ im Noten-Memory
+          if (r.variante) punkte.appendChild(element("span", "rekord-variante", t("variante." + r.variante)));
           var st = element("span", "rekord-sterne");
           st.innerHTML = '<span class="stern stern-voll" aria-hidden="true">★</span> ';
           st.appendChild(document.createTextNode(sterneText(r.sterne)));

@@ -1,9 +1,15 @@
 /*
- * Modus „Noten-Memory“: 6 Paare aus Notenkarte und Namenskarte, Raster 3 × 4.
- * Ein Zug = zwei Karten aufdecken. Sterne nach Zügen: bis 9 Züge 3,
- * bis 13 Züge 2, sonst 1. Punkte: 10 pro Paar plus 10 pro Stern.
- * Hat der gewählte Bereich weniger als 6 Noten, gibt es entsprechend
- * weniger Paare (Regeln: js/spiel-logik.js, memorySterne).
+ * Modus „Noten-Memory“: Paare aus Notenkarte und Namenskarte.
+ * Vor dem Spiel wählt das Kind die Stufe mit zwei großen Knöpfen, Antippen
+ * startet sofort. Die letzte Wahl merkt sich der Spielstand (memoryStufe)
+ * und ist beim nächsten Mal vorausgewählt.
+ *   Normal: 6 Paare, Raster 3 × 4 (breit 4 × 3). Hat der gewählte Bereich
+ *           weniger als 6 Noten, gibt es entsprechend weniger Paare.
+ *   Schwer: 10 Paare, Raster 4 × 5 (breit 5 × 4). Braucht 10 verschiedene
+ *           Namenskarten, sonst ist der Knopf ausgegraut mit Hinweis.
+ * Ein Zug = zwei Karten aufdecken. Sterne und Punkte je Stufe stehen in
+ * js/spiel-logik.js (MEMORY, memorySterne, memoryPunkte). Schwere Runden
+ * kommen mit `variante: "schwer"` in die gemeinsame Rekordliste.
  * Namenskarten zeigen den Antwortschlüssel (note.antwort): im einfachen Modus
  * nur den Buchstaben („F“, „Fis“), dann kommt jeder höchstens einmal vor.
  * Nutzt die Ansicht #ansicht-memory aus index.html.
@@ -18,8 +24,9 @@
   var ENDE_NACH = 1200;
 
   var umgebung = null;
-  var spiel = null;   // { karten, offen, paare, gefunden, zuege, fertig }
+  var spiel = null;   // { stufe, karten, offen, paare, gefunden, zuege, fertig }
   var timer = null;
+  var wahlOffen = false;
 
   function $(id) { return document.getElementById(id); }
 
@@ -27,35 +34,82 @@
     return spiel && umgebung && umgebung.laeuft();
   }
 
-  function starte(u) {
-    stoppe();
-    umgebung = u;
-    // Noten mit verschiedenen Namenskarten wählen (bei beiden Schlüsseln gibt es c¹
-    // zweimal, im einfachen Modus zählt nur der Buchstabe), damit Paare eindeutig sind.
+  /**
+   * Noten mit verschiedenen Namenskarten (bei beiden Schlüsseln gibt es c¹
+   * zweimal, im einfachen Modus zählt nur der Buchstabe), damit Paare eindeutig sind.
+   */
+  function eindeutige(noten) {
     var namen = {};
-    var auswahl = H.mische(u.noten).filter(function (n) {
+    return H.mische(noten).filter(function (n) {
       if (namen[n.antwort]) return false;
       namen[n.antwort] = true;
       return true;
-    }).slice(0, L.MEMORY.paare);
+    });
+  }
+
+  function starte(u) {
+    stoppe();
+    umgebung = u;
+    zeigeWahl();
+    u.zeigeAnsicht();
+  }
+
+  /** Wahl der Stufe vor dem Spiel. Die zuletzt gewählte ist hervorgehoben. */
+  function zeigeWahl() {
+    var schwerGeht = eindeutige(umgebung.noten).length >= L.MEMORY.schwer.paare;
+    var vorwahl = umgebung.memoryStufe === "schwer" && schwerGeht ? "schwer" : "normal";
+    ["normal", "schwer"].forEach(function (stufe) {
+      var b = $("memory-stufe-" + stufe);
+      var regel = L.MEMORY[stufe];
+      var an = stufe === vorwahl;
+      b.classList.toggle("knopf-haupt", an);
+      b.classList.toggle("knopf-neben", !an);
+      b.classList.toggle("ist-an", an);
+      b.querySelector(".stufe-info").textContent = T.t("memory.paareInfo", { n: regel.paare });
+      var raster = b.querySelector(".stufe-raster");
+      raster.innerHTML = new Array(regel.paare * 2 + 1).join("<i></i>");
+      raster.style.setProperty("--spalten", stufe === "schwer" ? 4 : 3);
+    });
+    var schwer = $("memory-stufe-schwer");
+    schwer.disabled = !schwerGeht;
+    $("memory-zu-wenig").hidden = schwerGeht;
+    if (schwerGeht) schwer.removeAttribute("aria-describedby");
+    else schwer.setAttribute("aria-describedby", "memory-zu-wenig");
+    $("memory-wahl").hidden = false;
+    $("memory-spiel").hidden = true;
+    $("memory-status").hidden = true;
+    wahlOffen = true;
+  }
+
+  function starteSpiel(stufe) {
+    if (!wahlOffen || !umgebung || !umgebung.laeuft()) return;
+    wahlOffen = false;
+    umgebung.merkeMemoryStufe(stufe);
+    var regel = L.MEMORY[stufe];
+    var auswahl = eindeutige(umgebung.noten).slice(0, regel.paare);
     var karten = [];
     auswahl.forEach(function (n) {
       karten.push({ art: "note", note: n });
       karten.push({ art: "name", note: n });
     });
-    spiel = { karten: H.mische(karten), offen: [], paare: auswahl.length, gefunden: 0, zuege: 0, fertig: false };
+    spiel = { stufe: stufe, karten: H.mische(karten), offen: [], paare: auswahl.length, gefunden: 0, zuege: 0, fertig: false };
+    $("memory-wahl").hidden = true;
+    $("memory-spiel").hidden = false;
+    $("memory-status").hidden = false;
     baueKarten();
-    u.zeigeTier($("memory-tier"), "normal");
+    umgebung.zeigeTier($("memory-tier"), "normal");
     $("memory-merkhilfe").hidden = true;
     $("memory-text").textContent = T.t("memory.start");
     zeigeStatus();
-    u.zeigeAnsicht();
+    // Der angetippte Knopf ist jetzt versteckt: Fokus auf den Titel wie beim Öffnen der Ansicht.
+    $("titel-memory").focus({ preventScroll: true });
   }
 
   function stoppe() {
     clearTimeout(timer);
     timer = null;
     spiel = null;
+    wahlOffen = false;
   }
 
   function zeigeStatus() {
@@ -66,7 +120,7 @@
   function baueKarten() {
     var box = $("memory-karten");
     box.innerHTML = "";
-    box.classList.toggle("memory-wenige", spiel.karten.length < 12);
+    box.classList.toggle("memory-schwer", spiel.stufe === "schwer");
     spiel.karten.forEach(function (k, i) {
       var b = document.createElement("button");
       b.type = "button";
@@ -159,20 +213,27 @@
     if (!aktiv()) return;
     var s = spiel;
     spiel = null;
-    var sterne = L.memorySterne(s.zuege, s.paare);
+    var sterne = L.memorySterne(s.zuege, s.paare, s.stufe);
+    var regel = L.MEMORY[s.stufe];
     umgebung.beende({
-      gesamt: L.memoryPunkte(s.paare, sterne),
+      gesamt: L.memoryPunkte(s.paare, sterne, s.stufe),
       neueSterne: sterne,
+      variante: s.stufe === "schwer" ? "schwer" : undefined,
       titel: T.t("memory.ueberschrift", { paare: s.paare, zuege: s.zuege }),
       spruch: T.t("memory.alle") + " " + (sterne === 3 ? T.t("memory.gedaechtnis") : T.t("ende.toll")),
       stimmung: "froh",
       zeilen: [
+        [T.t("memory.zeileStufe"), T.t("memory." + s.stufe)],
         [T.t("memory.zeileZuege"), String(s.zuege)],
-        [T.t("memory.zeilePunkte", { n: s.paare }), String(s.paare * L.MEMORY.punkteProPaar)],
-        [T.t("ende.bonus"), String(sterne * L.MEMORY.punkteProStern) + " (" + H.sterneText(sterne) + " × " + L.MEMORY.punkteProStern + ")"]
+        [T.t("memory.zeilePunkte", { n: s.paare }), String(s.paare * regel.punkteProPaar)],
+        [T.t("ende.bonus"), String(sterne * regel.punkteProStern) + " (" + H.sterneText(sterne) + " × " + regel.punkteProStern + ")"]
       ]
     });
   }
+
+  ["normal", "schwer"].forEach(function (stufe) {
+    $("memory-stufe-" + stufe).addEventListener("click", function () { starteSpiel(stufe); });
+  });
 
   window.Modi.registriere({
     id: "noten-memory",
