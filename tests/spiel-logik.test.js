@@ -259,3 +259,27 @@ test("Fehler üben: höchstens 3 verwechselte Noten, häufigste zuerst, je Note 
   assert.equal(u.aufgaben.length, 5);
   assert.deepEqual([u.aufgaben[4].note.id, u.aufgaben[4].art], [c.id, "erkennen"]);
 });
+
+test("Spiel eine Melodie: 5 Melodien aus 4 bis 7 Noten der Auswahl, Lieder behalten ihre Abstände", () => {
+  const zufall = festerZufall();
+  const auswahlen = [
+    NOTEN, // c¹ bis g¹: Hänschen klein, Alle meine Entchen … passen
+    N.fuerEinstellungen(K, { schluessel: ["violin", "bass"], noten: ["violin-c1", "violin-e1", "violin-fis1", "bass-c", "bass-g"] }).noten
+  ];
+  for (const noten of auswahlen) {
+    const ids = noten.map((n) => n.id);
+    const melodien = L.neueMelodien(noten, zufall);
+    assert.equal(melodien.length, 5);
+    for (const m of melodien) {
+      assert.ok(m.noten.length >= 4 && m.noten.length <= 7);
+      assert.equal(m.dauern.length, m.noten.length);
+      assert.ok(m.noten.every((n) => ids.includes(n.id) && n.schluessel === m.noten[0].schluessel));
+      if (m.lied) {
+        const lied = L.LIEDER.find((l) => l.id === m.lied).toene;
+        assert.deepEqual(m.noten.map((n) => n.halbton - m.noten[0].halbton), lied.map((t) => t - lied[0]));
+      }
+    }
+  }
+  assert.ok(L.neueMelodien(NOTEN, zufall).filter((m) => m.lied).length >= 4);
+  assert.deepEqual([0, 2, 3, 5, 6].map(L.melodieSterne), [3, 3, 2, 2, 1]);
+});

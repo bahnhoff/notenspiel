@@ -115,8 +115,13 @@
    *                        (nach der Antwort, auch bei Hilfslinien)
    *           namensPlatz  Zeichenzahl, für die rechts immer Platz bleibt. So ist das
    *                        System mit und ohne Beschriftung gleich breit und gleich hoch.
- *           weitere      [{ position, x, vorzeichen }]: weitere Noten im selben System,
- *                        je in <g class="note-weitere"> (Höher oder tiefer)
+ *           weitere      [{ position, x, vorzeichen, klasse, nr, marke }]: weitere Noten
+ *                        im selben System, je in <g class="note-weitere"> (Höher oder
+ *                        tiefer, Spiel eine Melodie). `klasse` kommt an die Gruppe dazu,
+ *                        `nr` als data-nr, `marke: true` legt eine zunächst unsichtbare
+ *                        Fläche <rect class="note-marke"> hinter die Note, die das CSS
+ *                        einfärben kann (aktuelle Note der Melodie).
+ *           beschreibung Text für Screenreader statt der Standardbeschreibung
    * Die Note samt Hilfslinien liegt in <g class="note-gruppe">, damit ein Modus
    * sie verschieben kann (Notenflug).
    */
@@ -182,7 +187,17 @@
     }
 
     (optionen.weitere || []).forEach(function (w) {
-      teile.push('<g class="note-weitere">' + viertelnote(w.position, w.x, w.vorzeichen) + "</g>");
+      var marke = "";
+      if (w.marke) {
+        // Fläche über das ganze System samt Hals und Hilfslinien der Note
+        var my = yVon(w.position);
+        var y0 = Math.min(yVon(8) - 6, my - 40), y1 = Math.max(yVon(0) + 6, my + 40);
+        var x0 = w.x - (w.vorzeichen ? 28 : 13);
+        marke = '<rect class="note-marke" x="' + x0 + '" y="' + y0 + '" width="' + (w.x + 13 - x0) + '" height="' + (y1 - y0) + '" rx="6"/>';
+      }
+      teile.push('<g class="note-weitere' + (w.klasse ? " " + w.klasse : "") + '"' +
+        (typeof w.nr === "number" ? ' data-nr="' + w.nr + '"' : "") + ">" + marke +
+        viertelnote(w.position, w.x, w.vorzeichen) + "</g>");
     });
 
     if (note) {
@@ -208,7 +223,7 @@
     var breiteGesamt = Math.max(RECHTS + 4, namensBreite(optionen.beschriftung ? String(optionen.beschriftung).length : 0),
       namensBreite(optionen.namensPlatz || 0));
     return '<svg class="notensystem-svg' + (optionen.klasse ? " " + optionen.klasse : "") + '" viewBox="0 ' + oben + " " + breiteGesamt + " " + (unten - oben) + '" role="img" aria-label="' +
-      systemText(schluessel, optionen.beschriftung, note) +
+      (optionen.beschreibung || systemText(schluessel, optionen.beschriftung, note)) +
       '" xmlns="http://www.w3.org/2000/svg">' + teile.join("") + "</svg>";
   }
 

@@ -1,6 +1,6 @@
 # Notenzoo
 
-Ein Browserspiel zum Üben von Noten im Violin- und Bassschlüssel. Im Hauptspiel „Welche Note ist das?“ (auf der Startseite der große Knopf **Noten üben** mit Aufgabenzahl und Notenbereich, zum Beispiel „10 Aufgaben · C bis G“) zeigt das Spiel eine Note im Notensystem, und das Kind tippt den passenden deutschen Notennamen an, zum Beispiel c¹, g oder F. Dazu kommen sieben Mini-Spiele. Für richtige Antworten gibt es Punkte und Sterne, mit gesammelten Sternen kommen neue Tiere dazu.
+Ein Browserspiel zum Üben von Noten im Violin- und Bassschlüssel. Im Hauptspiel „Welche Note ist das?“ (auf der Startseite der große Knopf **Noten üben** mit Aufgabenzahl und Notenbereich, zum Beispiel „10 Aufgaben · C bis G“) zeigt das Spiel eine Note im Notensystem, und das Kind tippt den passenden deutschen Notennamen an, zum Beispiel c¹, g oder F. Dazu kommen acht Mini-Spiele. Für richtige Antworten gibt es Punkte und Sterne, mit gesammelten Sternen kommen neue Tiere dazu.
 
 Das Spiel ist eine statische Website aus HTML, CSS und JavaScript. Es braucht keinen Server, keinen Build-Schritt, keine Anmeldung und lädt nichts von fremden Diensten. Den Spielstand speichert der Browser lokal im `localStorage`.
 
@@ -80,6 +80,8 @@ Auf Englisch gelten eigene Merktiere, passend zu den englischen Namen (`merktier
 
 Ganz oben steht der Hauptknopf **Noten üben** für „Welche Note ist das?“ mit einer Zeile wie „10 Aufgaben · C bis G“; der Bereich kommt aus der Notenauswahl. Direkt darunter steht die **Tägliche Notenreise** als eigene Karte mit „3 Spiele à 5 Aufgaben“ und dem Stand (heute geschafft, Tage in Folge). Die übrigen Spiele folgen als Kacheln unter „Mehr Spiele“.
 
+Spielkacheln, Notenreise und die Knöpfe **Meine Tiere**, **Rekorde**, **Einstellungen**, **Rekord speichern** und **Fehler üben** zeigen gezeichnete Symbole statt Emojis, im Stil der Tiere: warme Farben und dunkelbraune, runde Umrisse. So sehen sie auf jedem Gerät gleich aus. Die Zeichnungen stehen in `js/symbole.js`, je eine pro Kennung des Spiels oder Knopfs.
+
 ## Ergebnis
 
 Die Überschrift nennt die Kernzahl der Runde, zum Beispiel „9 von 10 richtig“, beim Notenflug die richtigen Noten und beim Memory Paare und Züge. Darunter steht der Fortschritt zum nächsten Tier, etwa „2 von 5 Sternen bis zum nächsten Tier“, mit der grauen Silhouette des Tiers, das als Nächstes kommt. Schafft das Ergebnis die Top 5, erscheint der Knopf **Rekord speichern**, der die Namenseingabe öffnet.
@@ -113,6 +115,7 @@ Alle Mini-Spiele nutzen die Einstellungen (Schlüssel, Notenauswahl, Merktiere, 
 - **Noten-Memory:** 6 Paare aus Notenkarte und Namenskarte liegen verdeckt. Decke zwei Karten auf und finde die Paare mit möglichst wenigen Zügen: bis 9 Züge gibt es 3 Sterne, bis 13 Züge 2, sonst 1. Hat der Tonumfang weniger als 6 Noten, gibt es entsprechend weniger Paare.
 - **Höher oder tiefer:** Zwei Noten stehen nebeneinander im selben System. Tippe die höhere an, oder die tiefere, wenn die Frage „Welche Note ist tiefer?“ lautet; anfangs liegen die Noten weit auseinander, später nur einen Schritt. 10 Aufgaben, Wertung wie bei „Welche Note ist das?“.
 - **Hör-Spiel:** Zum Einstieg erklingt c¹ als Bezugston, dann ein Ton, und du wählst aus drei gezeigten Noten die passende; „Nochmal hören“ spielt den Ton erneut. Der Ton entsteht im Browser, ohne Audiodateien. 10 Aufgaben, Wertung wie bei „Welche Note ist das?“.
+- **Spiel eine Melodie:** Im Notensystem stehen 4 bis 7 Noten, darunter liegt die Klaviatur. Die orange hinterlegte Note ist dran; spiele die Noten der Reihe nach, jede Taste klingt. Eine falsche Taste leuchtet kurz rot, die Note bleibt markiert, und ab dem zweiten Fehler an derselben Note nennt der Fuchs die Lage. Nach der letzten Note erklingt die ganze Melodie, die Noten leuchten dabei nacheinander auf, danach steht der Name des Lieds da. Die Melodien sind Anfänge bekannter Kinderlieder (Hänschen klein, Alle meine Entchen, Mary Had a Little Lamb, Morgen kommt der Weihnachtsmann, Freude, schöner Götterfunken, Bruder Jakob), verschoben in die Notenauswahl; passt keins, spielt das Kind eine zufällige Folge aus kleinen Schritten. Für die Taste gilt der Antwortmodus wie bei „Klaviertasten“. 5 Melodien pro Runde; bis 2 falsche Tasten gibt es 3 Sterne, bis 5 falsche Tasten 2, sonst 1. Punkte: 10 pro Melodie plus 10 pro Stern.
 - **Tägliche Notenreise:** Jeden Tag drei Etappen mit je 5 Aufgaben aus „Welche Note ist das?“, „Klaviertasten“, „Note setzen“ und „Höher oder tiefer“; die Auswahl wechselt täglich. Jede Etappe wird bis zur letzten Aufgabe gespielt. Wer alle drei Etappen gespielt hat, hat die Reise geschafft und bekommt den Durchschnitt der Etappensterne und einmal pro Tag einen Extrastern; die Startseite zeigt, ob die Reise heute geschafft ist und wie viele Tage in Folge.
 
 ## Fehler üben
@@ -133,11 +136,12 @@ In allen Spielen bleiben Notensystem und Antworten nach der Antwort an ihrer Ste
 - `js/spiel-logik.js`: Regeln, Wertung, Wiederholungen, Rekorde, Tiersammlung und Spielstand
 - `js/notensystem.js`: das Notensystem mit Violin- und Bassschlüssel
 - `js/tiere.js`: die Tierzeichnungen
-- `js/klang.js`: der Klavierton für Hör-Spiel und Klaviertasten (Web Audio API, keine Audiodateien)
-- `js/klaviatur.js`: die Klaviatur für Klaviertasten und „Fehler üben“
+- `js/symbole.js`: die gezeichneten Symbole für Spiele und Menüknöpfe
+- `js/klang.js`: der Klavierton für Hör-Spiel, Klaviertasten und „Spiel eine Melodie“ (Web Audio API, keine Audiodateien)
+- `js/klaviatur.js`: die Klaviatur für Klaviertasten, „Spiel eine Melodie“ und „Fehler üben“
 - `js/modi.js`: die gemeinsame Schnittstelle für Spielmodi
 - `js/modi/klassisch.js`: das Spiel „Welche Note ist das?“
-- `js/modi/notenflug.js`, `js/modi/klaviertasten.js`, `js/modi/note-setzen.js`, `js/modi/noten-memory.js`, `js/modi/hoeher-tiefer.js`, `js/modi/hoer-spiel.js`, `js/modi/notenreise.js`: die Mini-Spiele
+- `js/modi/notenflug.js`, `js/modi/klaviertasten.js`, `js/modi/note-setzen.js`, `js/modi/noten-memory.js`, `js/modi/hoeher-tiefer.js`, `js/modi/hoer-spiel.js`, `js/modi/melodie.js`, `js/modi/notenreise.js`: die Mini-Spiele
 - `js/fehler-ueben.js`: die Übung „Fehler üben“ nach einer Runde
 - `js/app.js`: Startseite, Ergebnis, Einstellungen, Tiere, Rekorde und Speichern
 - `tests/spiel-logik.test.js`: automatische Tests der Spiellogik

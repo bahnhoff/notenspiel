@@ -1,5 +1,5 @@
 /*
- * Gemeinsame Klaviatur für den Modus „Klaviertasten“ und für „Fehler üben“.
+ * Gemeinsame Klaviatur für „Klaviertasten“, „Spiel eine Melodie“ und „Fehler üben“.
  *
  *   var k = Klaviatur.baue(box, namen, beiTipp);
  *

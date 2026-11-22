@@ -221,6 +221,7 @@ h1:focus { outline: none; }
 }
 
 .modus-symbol { font-size: 2.6rem; line-height: 1; }
+.modus-symbol .symbol-svg { width: 3.2rem; height: 3.2rem; }
 .modus-name { overflow-wrap: anywhere; }
 
 @media (min-width: 700px) {
@@ -1314,6 +1315,7 @@ h1:focus { outline: none; }
 }
 
 .reise-symbol { font-size: 1.8rem; line-height: 1; }
+.reise-symbol .symbol-svg { width: 2.4rem; height: 2.4rem; }
 .reise-name { font-weight: 700; overflow-wrap: anywhere; }
 .reise-stand { font-weight: 700; color: var(--text-leise); white-space: nowrap; }
 .reise-etappe.ist-dran { border: 3px solid var(--akzent); }
@@ -1391,6 +1393,7 @@ h1:focus { outline: none; }
 }
 
 .start-karte .modus-symbol { flex: 0 0 auto; font-size: 2.8rem; }
+.start-karte .modus-symbol .symbol-svg { width: 3.6rem; height: 3.6rem; }
 .karte-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .karte-name { font-size: 1.3rem; line-height: 1.15; }
 .karte-info { font-size: 1rem; font-weight: 600; color: var(--text); }
@@ -1465,3 +1468,24 @@ h1:focus { outline: none; }
 
 .rekord-zeile-info { margin: 0; text-align: center; font-weight: 700; color: var(--akzent-dunkel); }
 .knopf-rekord-speichern { font-size: 1.2rem; min-height: 56px; }
+
+/* ---------- Gezeichnete Symbole (js/symbole.js) ---------- */
+
+.symbol-svg { display: block; overflow: visible; }
+/* In Knöpfen mit Text: so hoch wie etwa zwei Zeilen Schrift, mittig zur Zeile */
+.knopf-symbol { display: inline-block; vertical-align: middle; line-height: 0; }
+.knopf-symbol .symbol-svg { width: 1.9em; height: 1.9em; margin: -0.35em 0.1em -0.35em 0; }
+
+/* ---------- Spiel eine Melodie ---------- */
+
+/* Aktuelle Note: weiche orange Fläche hinter der Note, Note selbst orange.
+   Gespielte Noten grün, beim Vorspielen leuchtet die klingende Note gelb auf. */
+.melodie-note .note-marke { fill: transparent; }
+.melodie-note.ist-aktuell { color: var(--akzent-dunkel); }
+.melodie-note.ist-aktuell .note-marke { fill: rgba(232, 105, 43, 0.2); stroke: var(--akzent); stroke-width: 1.4; }
+.melodie-note.ist-gespielt { color: var(--gruen); }
+.melodie-note.leuchtet { color: #9a6400; }
+.melodie-note.leuchtet .note-marke { fill: rgba(245, 179, 0, 0.45); stroke: var(--gelb); stroke-width: 1.4; }
+
+.melodie-knoepfe { display: flex; flex-wrap: wrap; gap: 10px; }
+.melodie-knoepfe .knopf { flex: 1 1 140px; }

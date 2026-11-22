@@ -674,13 +674,16 @@
   /* ---------- Startseite ---------- */
 
   /**
-   * Symbol eines Modus auf der Startseite (Kachel und Karte). Heute ein Emoji
-   * als Text (`modus.symbol`). Gezeichnete Symbole lassen sich hier an einer
-   * Stelle einsetzen; `data-symbol` trägt die Kennung des Modus, wie bei den
-   * Knöpfen mit der Klasse `knopf-symbol` in index.html.
+   * Symbol eines Modus auf der Startseite (Kachel und Karte): die Zeichnung
+   * aus js/symbole.js zur Kennung des Modus, nur ohne Zeichnung das Emoji
+   * `modus.symbol`. `data-symbol` trägt die Kennung, wie bei den Knöpfen mit
+   * der Klasse `knopf-symbol` in index.html.
    */
   function modusSymbol(modus) {
-    var el = element("span", "modus-symbol", modus.symbol || "");
+    var el = element("span", "modus-symbol");
+    var svg = window.Symbole.zeichne(modus.id);
+    if (svg) el.innerHTML = svg;
+    else el.textContent = modus.symbol || "";
     el.dataset.symbol = modus.id;
     el.setAttribute("aria-hidden", "true");
     return el;
@@ -780,6 +783,7 @@
     b.addEventListener("click", zurStartseite);
   });
 
+  window.Symbole.setzeEin(document); // gezeichnete Symbole in Menü- und Ergebnisknöpfen
   wendeSpracheAn();
   baueStartseite();
   speichereSpielstand(); // übernimmt eine Migration alter Spielstände sofort

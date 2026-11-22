@@ -315,6 +315,42 @@
       </div>
     </section>
 
+    <!-- Spiel eine Melodie: Noten der Reihe nach auf der Klaviatur spielen (js/modi/melodie.js) -->
+    <section id="ansicht-melodie" class="ansicht ansicht-runde ansicht-klavier ansicht-melodie" aria-labelledby="titel-melodie" hidden>
+      <header class="runde-kopf">
+        <button type="button" class="knopf knopf-klein knopf-zurueck" aria-label="Zurück zur Startseite" data-text-aria-label="zurueck.aria">
+          <span aria-hidden="true">←</span> <span class="knopf-text" data-text="zurueck.startseite">Startseite</span>
+        </button>
+        <div class="runde-status">
+          <span class="sterne-anzeige" id="melodie-sterne" role="img"></span>
+          <span class="punkte-anzeige" id="melodie-punkte"></span>
+        </div>
+      </header>
+
+      <div class="runde-inhalt">
+        <div class="runde-noten">
+          <p class="aufgabe-nr" id="melodie-aufgabe"></p>
+          <h1 id="titel-melodie" class="frage" tabindex="-1" data-text="melodie.frage">Spiel die Melodie!</h1>
+          <div class="notensystem notensystem-melodie" id="melodie-notensystem"></div>
+          <div class="klaviatur" id="melodie-klaviatur" role="group" aria-label="Klaviatur" data-text-aria-label="klavier.aria"></div>
+        </div>
+        <div class="runde-antworten">
+          <div class="tier-zeile">
+            <div class="tier-klein" id="melodie-tier"></div>
+            <div class="sprechblase">
+              <div aria-live="polite">
+                <p id="melodie-text"></p>
+              </div>
+              <div class="melodie-knoepfe">
+                <button type="button" class="knopf knopf-haupt knopf-weiter" id="melodie-weiter" hidden data-text="runde.weiter">Weiter</button>
+                <button type="button" class="knopf knopf-neben" id="melodie-nochmal" hidden data-text="hoeren.nochmal">Nochmal hören</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- Fehler üben: nach einer Runde mit Fehlern, ohne Punkte und Sterne (js/fehler-ueben.js) -->
     <section id="ansicht-ueben" class="ansicht ansicht-runde ansicht-ueben" aria-labelledby="titel-ueben" hidden>
       <header class="runde-kopf">
@@ -474,6 +510,7 @@
   <script src="js/tiere.js"></script>
   <script src="js/klang.js"></script>
   <script src="js/klaviatur.js"></script>
+  <script src="js/symbole.js"></script>
   <script src="js/modi.js"></script>
   <!-- Spielmodi: je Modus eine Datei, vor js/app.js -->
   <script src="js/modi/klassisch.js"></script>
@@ -483,6 +520,7 @@
   <script src="js/modi/noten-memory.js"></script>
   <script src="js/modi/hoeher-tiefer.js"></script>
   <script src="js/modi/hoer-spiel.js"></script>
+  <script src="js/modi/melodie.js"></script>
   <script src="js/modi/notenreise.js"></script>
   <!-- Fehler üben: eigene Ansicht, kein Modus (siehe js/modi.js) -->
   <script src="js/fehler-ueben.js"></script>

@@ -430,6 +430,126 @@
     return paare * MEMORY.punkteProPaar + sterne * MEMORY.punkteProStern;
   }
 
+  /* ---------- Spiel eine Melodie ---------- */
+
+  var MELODIE = { melodienProRunde: 5, minLaenge: 4, maxLaenge: 7, punkteProMelodie: 10, punkteProStern: 10 };
+
+  /*
+   * Anfänge bekannter, gemeinfreier Kinderlieder in Dur. `toene` sind Halbtöne
+   * über dem Grundton, `dauern` Schläge (1 = Viertel). Die Namen stehen in
+   * js/texte.js unter "lied.<id>".
+   */
+  var LIEDER = [
+    { id: "haenschen", toene: [7, 4, 4, 5, 2, 2, 0], dauern: [1, 1, 2, 1, 1, 2, 2] },
+    { id: "entchen", toene: [0, 2, 4, 5, 7, 7], dauern: [1, 1, 1, 1, 2, 2] },
+    { id: "mary", toene: [4, 2, 0, 2, 4, 4, 4], dauern: [1, 1, 1, 1, 1, 1, 2] },
+    { id: "twinkle", toene: [0, 0, 7, 7, 9, 9, 7], dauern: [1, 1, 1, 1, 1, 1, 2] },
+    { id: "ode", toene: [4, 4, 5, 7, 7, 5, 4], dauern: [1, 1, 1, 1, 1, 1, 2] },
+    { id: "jakob", toene: [0, 2, 4, 0, 0, 2, 4], dauern: [1, 1, 1, 1, 1, 1, 2] }
+  ];
+
+  /**
+   * Noten eines Schlüssels nach Tonhöhe: { halbton → Note }. Gibt es zu einer
+   * Tonhöhe zwei Namen (fis und ges), gilt der Stammton, sonst der erste.
+   */
+  function notenNachTonhoehe(noten) {
+    var karte = {};
+    noten.forEach(function (n) {
+      var schon = karte[n.halbton];
+      if (!schon || (schon.vorzeichen && !n.vorzeichen)) karte[n.halbton] = n;
+    });
+    return karte;
+  }
+
+  function nachSchluessel(noten) {
+    var gruppen = {};
+    noten.forEach(function (n) { (gruppen[n.schluessel] = gruppen[n.schluessel] || []).push(n); });
+    return gruppen;
+  }
+
+  /**
+   * Alle Lieder, die sich so verschieben lassen, dass jeder Ton in der
+   * Notenauswahl eines Schlüssels liegt: [{ lied, noten, dauern }].
+   */
+  function passendeLieder(noten) {
+    var treffer = [];
+    var gruppen = nachSchluessel(noten);
+    Object.keys(gruppen).forEach(function (sl) {
+      var karte = notenNachTonhoehe(gruppen[sl]);
+      var hoehen = Object.keys(karte).map(Number);
+      if (!hoehen.length) return;
+      var tief = Math.min.apply(null, hoehen), hoch = Math.max.apply(null, hoehen);
+      LIEDER.forEach(function (lied) {
+        for (var grund = tief; grund <= hoch; grund++) {
+          var folge = lied.toene.map(function (t) { return karte[grund + t]; });
+          if (folge.every(Boolean)) treffer.push({ lied: lied.id, noten: folge, dauern: lied.dauern.slice() });
+        }
+      });
+    });
+    return treffer;
+  }
+
+  /**
+   * Zufällige, singbare Folge aus kleinen Schritten (höchstens zwei Töne der
+   * Auswahl weit) in einem Schlüssel, 4 bis 7 Noten.
+   */
+  function zufallsMelodie(noten, zufall) {
+    var gruppen = nachSchluessel(noten);
+    var listen = Object.keys(gruppen).map(function (sl) {
+      var karte = notenNachTonhoehe(gruppen[sl]);
+      return Object.keys(karte).map(Number).sort(function (a, b) { return a - b; }).map(function (h) { return karte[h]; });
+    });
+    var gute = listen.filter(function (l) { return l.length >= 3; });
+    if (!gute.length) gute = listen.sort(function (a, b) { return b.length - a.length; }).slice(0, 1);
+    var liste = zufallsElement(gute, zufall);
+    var laenge = MELODIE.minLaenge + Math.floor(zufall() * (MELODIE.maxLaenge - MELODIE.minLaenge + 1));
+    var schritte = [-2, -1, -1, 1, 1, 2];
+    var i = Math.floor(zufall() * liste.length);
+    var folge = [liste[i]];
+    while (folge.length < laenge) {
+      if (liste.length > 1) {
+        var s = zufallsElement(schritte, zufall);
+        if (i + s < 0 || i + s >= liste.length) s = -s;
+        i = Math.max(0, Math.min(liste.length - 1, i + s));
+      }
+      folge.push(liste[i]);
+    }
+    var dauern = folge.map(function () { return 1; });
+    dauern[dauern.length - 1] = 2;
+    return { lied: null, noten: folge, dauern: dauern };
+  }
+
+  /**
+   * Melodien für eine Runde: zuerst verschiedene passende Lieder (in zufälliger
+   * Lage), fehlende Plätze füllen zufällige Folgen aus kleinen Schritten.
+   * Jede Melodie: { lied (Kennung oder null), noten, dauern }.
+   */
+  function neueMelodien(noten, zufall) {
+    zufall = zufall || Math.random;
+    var nachLied = {};
+    passendeLieder(noten).forEach(function (m) { (nachLied[m.lied] = nachLied[m.lied] || []).push(m); });
+    var lieder = Object.keys(nachLied).map(function (id) { return zufallsElement(nachLied[id], zufall); });
+    // mischen (Fisher-Yates)
+    for (var i = lieder.length - 1; i > 0; i--) {
+      var j = Math.floor(zufall() * (i + 1));
+      var t = lieder[i]; lieder[i] = lieder[j]; lieder[j] = t;
+    }
+    var melodien = lieder.slice(0, MELODIE.melodienProRunde);
+    while (melodien.length < MELODIE.melodienProRunde) melodien.push(zufallsMelodie(noten, zufall));
+    return melodien;
+  }
+
+  /** Sterne nach Fehlern der ganzen Runde: 0–2 Fehler 3 Sterne, bis 5 Fehler 2, sonst 1. */
+  function melodieSterne(fehler) {
+    if (fehler <= 2) return 3;
+    if (fehler <= 5) return 2;
+    return 1;
+  }
+
+  function melodiePunkte(melodien, sterne) {
+    return melodien * MELODIE.punkteProMelodie + sterne * MELODIE.punkteProStern;
+  }
+
   /* ---------- Spielstand ---------- */
 
   function leererSpielstand() {
@@ -753,6 +873,11 @@
     MEMORY: MEMORY,
     memorySterne: memorySterne,
     memoryPunkte: memoryPunkte,
+    MELODIE: MELODIE,
+    LIEDER: LIEDER,
+    neueMelodien: neueMelodien,
+    melodieSterne: melodieSterne,
+    melodiePunkte: melodiePunkte,
     leererSpielstand: leererSpielstand,
     bereinigeSpielstand: bereinigeSpielstand,
     bereinigeEinstellungen: bereinigeEinstellungen,

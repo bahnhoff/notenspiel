@@ -102,7 +102,9 @@
       li.className = "reise-etappe" + (e ? " ist-geschafft" : i === n ? " ist-dran" : "");
       li.innerHTML = '<span class="reise-symbol" aria-hidden="true"></span>' +
         '<span class="reise-name"></span><span class="reise-stand"></span>';
-      li.querySelector(".reise-symbol").textContent = modus.symbol || "🎵";
+      var svg = window.Symbole.zeichne(modus.id);
+      if (svg) li.querySelector(".reise-symbol").innerHTML = svg;
+      else li.querySelector(".reise-symbol").textContent = modus.symbol || "";
       li.querySelector(".reise-name").textContent = (i + 1) + ". " + modus.name;
       li.querySelector(".reise-stand").textContent = e
         ? T.t("reise.stand", { richtige: e.richtige, aufgaben: e.aufgaben })

@@ -9,10 +9,12 @@
  *     get name() { return Texte.t("modus.notenflug"); },
  *                             // Name auf der Startseite und bei den Rekorden,
  *                             // als Getter, damit er der gewählten Sprache folgt
- *     symbol: "🚀",           // optional, Bild vor dem Namen auf der Startseite
- *                             // (die App setzt es über modusSymbol in js/app.js ein,
- *                             // mit data-symbol = id, damit gezeichnete Symbole es
- *                             // an einer Stelle ersetzen können)
+ *     symbol: "🚀",           // optional, Ersatz-Emoji. Auf Startseite und in der
+ *                             // Notenreise steht die Zeichnung aus js/symbole.js zur
+ *                             // Kennung (Symbole.zeichne(id), eingesetzt über
+ *                             // modusSymbol in js/app.js mit data-symbol = id). Nur
+ *                             // ohne Zeichnung erscheint das Emoji. Ein neuer Modus
+ *                             // bekommt deshalb eine Zeichnung in js/symbole.js.
  *     hauptspiel: false,      // true nur beim klassischen Spiel (großer Knopf „Noten üben“)
  *     startKarte: false,      // optional true: eigene, große Karte direkt unter dem
  *                             // Hauptknopf statt Kachel (Tägliche Notenreise)
@@ -118,6 +120,15 @@
  * unten), damit die Beschriftung nach der Antwort Breite und Höhe nicht
  * ändert, und zeigen „Weiter“ über die Hilfe zeigeWeiter. Nach der Antwort
  * hinterlegt `markiere: true` Linie oder Zwischenraum der Note.
+ *
+ * Spiel eine Melodie
+ * ------------------
+ * js/modi/melodie.js zeigt mehrere Noten in einem System: Notensystem.zeichne
+ * mit `weitere` ({ klasse, nr, marke } je Note) und `beschreibung`. Das System
+ * wird pro Melodie einmal gezeichnet, danach wechseln nur CSS-Klassen
+ * (ist-aktuell, ist-gespielt, leuchtet). Melodien, Sterne und Punkte stehen in
+ * js/spiel-logik.js (neueMelodien, melodieSterne, melodiePunkte). Das
+ * Vorspielen läuft über Timer und js/klang.js; stoppe() bricht beides ab.
  *
  * Fehler üben
  * -----------
