@@ -1,6 +1,8 @@
 /*
  * Modus „Klaviertasten“: Note im Notensystem, darunter eine Klaviatur über
- * den gewählten Bereich. Das Kind tippt die passende weiße Taste.
+ * den gewählten Bereich. Das Kind tippt die passende weiße Taste. Hat die
+ * Notenauswahl Lücken, zeigt die Klaviatur trotzdem alle weißen Tasten von der
+ * tiefsten bis zur höchsten gewählten Note, damit sie wie ein Klavier aussieht.
  * Die schwarzen Tasten sind nur Dekoration. Das mittlere C ist markiert.
  * 10 Aufgaben, Wertung wie im klassischen Spiel (js/spiel-logik.js).
  * Nutzt die Ansicht #ansicht-klavier aus index.html.
@@ -19,6 +21,7 @@
   var runde = null;
   var weiterTimer = null;
   var tasten = [];
+  var tastenNoten = [];          // alle Tasten der Klaviatur, auch die Lücken
   var tastenProReihe = 0;
   var letzteTaste = -1;
 
@@ -33,7 +36,8 @@
     umgebung = u;
     runde = L.neueRunde(u.noten, { vorrang: u.schwierig, aufgaben: u.aufgaben });
     letzteTaste = -1;
-    baueTasten(u.antworten);
+    tastenNoten = lueckenlos(u.antworten);
+    baueTasten(tastenNoten);
     u.zeigeTier($("klavier-tier"), "normal");
     u.zeigeAnsicht();
     ordneTasten(true);
@@ -48,6 +52,17 @@
 
   /* ---------- Klaviatur ---------- */
 
+  /** Weiße Tasten von der tiefsten bis zur höchsten Antwort, ohne Lücken. */
+  function lueckenlos(antworten) {
+    if (antworten.length === 0) return [];
+    var N = window.Noten;
+    var liste = [];
+    for (var s = antworten[0].stufe; s <= antworten[antworten.length - 1].stufe; s++) {
+      liste.push({ name: N.name(s), stufe: s, oktave: Math.floor(s / 7), buchstabe: N.BUCHSTABEN[s % 7] });
+    }
+    return liste;
+  }
+
   function baueTasten(antworten) {
     tasten = antworten.map(function (a) {
       var b = document.createElement("button");
@@ -55,12 +70,12 @@
       b.className = "taste";
       b.dataset.name = a.name;
       b.dataset.buchstabe = a.buchstabe;
-      var mitte = a.name === "c1";
+      var mitte = a.stufe === 28; // c¹, das mittlere C
       if (mitte) b.classList.add("taste-mitte");
       b.innerHTML = '<span class="taste-schwarz" aria-hidden="true"></span>' +
         '<span class="taste-marke" aria-hidden="true"></span>' +
         '<span class="taste-name" aria-hidden="true"></span>' +
-        (mitte ? '<span class="taste-mitte-zeichen" aria-hidden="true">c1</span>' : "");
+        (mitte ? '<span class="taste-mitte-zeichen" aria-hidden="true">c¹</span>' : "");
       b.setAttribute("aria-label", "Taste " + a.name + (mitte ? ", mittleres C" : ""));
       b.addEventListener("click", function () { beantworte(a.name); });
       return b;
@@ -203,7 +218,7 @@
     if (!aktiv() || $("ansicht-klavier").hidden || runde.gesperrt || ev.altKey || ev.ctrlKey || ev.metaKey) return;
     var taste = (ev.key || "").toLowerCase();
     if (!/^[a-h]$/.test(taste)) return;
-    var treffer = umgebung.antworten.filter(function (a) { return a.buchstabe === taste; });
+    var treffer = tastenNoten.filter(function (a) { return a.buchstabe === taste; });
     if (treffer.length === 1) {
       ev.preventDefault();
       beantworte(treffer[0].name);

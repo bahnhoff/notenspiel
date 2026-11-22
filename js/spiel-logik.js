@@ -179,7 +179,7 @@
 
   /**
    * Nimmt genau eine Antwort pro Aufgabe an. `name` ist der getippte
-   * Notenname, zum Beispiel "c1". Weitere Antworten liefern null,
+   * Notenname, zum Beispiel "c¹". Weitere Antworten liefern null,
    * bis `weiter()` die nächste Aufgabe öffnet.
    */
   function antworte(runde, name) {
@@ -344,10 +344,6 @@
 
   /* ---------- Spielstand ---------- */
 
-  function standardEinstellungen() {
-    return { schluessel: "violin", bereich: { violin: "erste", bass: "erste" }, merktiere: true };
-  }
-
   function leererSpielstand() {
     return {
       version: 2,
@@ -394,11 +390,26 @@
     return m[1] + "-" + b + (oktave === 3 ? "" : oktave - 3);
   }
 
+  /**
+   * Übernimmt nur Felder mit gültigem Typ. Neue Form: schluessel als Liste,
+   * noten als Liste von Notenkennungen. Alte Form (schluessel als Text,
+   * bereich je Schlüssel) bleibt erhalten; Noten.einstellungen übersetzt sie
+   * mit den Bereichen aus js/noten-konfiguration.js in Notenlisten.
+   */
   function bereinigeEinstellungen(roh) {
     if (!roh || typeof roh !== "object") return null;
-    var e = standardEinstellungen();
-    if (["violin", "bass", "beide"].indexOf(roh.schluessel) !== -1) e.schluessel = roh.schluessel;
-    if (roh.bereich && typeof roh.bereich === "object") {
+    var e = {};
+    if (Array.isArray(roh.schluessel)) {
+      e.schluessel = roh.schluessel.filter(function (s) { return s === "violin" || s === "bass"; });
+    } else if (["violin", "bass", "beide"].indexOf(roh.schluessel) !== -1) {
+      e.schluessel = roh.schluessel;
+    }
+    if (Array.isArray(roh.noten)) {
+      e.noten = roh.noten.filter(function (id) {
+        return typeof id === "string" && /^(violin|bass)-[a-hA-H]\d?$/.test(id);
+      }).slice(0, 100);
+    } else if (roh.bereich && typeof roh.bereich === "object") {
+      e.bereich = {};
       if (typeof roh.bereich.violin === "string") e.bereich.violin = roh.bereich.violin;
       if (typeof roh.bereich.bass === "string") e.bereich.bass = roh.bereich.bass;
     }

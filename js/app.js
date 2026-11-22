@@ -49,7 +49,8 @@
         geladen = L.leererSpielstand();
       }
     }
-    if (!geladen.einstellungen) geladen.einstellungen = L.bereinigeEinstellungen(K.standardEinstellungen) || L.bereinigeEinstellungen({});
+    // Fehlende oder alte Einstellungen werden in die aktuelle Form mit Notenlisten übersetzt.
+    geladen.einstellungen = N.einstellungen(K, geladen.einstellungen);
     return geladen;
   }
 
@@ -90,15 +91,28 @@
     return N.fuerEinstellungen(K, stand.einstellungen);
   }
 
-  function auswahlText() {
-    var e = stand.einstellungen;
-    return ["violin", "bass"].filter(function (s) {
-      return e.schluessel === s || e.schluessel === "beide";
-    }).map(function (s) {
-      var b = N.bereichVon(K, s, e.bereich[s]);
-      return N.SCHLUESSEL[s].name + ": " + (b ? b.von + " bis " + b.bis : "?");
+  /** Reicht die Auswahl zum Spielen? Mindestens 3 verschiedene Notennamen. */
+  function auswahlReicht(a) {
+    return a.antworten.length >= N.MINDEST_NOTEN;
+  }
+
+  /** Kurzbeschreibung der Noten eines Schlüssels, zum Beispiel „c¹ bis g¹“ oder „c¹, e¹, g¹“. */
+  function notenText(noten) {
+    if (noten.length === 0) return "keine Noten";
+    var erste = noten[0], letzte = noten[noten.length - 1];
+    if (noten.length === 1) return erste.name;
+    if (letzte.stufe - erste.stufe === noten.length - 1) return erste.name + " bis " + letzte.name;
+    if (noten.length <= 5) return noten.map(function (n) { return n.name; }).join(", ");
+    return noten.length + " Noten von " + erste.name + " bis " + letzte.name;
+  }
+
+  function auswahlText(a) {
+    return stand.einstellungen.schluessel.map(function (s) {
+      return N.SCHLUESSEL[s].name + ": " + notenText(a.noten.filter(function (n) { return n.schluessel === s; }));
     }).join(" · ");
   }
+
+  var ZU_WENIG = "Wähle in den Einstellungen mindestens " + N.MINDEST_NOTEN + " verschiedene Noten aus, dann kann es losgehen.";
 
   /* ---------- Ansichten ---------- */
 
@@ -123,8 +137,11 @@
     zeigeTier($("start-tier"), "normal");
     $("hinweis-speicher").hidden = speicherVerfuegbar;
     var a = auswahl();
-    $("knopf-start").disabled = a.noten.length === 0;
-    $("start-auswahl").textContent = a.noten.length ? auswahlText() : "Der gewählte Bereich enthält keine Noten. Prüfe js/noten-konfiguration.js.";
+    var reicht = auswahlReicht(a);
+    $("knopf-start").disabled = !reicht;
+    Array.prototype.forEach.call(document.querySelectorAll("#start-modi .knopf-modus"), function (b) { b.disabled = !reicht; });
+    $("start-auswahl").textContent = reicht ? auswahlText(a) : ZU_WENIG;
+    $("start-auswahl").classList.toggle("start-auswahl-hinweis", !reicht);
     aktualisiereKacheln();
     zeigeAnsicht("start");
   }
@@ -137,7 +154,7 @@
     offenerRekord = null;
     aktiverModus = modus;
     var a = auswahl();
-    if (a.noten.length === 0) return;
+    if (!auswahlReicht(a)) return;
     var nr = ++startNr;
     laufendeNr = nr;
     modus.starte({
@@ -160,7 +177,7 @@
     });
   }
 
-  /** Merktier zur Note, zum Beispiel „d1 wie Delfin“, oder null, wenn ausgeschaltet. */
+  /** Merktier zur Note, zum Beispiel „d¹ wie Delfin“, oder null, wenn ausgeschaltet. */
   function merkhilfe(note) {
     if (!stand.einstellungen.merktiere || !note || !note.tier || !window.Tiere.hat(note.tier)) return null;
     var name = window.Tiere.NAMEN[note.tier] || note.tier;
@@ -349,64 +366,160 @@
 
   /* ---------- Einstellungen ---------- */
 
-  function gruppe(formular, titel, name, optionen, wert, beiWahl) {
-    var fs = element("fieldset", "einstellung");
-    fs.appendChild(element("legend", "", titel));
-    optionen.forEach(function (o) {
-      var label = element("label", "wahl");
-      var input = document.createElement("input");
-      input.type = "radio";
-      input.name = name;
-      input.value = o.wert;
-      input.checked = o.wert === wert;
-      input.addEventListener("change", function () { if (input.checked) beiWahl(o.wert); });
-      label.appendChild(input);
-      label.appendChild(element("span", "wahl-text", o.text));
-      fs.appendChild(label);
-    });
-    formular.appendChild(fs);
-    return fs;
-  }
+  var OKTAVEN = ["", "", "Große Oktave", "Kleine Oktave", "Eingestrichene Oktave", "Zweigestrichene Oktave", "Dreigestrichene Oktave"];
+  var einstellungsHinweis = "";
 
-  function aendereEinstellung(aenderung, fokusName) {
+  /** Speichert eine Änderung, baut die Ansicht neu und setzt den Fokus wieder auf das Bedienelement. */
+  function aendereEinstellung(aenderung, fokus) {
+    einstellungsHinweis = "";
     aenderung(stand.einstellungen);
     speichereSpielstand();
     baueEinstellungen();
-    var feld = document.querySelector('#einstellungen-formular input[name="' + fokusName + '"]:checked');
-    if (feld) feld.focus({ preventScroll: true });
+    var el = document.querySelector('#einstellungen-formular [data-fokus="' + fokus + '"]');
+    if (el) el.focus({ preventScroll: true });
+  }
+
+  /** Kästchen oder Schalter mit Beschriftung. */
+  function kaestchen(text, fokus, an, schalter, beiWechsel) {
+    var label = element("label", schalter ? "wahl wahl-schalter" : "wahl");
+    var input = document.createElement("input");
+    input.type = "checkbox";
+    input.checked = an;
+    input.dataset.fokus = fokus;
+    if (schalter) input.setAttribute("role", "switch");
+    input.addEventListener("change", function () { beiWechsel(input.checked); });
+    label.appendChild(input);
+    label.appendChild(element("span", "wahl-text", text));
+    return label;
+  }
+
+  function notenGruppe(f, sl, e) {
+    var fs = element("fieldset", "einstellung");
+    fs.appendChild(element("legend", "", "Noten im " + N.SCHLUESSEL[sl].name));
+    var verfuegbar = N.verfuegbareNoten(K, sl);
+    var alleIds = verfuegbar.map(function (n) { return n.id; });
+    function setze(ids) {
+      return function (x) {
+        x.noten = x.noten.filter(function (id) { return alleIds.indexOf(id) === -1; }).concat(ids);
+      };
+    }
+
+    // Schnellwahl: setzt nur die Häkchen dieses Schlüssels.
+    var schnell = element("div", "noten-schnellwahl");
+    schnell.setAttribute("role", "group");
+    schnell.setAttribute("aria-label", "Schnellwahl " + N.SCHLUESSEL[sl].name);
+    var wahlen = N.bereichsListe(K, sl).map(function (b) {
+      return { id: b.id, text: b.name, info: N.name(N.stufe(b.von)) + "–" + N.name(N.stufe(b.bis)), ids: N.bereichsKennungen(K, sl, b.id) };
+    }).concat([{ id: "alle", text: "Alle", ids: alleIds }, { id: "keine", text: "Keine", ids: [] }]);
+    wahlen.forEach(function (w) {
+      var b = element("button", "knopf knopf-klein knopf-schnellwahl");
+      b.type = "button";
+      b.dataset.fokus = sl + "-schnell-" + w.id;
+      b.appendChild(element("span", "schnellwahl-name", w.text));
+      if (w.info) b.appendChild(element("span", "schnellwahl-info", w.info));
+      b.addEventListener("click", function () { aendereEinstellung(setze(w.ids), b.dataset.fokus); });
+      schnell.appendChild(b);
+    });
+    fs.appendChild(schnell);
+
+    // Ankreuz-Knöpfe, eine Reihe pro Oktave, Buchstaben in festen Spalten.
+    var oktaven = [];
+    verfuegbar.forEach(function (n) {
+      var letzte = oktaven[oktaven.length - 1];
+      if (!letzte || letzte.oktave !== n.oktave) oktaven.push(letzte = { oktave: n.oktave, noten: [] });
+      letzte.noten.push(n);
+    });
+    oktaven.forEach(function (o) {
+      var reihe = element("div", "noten-oktave");
+      reihe.setAttribute("role", "group");
+      var titel = element("p", "noten-oktave-titel", OKTAVEN[o.oktave] || "");
+      titel.id = "oktave-" + sl + "-" + o.oktave;
+      reihe.setAttribute("aria-labelledby", titel.id);
+      reihe.appendChild(titel);
+      var gitter = element("div", "noten-gitter");
+      o.noten.forEach(function (n) {
+        var an = e.noten.indexOf(n.id) !== -1;
+        var b = element("button", "noten-wahl" + (an ? " ist-an" : ""));
+        b.type = "button";
+        b.dataset.fokus = n.id;
+        b.setAttribute("aria-pressed", an ? "true" : "false");
+        b.setAttribute("aria-label", n.name);
+        b.style.gridColumn = String(N.BUCHSTABEN.indexOf(n.buchstabe) % 7 + 1);
+        b.appendChild(element("span", "noten-wahl-haken", an ? "✓" : "")).setAttribute("aria-hidden", "true");
+        b.appendChild(element("span", "noten-wahl-name", n.name)).setAttribute("aria-hidden", "true");
+        b.addEventListener("click", function () {
+          aendereEinstellung(function (x) {
+            if (an) x.noten = x.noten.filter(function (id) { return id !== n.id; });
+            else x.noten = x.noten.concat([n.id]);
+          }, n.id);
+        });
+        gitter.appendChild(b);
+      });
+      reihe.appendChild(gitter);
+      fs.appendChild(reihe);
+    });
+    f.appendChild(fs);
   }
 
   function baueEinstellungen() {
     var f = $("einstellungen-formular");
     var e = stand.einstellungen;
     f.innerHTML = "";
-    gruppe(f, "Schlüssel", "schluessel", [
-      { wert: "violin", text: "Violinschlüssel" },
-      { wert: "bass", text: "Bassschlüssel" },
-      { wert: "beide", text: "Beide gemischt" }
-    ], e.schluessel, function (w) {
-      aendereEinstellung(function (x) { x.schluessel = w; }, "schluessel");
+
+    var fs = element("fieldset", "einstellung");
+    fs.appendChild(element("legend", "", "Schlüssel"));
+    ["violin", "bass"].forEach(function (sl) {
+      var an = e.schluessel.indexOf(sl) !== -1;
+      fs.appendChild(kaestchen(N.SCHLUESSEL[sl].name, "schluessel-" + sl, an, false, function (neu) {
+        if (!neu && e.schluessel.length === 1) {
+          // Mindestens ein Schlüssel bleibt angekreuzt.
+          baueEinstellungen();
+          einstellungsHinweis = "Ein Schlüssel bleibt immer angekreuzt.";
+          zeigeEinstellungsHinweis();
+          var el = document.querySelector('#einstellungen-formular [data-fokus="schluessel-' + sl + '"]');
+          if (el) el.focus({ preventScroll: true });
+          return;
+        }
+        aendereEinstellung(function (x) {
+          x.schluessel = ["violin", "bass"].filter(function (s) { return s === sl ? neu : x.schluessel.indexOf(s) !== -1; });
+        }, "schluessel-" + sl);
+      }));
     });
-    ["violin", "bass"].forEach(function (s) {
-      if (e.schluessel !== s && e.schluessel !== "beide") return;
-      var aktuell = N.bereichVon(K, s, e.bereich[s]);
-      gruppe(f, "Tonumfang im " + N.SCHLUESSEL[s].name, "bereich-" + s, N.bereichsListe(K, s).map(function (b) {
-        return { wert: b.id, text: b.name };
-      }), aktuell ? aktuell.id : "", function (w) {
-        aendereEinstellung(function (x) { x.bereich[s] = w; }, "bereich-" + s);
-      });
-    });
-    gruppe(f, "Merktiere nach der Antwort", "merktiere", [
-      { wert: "an", text: "An, zum Beispiel „d1 wie Delfin“" },
-      { wert: "aus", text: "Aus" }
-    ], e.merktiere ? "an" : "aus", function (w) {
-      aendereEinstellung(function (x) { x.merktiere = w === "an"; }, "merktiere");
-    });
-    var info = element("p", "einstellungen-info", "Die Einstellungen gelten für alle Spiele und werden auf diesem Gerät gespeichert.");
-    f.appendChild(info);
+    f.appendChild(fs);
+
+    var hinweis = element("p", "einstellungen-hinweis");
+    hinweis.id = "einstellungen-hinweis";
+    hinweis.setAttribute("role", "status");
+    f.appendChild(hinweis);
+
+    e.schluessel.forEach(function (sl) { notenGruppe(f, sl, e); });
+
+    var mt = element("fieldset", "einstellung");
+    mt.appendChild(element("legend", "", "Merktiere"));
+    mt.appendChild(kaestchen("Merktier nach der Antwort, zum Beispiel „d¹ wie Delfin“", "merktiere", e.merktiere, true, function (neu) {
+      aendereEinstellung(function (x) { x.merktiere = neu; }, "merktiere");
+    }));
+    f.appendChild(mt);
+    f.appendChild(element("p", "einstellungen-info", "Die Einstellungen gelten für alle Spiele und werden auf diesem Gerät gespeichert."));
+    zeigeEinstellungsHinweis();
+  }
+
+  /** Freundlicher Hinweis oben: zu wenige Noten oder letzter Schlüssel. */
+  function zeigeEinstellungsHinweis() {
+    var el = $("einstellungen-hinweis");
+    if (!el) return;
+    var a = auswahl();
+    var text = einstellungsHinweis;
+    if (!auswahlReicht(a)) {
+      text = (text ? text + " " : "") + "Kreuze mindestens " + N.MINDEST_NOTEN + " verschiedene Noten an, sonst können die Spiele nicht starten." +
+        (a.antworten.length ? " Gewählt: " + a.antworten.map(function (x) { return x.name; }).join(", ") + "." : "");
+    }
+    el.textContent = text;
+    el.hidden = !text;
   }
 
   function zeigeEinstellungen() {
+    einstellungsHinweis = "";
     baueEinstellungen();
     zeigeAnsicht("einstellungen");
   }

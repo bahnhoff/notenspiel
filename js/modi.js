@@ -26,7 +26,7 @@
  *   noten          erzeugte Noten der aktuellen Einstellungen (siehe js/noten.js)
  *   antworten      eindeutige Notennamen, tief nach hoch: { name, stufe, oktave, buchstabe }
  *   bereich        [tiefste, höchste Position] für Notensystem.zeichne(…, { bereich })
- *   einstellungen  { schluessel, bereich, merktiere }
+ *   einstellungen  { schluessel: ["violin", "bass"], noten: [Kennungen], merktiere }
  *   schwierig      Notenkennungen, die zuletzt Mühe gemacht haben
  *   aufgaben       optional: Zahl der Aufgaben, zum Beispiel 5 in der Notenreise.
  *                  Fehlt sie, gilt die normale Rundenlänge (10). Modi mit
@@ -145,7 +145,7 @@
   }
 
   /**
-   * Zeigt nach der Antwort das Merktier, zum Beispiel „d1 wie Delfin“.
+   * Zeigt nach der Antwort das Merktier, zum Beispiel „d¹ wie Delfin“.
    * `id` ist die Kennung der Box, Bild und Text heißen id-bild und id-text.
    */
   function zeigeMerkhilfe(umgebung, note, id) {

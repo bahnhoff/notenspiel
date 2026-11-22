@@ -122,7 +122,7 @@
       teile.push(viertelnote(p, NOTE_X));
 
       if (optionen.beschriftung) {
-        teile.push('<text class="notenname" x="' + (NOTE_X + 22) + '" y="' + (ny + 5.5) + '" font-size="16" font-weight="700" fill="currentColor">' + optionen.beschriftung + "</text>");
+        teile.push('<text class="notenname" x="' + (NOTE_X + 22) + '" y="' + (ny + 5.5) + '" font-size="18" font-weight="700" fill="currentColor">' + optionen.beschriftung + "</text>");
       }
       teile.push("</g>");
     }

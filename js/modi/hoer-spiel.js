@@ -1,6 +1,6 @@
 /*
  * Modus „Hör-Spiel“: Das Spiel spielt einen Ton, das Kind wählt aus drei
- * gezeigten Noten die passende. Zum Einstieg erklingt c1 als Bezugston.
+ * gezeigten Noten die passende. Zum Einstieg erklingt c¹ als Bezugston.
  * „Nochmal hören“ ist immer da. 10 Aufgaben, Wertung wie im klassischen
  * Spiel (js/spiel-logik.js). Tastatur: 1, 2, 3 wählen eine Note.
  *
@@ -17,8 +17,8 @@
   var L = window.SpielLogik;
   var H = window.Modi.hilfen;
   var PAUSE_NACH_RICHTIG = 1300; // Millisekunden
-  var PAUSE_BEZUGSTON = 1600;    // vom Bezugston c1 bis zum ersten Aufgabenton
-  var MITTLERES_C = 28;          // Stufe von c1 (js/noten.js)
+  var PAUSE_BEZUGSTON = 1600;    // vom Bezugston c¹ bis zum ersten Aufgabenton
+  var MITTLERES_C = 28;          // Stufe von c¹ (js/noten.js)
   var OPTIONEN = 3;
   // Schmales System für die drei Notenkarten
   var FORM = { breite: 92, noteX: 70 };
@@ -163,7 +163,7 @@
     var mitTon = Ton.bereit();
     zeigeTonHinweis(mitTon);
     if (mitTon && Ton.spiele(MITTLERES_C)) {
-      $("hoeren-text").textContent = "Hör zu: Das ist c1, das mittlere C. Gleich kommt dein Ton.";
+      $("hoeren-text").textContent = "Hör zu: Das ist c¹, das mittlere C. Gleich kommt dein Ton.";
       offen = false;
       timer = setTimeout(function () {
         if (!aktiv()) return;

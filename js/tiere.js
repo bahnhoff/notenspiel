@@ -17,7 +17,7 @@
 
   var REGENBOGEN = ["#ff6b6b", "#ffa94d", "#ffd43b", "#69db7c", "#4dabf7", "#9775fa"];
 
-  // Namen der Merktiere („d1 wie Delfin“).
+  // Namen der Merktiere („d¹ wie Delfin“).
   var NAMEN = {
     chamaeleon: "Chamäleon", delfin: "Delfin", elefant: "Elefant", frosch: "Frosch",
     fuchs: "Fuchs", giraffe: "Giraffe", affe: "Affe", hase: "Hase"

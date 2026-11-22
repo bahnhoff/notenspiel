@@ -1,6 +1,6 @@
 # Notenzoo
 
-Ein Browserspiel zum Üben von Noten im Violin- und Bassschlüssel. Im Hauptspiel „Welche Note ist das?“ zeigt das Spiel eine Note im Notensystem, und das Kind tippt den passenden deutschen Notennamen an, zum Beispiel `c1`, `g` oder `F`. Dazu kommen sieben Mini-Spiele. Für richtige Antworten gibt es Punkte und Sterne, mit gesammelten Sternen kommen neue Tiere dazu.
+Ein Browserspiel zum Üben von Noten im Violin- und Bassschlüssel. Im Hauptspiel „Welche Note ist das?“ zeigt das Spiel eine Note im Notensystem, und das Kind tippt den passenden deutschen Notennamen an, zum Beispiel c¹, g oder F. Dazu kommen sieben Mini-Spiele. Für richtige Antworten gibt es Punkte und Sterne, mit gesammelten Sternen kommen neue Tiere dazu.
 
 Das Spiel ist eine statische Website aus HTML, CSS und JavaScript. Es braucht keinen Server, keinen Build-Schritt, keine Anmeldung und lädt nichts von fremden Diensten. Den Spielstand speichert der Browser lokal im `localStorage`.
 
@@ -29,27 +29,27 @@ Nach ein bis zwei Minuten ist das Spiel unter `https://<owner>.github.io/<repo>/
 
 Unter **Einstellungen** auf der Startseite wählst du:
 
-- den Schlüssel: Violinschlüssel, Bassschlüssel oder beide gemischt
-- den Tonumfang je Schlüssel, zum Beispiel „Erste Noten: c1 bis g1“, „1 Oktave: c1 bis c2“ oder „2 Oktaven: C bis c1“
-- ob nach der Antwort ein Merktier erscheint
+- die Schlüssel: Kästchen für Violinschlüssel und Bassschlüssel, auch beide gleichzeitig. Ein Schlüssel bleibt immer angekreuzt.
+- die Noten je Schlüssel: Jede Note ist ein großer Ankreuz-Knopf, eine Reihe pro Oktave. Die Schnellwahl-Knöpfe „Erste Noten“, „1 Oktave“, „2 Oktaven“, „Alle“ und „Keine“ setzen die Häkchen auf einmal; danach kannst du einzelne Noten an- oder abwählen, auch mit Lücken (zum Beispiel nur c¹, e¹ und g¹).
+- mit einem Schalter, ob nach der Antwort ein Merktier erscheint
 
-Die Einstellungen gelten für alle Spiele und bleiben auf dem Gerät gespeichert. Bei gemischten Schlüsseln enthalten die Antwortschaltflächen die Noten beider Bereiche. Umfasst die Auswahl mehrere Oktaven, steht jede Oktave in einer eigenen Reihe: tiefe Noten unten, hohe oben.
+Insgesamt müssen mindestens 3 verschiedene Noten angekreuzt sein, sonst zeigt das Spiel einen Hinweis, und die Spiele starten nicht. Die Einstellungen gelten für alle Spiele und bleiben auf dem Gerät gespeichert. Ältere Einstellungen mit Tonumfang werden automatisch in die passende Notenauswahl übersetzt. Bei beiden Schlüsseln enthalten die Antwortschaltflächen die Noten beider Schlüssel. Umfasst die Auswahl mehrere Oktaven, steht jede Oktave in einer eigenen Reihe: tiefe Noten unten, hohe oben.
 
-Die Notennamen folgen der deutschen Schreibweise: `C D E F G A H` (große Oktave), `c d e f g a h` (kleine Oktave), `c1` bis `h1` (c1 ist das mittlere C), danach `c2` und `c3`.
+Die Notennamen folgen der deutschen Schreibweise mit hochgestellter Oktavziffer: C D E F G A H (große Oktave), c d e f g a h (kleine Oktave), c¹ bis h¹ (c¹ ist das mittlere C), danach c² bis h² und c³. In `js/noten-konfiguration.js` und in den Notenkennungen (zum Beispiel `violin-c1`) steht die Ziffer als normale Ziffer.
 
 ## Bereiche und Merktiere anpassen
 
 Alle Anpassungen stehen in der Datei `js/noten-konfiguration.js`. Die Noten selbst musst du nicht pflegen: Das Spiel erzeugt Name, Lage im Notensystem, Hinweis und Merktier aus Schlüssel und Bereich.
 
-- Unter `bereiche` stehen die Tonumfänge je Schlüssel mit Kennung (`id`), Anzeigetext (`name`) und tiefster und höchster Note (`von`, `bis`). Neue Einträge erscheinen automatisch in den Einstellungen.
+- Unter `bereiche` stehen die Tonumfänge je Schlüssel mit Kennung (`id`), Text auf dem Schnellwahl-Knopf (`name`) und tiefster und höchster Note (`von`, `bis`, zum Beispiel `"c1"`). Neue Einträge erscheinen automatisch als Schnellwahl. Zum Ankreuzen stehen alle Noten vom tiefsten bis zum höchsten Bereich des Schlüssels bereit.
 - Unter `merktiere` steht das Tier zu jedem Buchstaben. Mit `merktierAb` bekommt ein Buchstabe ab einer bestimmten Note ein anderes Tier.
-- Unter `standardEinstellungen` legst du fest, womit das Spiel beim ersten Start beginnt.
+- Unter `standardEinstellungen` legst du fest, womit das Spiel beim ersten Start beginnt: angekreuzte Schlüssel, je Schlüssel der Bereich, dessen Noten angekreuzt sind, und die Merktiere.
 
 Nach dem Speichern lädst du die Seite neu.
 
 ## Merktiere
 
-Nach jeder Antwort zeigt das Spiel das Tier zum Buchstaben der Note, zum Beispiel „d1 wie Delfin“. Vor der Antwort ist das Tier nicht zu sehen. In den Einstellungen lassen sich die Merktiere ausschalten.
+Nach jeder Antwort zeigt das Spiel das Tier zum Buchstaben der Note, zum Beispiel „d¹ wie Delfin“. Vor der Antwort ist das Tier nicht zu sehen. In den Einstellungen lassen sich die Merktiere ausschalten.
 
 - c: Chamäleon
 - d: Delfin
@@ -78,14 +78,14 @@ Das Spiel führt für jedes Spiel die fünf besten Ergebnisse. Schafft ein Ergeb
 
 ## Mini-Spiele
 
-Alle Mini-Spiele nutzen die Einstellungen (Schlüssel, Tonumfang, Merktiere), sammeln Sterne in dieselbe Sammlung und haben eigene Rekorde.
+Alle Mini-Spiele nutzen die Einstellungen (Schlüssel, Notenauswahl, Merktiere), sammeln Sterne in dieselbe Sammlung und haben eigene Rekorde.
 
 - **Notenflug:** Eine Note fliegt von rechts nach links über das Notensystem. Tippe ihren Namen, bevor sie den Schlüssel erreicht. Zu spät oder falsch kostet einen von drei Sternen, nach dem dritten Fehler ist das Spiel vorbei. Jedes Level hat 10 Noten und ist etwa 15 % schneller als das vorige. Eine richtige Note bringt 10 Punkte mal Level, jedes geschaffte Level einen neuen Stern (höchstens 3).
-- **Klaviertasten:** Unter der Note liegt eine Klaviatur über den gewählten Tonumfang, das mittlere C ist markiert. Tippe die passende weiße Taste. 10 Aufgaben, Wertung wie bei „Welche Note ist das?“.
+- **Klaviertasten:** Unter der Note liegt eine Klaviatur von der tiefsten bis zur höchsten gewählten Note (bei Lücken mit allen weißen Tasten dazwischen), das mittlere C ist markiert. Tippe die passende weiße Taste. 10 Aufgaben, Wertung wie bei „Welche Note ist das?“.
 - **Note setzen:** Das Spiel nennt einen Notennamen, zum Beispiel `f1`. Tippe im Notensystem auf die passende Linie oder den Zwischenraum, verschiebe die Note bei Bedarf mit ▲ und ▼ und tippe auf **Prüfen**. 10 Aufgaben, Wertung wie bei „Welche Note ist das?“.
 - **Noten-Memory:** 6 Paare aus Notenkarte und Namenskarte liegen verdeckt. Decke zwei Karten auf und finde die Paare mit möglichst wenigen Zügen: bis 9 Züge gibt es 3 Sterne, bis 13 Züge 2, sonst 1. Hat der Tonumfang weniger als 6 Noten, gibt es entsprechend weniger Paare.
 - **Höher oder tiefer:** Zwei Noten stehen nebeneinander im selben System. Tippe die höhere an, oder die tiefere, wenn die Frage „Welche Note ist tiefer?“ lautet; anfangs liegen die Noten weit auseinander, später nur einen Schritt. 10 Aufgaben, Wertung wie bei „Welche Note ist das?“.
-- **Hör-Spiel:** Zum Einstieg erklingt c1 als Bezugston, dann ein Ton, und du wählst aus drei gezeigten Noten die passende; „Nochmal hören“ spielt den Ton erneut. Der Ton entsteht im Browser, ohne Audiodateien. 10 Aufgaben, Wertung wie bei „Welche Note ist das?“.
+- **Hör-Spiel:** Zum Einstieg erklingt c¹ als Bezugston, dann ein Ton, und du wählst aus drei gezeigten Noten die passende; „Nochmal hören“ spielt den Ton erneut. Der Ton entsteht im Browser, ohne Audiodateien. 10 Aufgaben, Wertung wie bei „Welche Note ist das?“.
 - **Tägliche Notenreise:** Jeden Tag drei Etappen mit je 5 Aufgaben aus „Welche Note ist das?“, „Klaviertasten“, „Note setzen“ und „Höher oder tiefer“; die Auswahl wechselt täglich. Wer alle drei Etappen ohne drei Fehler in einer Etappe schafft, bekommt den Durchschnitt der Etappensterne und einmal pro Tag einen Extrastern; die Startseite zeigt, ob die Reise heute geschafft ist und wie viele Tage in Folge.
 
 Ältere Spielstände bleiben erhalten: Sterne und Rekorde zählen weiter, Häschen und Kätzchen bleiben, fehlende Tiere ergänzt das Spiel einmalig nach Sternzahl.

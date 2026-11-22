@@ -4,7 +4,9 @@
  * Läuft im Browser (window.Noten) und in Node (für die Tests).
  *
  * Stufe = Oktave × 7 + Buchstabe (C = 0 … H = 6), Oktave wie in der
- * wissenschaftlichen Schreibweise (c1 = C4 = Stufe 28).
+ * wissenschaftlichen Schreibweise (c¹ = C4 = Stufe 28).
+ * Angezeigt wird `name` mit hochgestellter Oktavziffer (c¹), Kennungen und
+ * Spielstand nutzen die ASCII-Form (`violin-c1`, siehe `kennung`).
  * Position = Schritte von der untersten Linie (0 = unterste Linie).
  */
 (function (root) {
@@ -20,8 +22,10 @@
 
   var ORDNUNG = ["ersten", "zweiten", "dritten", "vierten", "fünften", "sechsten"];
 
-  /** Deutscher Name einer Stufe: C (große), c (kleine), c1, c2, c3 … */
-  function name(stufe) {
+  var HOCH = ["\u2070", "\u00b9", "\u00b2", "\u00b3", "\u2074", "\u2075", "\u2076", "\u2077", "\u2078", "\u2079"];
+
+  /** ASCII-Kennung einer Stufe für Notenkennungen und Spielstand: C, c, c1, c2 … */
+  function kennung(stufe) {
     var oktave = Math.floor(stufe / 7);
     var b = BUCHSTABEN[((stufe % 7) + 7) % 7];
     if (oktave <= 2) return b.toUpperCase();
@@ -29,9 +33,17 @@
     return b + (oktave - 3);
   }
 
-  /** Stufe zu einem Namen, oder null bei unbekanntem Namen. */
+  /** Deutscher Name zum Anzeigen, Oktavziffer hochgestellt: C, c, c¹, c², c³ … */
+  function name(stufe) {
+    return kennung(stufe).replace(/\d/g, function (z) { return HOCH[Number(z)]; });
+  }
+
+  /** Stufe zu einem Namen ("c1" oder "c¹"), oder null bei unbekanntem Namen. */
   function stufe(notenname) {
-    var m = /^([a-hA-H])(\d?)$/.exec(String(notenname || ""));
+    var text = String(notenname || "").replace(/[\u2070\u00b9\u00b2\u00b3\u2074-\u2079]/g, function (z) {
+      return String(HOCH.indexOf(z));
+    });
+    var m = /^([a-hA-H])(\d?)$/.exec(text);
     if (!m) return null;
     var b = BUCHSTABEN.indexOf(m[1].toLowerCase());
     if (b < 0) return null;
@@ -85,7 +97,7 @@
 
   function erzeugeNote(konfiguration, schluessel, s) {
     return {
-      id: schluessel + "-" + name(s),
+      id: schluessel + "-" + kennung(s),
       schluessel: schluessel,
       name: name(s),
       buchstabe: BUCHSTABEN[s % 7],
@@ -119,24 +131,69 @@
     return liste[0] || null;
   }
 
-  function schluesselListe(einstellungen) {
-    var s = einstellungen && einstellungen.schluessel;
-    if (s === "bass") return ["bass"];
-    if (s === "beide") return ["violin", "bass"];
-    return ["violin"];
+  /** Alle Noten, die ein Schlüssel in den Einstellungen anbietet: vom tiefsten bis zum höchsten Bereich. */
+  function verfuegbareNoten(konfiguration, schluessel) {
+    var liste = bereichsListe(konfiguration, schluessel);
+    if (!SCHLUESSEL[schluessel] || liste.length === 0) return [];
+    var stufen = [];
+    liste.forEach(function (b) { stufen.push(stufe(b.von), stufe(b.bis)); });
+    return notenImBereich(konfiguration, schluessel, kennung(Math.min.apply(null, stufen)), kennung(Math.max.apply(null, stufen)));
+  }
+
+  /** Kennungen der Noten eines Bereichs, zum Beispiel ["violin-c1", …]. */
+  function bereichsKennungen(konfiguration, schluessel, bereichId) {
+    var b = bereichVon(konfiguration, schluessel, bereichId);
+    return b ? notenImBereich(konfiguration, schluessel, b.von, b.bis).map(function (n) { return n.id; }) : [];
+  }
+
+  /**
+   * Bringt Einstellungen in die aktuelle Form und übersetzt alte Einstellungen:
+   *   { schluessel: ["violin", "bass"], noten: ["violin-c1", "bass-G", …], merktiere: true }
+   * `noten` enthält die gewählten Noten beider Schlüssel. Abgefragt werden nur
+   * die Noten der angekreuzten Schlüssel; die Auswahl des anderen bleibt erhalten.
+   * Alte Form { schluessel: "violin" | "bass" | "beide", bereich: { violin, bass } }
+   * wird in Notenlisten übersetzt. Fehlt etwas, gilt `standardEinstellungen`.
+   */
+  function einstellungen(konfiguration, roh) {
+    var standard = konfiguration.standardEinstellungen || {};
+    if (!roh || typeof roh !== "object") roh = standard;
+    function schluesselAus(wert) {
+      if (wert === "beide") return ["violin", "bass"];
+      if (typeof wert === "string") wert = [wert];
+      if (!Array.isArray(wert)) return [];
+      return ["violin", "bass"].filter(function (s) { return wert.indexOf(s) !== -1; });
+    }
+    var sl = schluesselAus(roh.schluessel);
+    if (sl.length === 0) sl = schluesselAus(standard.schluessel);
+    if (sl.length === 0) sl = ["violin"];
+
+    var noten;
+    if (Array.isArray(roh.noten)) {
+      var erlaubt = {};
+      ["violin", "bass"].forEach(function (s) {
+        verfuegbareNoten(konfiguration, s).forEach(function (n) { erlaubt[n.id] = true; });
+      });
+      noten = roh.noten.filter(function (id, i) { return erlaubt[id] === true && roh.noten.indexOf(id) === i; });
+    } else {
+      var bereich = roh.bereich && typeof roh.bereich === "object" ? roh.bereich : (standard.bereich || {});
+      noten = [];
+      ["violin", "bass"].forEach(function (s) { noten = noten.concat(bereichsKennungen(konfiguration, s, bereich[s])); });
+    }
+    var merktiere = typeof roh.merktiere === "boolean" ? roh.merktiere : standard.merktiere !== false;
+    return { schluessel: sl, noten: noten, merktiere: merktiere };
   }
 
   /**
    * Alles, was ein Spielmodus für die aktuellen Einstellungen braucht:
-   * - noten:     alle abgefragten Noten (bei „beide“ aus beiden Schlüsseln)
+   * - noten:     alle abgefragten Noten der angekreuzten Schlüssel, je Schlüssel tief nach hoch
    * - antworten: eindeutige Namen, tief nach hoch
    * - bereich:   [tiefste, höchste Position] für einen festen Ausschnitt
    */
-  function fuerEinstellungen(konfiguration, einstellungen) {
+  function fuerEinstellungen(konfiguration, roh) {
+    var e = einstellungen(konfiguration, roh);
     var noten = [];
-    schluesselListe(einstellungen).forEach(function (sl) {
-      var b = bereichVon(konfiguration, sl, ((einstellungen && einstellungen.bereich) || {})[sl]);
-      if (b) noten = noten.concat(notenImBereich(konfiguration, sl, b.von, b.bis));
+    e.schluessel.forEach(function (sl) {
+      noten = noten.concat(verfuegbareNoten(konfiguration, sl).filter(function (n) { return e.noten.indexOf(n.id) !== -1; }));
     });
     var gesehen = {};
     var antworten = noten.slice().sort(function (x, y) { return x.stufe - y.stufe; })
@@ -153,6 +210,8 @@
   var api = {
     BUCHSTABEN: BUCHSTABEN,
     SCHLUESSEL: SCHLUESSEL,
+    MINDEST_NOTEN: 3,
+    kennung: kennung,
     name: name,
     stufe: stufe,
     position: position,
@@ -160,6 +219,9 @@
     notenImBereich: notenImBereich,
     bereichsListe: bereichsListe,
     bereichVon: bereichVon,
+    verfuegbareNoten: verfuegbareNoten,
+    bereichsKennungen: bereichsKennungen,
+    einstellungen: einstellungen,
     fuerEinstellungen: fuerEinstellungen
   };
 

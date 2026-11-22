@@ -27,7 +27,7 @@
   function starte(u) {
     stoppe();
     umgebung = u;
-    // Noten mit verschiedenen Namen wählen (bei beiden Schlüsseln gibt es c1 zweimal).
+    // Noten mit verschiedenen Namen wählen (bei beiden Schlüsseln gibt es c¹ zweimal).
     var namen = {};
     var auswahl = H.mische(u.noten).filter(function (n) {
       if (namen[n.name]) return false;

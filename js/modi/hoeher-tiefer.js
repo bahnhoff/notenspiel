@@ -31,10 +31,25 @@
     return runde && umgebung && umgebung.laeuft();
   }
 
+  /**
+   * Nur Noten aus Schlüsseln mit mindestens zwei verschiedenen Noten, damit
+   * es immer einen Partner im selben Schlüssel gibt (wichtig bei freier
+   * Notenauswahl, zum Beispiel nur eine Bassnote neben mehreren Violinnoten).
+   */
+  function paarfaehig(noten) {
+    var stufen = {};
+    noten.forEach(function (n) {
+      stufen[n.schluessel] = stufen[n.schluessel] || {};
+      stufen[n.schluessel][n.stufe] = true;
+    });
+    var liste = noten.filter(function (n) { return Object.keys(stufen[n.schluessel]).length >= 2; });
+    return liste.length ? liste : noten;
+  }
+
   function starte(u) {
     stoppe();
     umgebung = u;
-    runde = L.neueRunde(u.noten, { vorrang: u.schwierig, aufgaben: u.aufgaben });
+    runde = L.neueRunde(paarfaehig(u.noten), { vorrang: u.schwierig, aufgaben: u.aufgaben });
     letzteSeite = "";
     u.zeigeTier($("ht-tier"), "normal");
     u.zeigeAnsicht();
