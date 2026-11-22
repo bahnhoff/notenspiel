@@ -210,3 +210,11 @@ Umfang der ersten Überarbeitung, wie in der Rückmeldung empfohlen. Die übrige
 - Das Spiel ergibt so keinen Sinn, weil man im Notensystem sofort sieht, welche Note höher ist. Es wird vollständig entfernt: Modusdatei, Ansicht in `index.html`, Texte, Symbol, CSS, Etappe der Notenreise, README.
 - Gespeicherte Rekorde dieses Modus bleiben im Spielstand liegen, werden aber nicht mehr angezeigt. Spielstände bleiben gültig.
 - Die Notenreise wählt ihre Etappen nur noch aus Welche Note ist das?, Klaviertasten und Note setzen (und dem Melodie-Spiel, falls es als Etappe taugt).
+
+## 21. Noten-Memory mit schwerer Variante (2026-11-22)
+
+- Vor dem Spiel wählt das Kind mit zwei großen Knöpfen: **Normal** (6 Paare, Raster 3 × 4, wie bisher) oder **Schwer** (10 Paare, Raster 4 × 5). Die letzte Wahl wird gemerkt und ist beim nächsten Mal vorausgewählt.
+- Schwer braucht 10 verschiedene Antworten in der Auswahl (im Modus Einfach 10 verschiedene Buchstaben bzw. Vorzeichen-Namen). Reicht die Auswahl nicht, ist der Knopf ausgegraut mit kurzem Hinweis („Wähle in den Einstellungen mehr Noten“).
+- Sterne nach Zügen: Normal wie bisher (bis 9 Züge 3, bis 13 Züge 2, sonst 1). Schwer: bis 16 Züge 3, bis 22 Züge 2, sonst 1.
+- Punkte: Normal 10 pro Paar plus 10 pro Stern (höchstens 90). Schwer 15 pro Paar plus 20 pro Stern (höchstens 210). Gemeinsame Rekordliste, die Punkte spiegeln die Schwierigkeit; in der Rekordzeile steht „Schwer“ dabei.
+- Das Raster 4 × 5 muss bei 340 px Breite ohne Scrollen nach der Seite passen, Karten bleiben gut tippbar.
