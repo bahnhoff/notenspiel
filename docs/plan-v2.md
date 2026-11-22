@@ -182,3 +182,7 @@ Umfang der ersten Überarbeitung, wie in der Rückmeldung empfohlen. Die übrige
 - Ergebnis stärker: „9 von 10 richtig“ als Überschrift, darunter Fortschritt zum nächsten Tier mit Silhouette, Namenseingabe erst über „Rekord speichern“.
 - Hauptmodus immer bis zur zehnten Aufgabe spielen, schwierige Noten später erneut zeigen (Notenflug behält die Fehlergrenze).
 - „Spiel eine Melodie“: vier bis sieben Noten nachspielen, am Ende erklingt die Melodie.
+
+## 17. Klaviatur mit mindestens 7 weißen Tasten (2026-11-22)
+
+- Die Klaviatur (Klaviertasten und Fehler üben) zeigt immer mindestens 7 weiße Tasten, also eine ganze Oktave. Fehlende Tasten kommen oberhalb der höchsten gewählten Note dazu, aus c¹ bis g¹ wird c¹ bis h¹. Die zusätzlichen Tasten sind tippbar, klingen und zählen als falsche Antwort, weil nicht nach ihnen gefragt wird.

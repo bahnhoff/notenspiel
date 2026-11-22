@@ -70,6 +70,8 @@
     box.appendChild(div);
   }
 
+  var MINDEST_WEISSE = 7;
+
   function baue(box, namen, beiTipp) {
     var N = root.Noten;
     var L = root.SpielLogik;
@@ -82,6 +84,9 @@
         hoch = Math.max(hoch, n.vorzeichen > 0 ? n.stufe + 1 : n.stufe);
         if (n.vorzeichen) { hoehen[n.halbton] = n.name; hoehenAnzeige[n.halbton] = n.anzeige; }
       });
+      // Mindestens 7 weiße Tasten (eine ganze Oktave), auch bei kleiner Notenauswahl.
+      // Fehlende Tasten kommen oben dazu: aus c¹ bis g¹ wird c¹ bis h¹.
+      while (hoch - tief + 1 < MINDEST_WEISSE) hoch++;
       for (var s = tief; s <= hoch; s++) {
         var ton = N.ton(s, 0);
         var weiss = { art: "weiss", toene: [ton], halbton: ton.halbton, buchstabe: ton.buchstabe, name: ton.name, anzeige: ton.anzeige, schwarz: null };
