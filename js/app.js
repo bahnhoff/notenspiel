@@ -22,6 +22,7 @@
   var startNr = 0;           // jede gestartete Runde bekommt eine neue Nummer
   var laufendeNr = -1;       // Nummer der Runde, die noch verbucht werden darf
   var offenerRekord = null;  // { modus, nr } für die Namensabfrage
+  var rekordModus = null;    // Modus des offenen Rekords (Text der Namensabfrage)
   var uebungsNoten = [];     // Noten für „Fehler üben“ aus der letzten Runde
 
   function $(id) { return document.getElementById(id); }
@@ -151,7 +152,10 @@
     var a = auswahl();
     var reicht = auswahlReicht(a);
     $("knopf-start").disabled = !reicht;
-    Array.prototype.forEach.call(document.querySelectorAll("#start-modi .knopf-modus"), function (b) { b.disabled = !reicht; });
+    Array.prototype.forEach.call(document.querySelectorAll("#start-modi .knopf-modus, #start-karten .start-karte"), function (b) { b.disabled = !reicht; });
+    // Zeile im Hauptknopf: „10 Aufgaben · C bis G“ (Bereich der Antworten aus der Auswahl)
+    $("start-unterzeile").textContent = reicht ? t("start.uebenInfo", { n: L.REGELN.aufgabenProRunde,
+      von: a.antworten[0].anzeige, bis: a.antworten[a.antworten.length - 1].anzeige }) : "";
     $("start-auswahl").textContent = reicht ? auswahlText(a) : zuWenigText(a);
     $("start-auswahl").classList.toggle("start-auswahl-hinweis", !reicht);
     aktualisiereKacheln();
@@ -244,6 +248,8 @@
     sterne.appendChild(document.createTextNode(String(anzahl)));
     zeile(t("ergebnis.neueSterne"), sterne);
 
+    zeigeTierFortschritt();
+
     var box = $("neues-tier");
     var neuesTier = v.neueTiere.length ? v.neueTiere[v.neueTiere.length - 1] : null;
     if (neuesTier) {
@@ -264,9 +270,26 @@
     $("knopf-nochmal").classList.toggle("knopf-haupt", uebungsNoten.length === 0);
     $("knopf-nochmal").classList.toggle("knopf-neben", uebungsNoten.length > 0);
 
+    // Top-5-Rekord: erst ein Knopf „Rekord speichern“, die Namensabfrage öffnet sich beim Antippen.
+    $("rekord-name").hidden = true;
+    offenerRekord = v.rekord || null;
+    rekordModus = v.rekord ? modus : null;
+    $("rekord-zeile").hidden = !v.rekord;
+    if (v.rekord) $("rekord-zeile-info").textContent = t("rekordName.neu", { platz: v.rekord.platz + 1, modus: modus.name });
+
     zeigeAnsicht("ergebnis");
-    if (v.rekord) zeigeNamensabfrage(modus, v.rekord);
-    else $("rekord-name").hidden = true;
+  }
+
+  /** „2 von 5 Sternen bis zum nächsten Tier“ mit grauer Silhouette des vorgemerkten Tiers. */
+  function zeigeTierFortschritt() {
+    var box = $("tier-fortschritt");
+    var n = L.naechstesTier(stand);
+    if (!n) { box.hidden = true; return; }
+    $("tier-fortschritt-bild").innerHTML = n.id ? window.Tiere.zeichne(n.id, "normal", t("ergebnis.geheim"), true) : "";
+    $("tier-fortschritt-bild").hidden = !n.id;
+    $("tier-fortschritt-sterne").innerHTML = H.sternSymbole(n.gesammelt, n.schritt);
+    $("tier-fortschritt-text").textContent = t("ergebnis.naechstesTier", { gesammelt: n.gesammelt, schritt: n.schritt });
+    box.hidden = false;
   }
 
   /* ---------- Fehler üben ---------- */
@@ -329,6 +352,15 @@
     $("rekord-name-fertig").textContent = gesetzt ? t("rekordName.fuer", { name: gesetzt }) : t("rekordName.ohneGespeichert");
     $("knopf-nochmal").focus({ preventScroll: true });
   }
+
+  // „Rekord speichern“ öffnet die Namensabfrage.
+  $("knopf-rekord-speichern").addEventListener("click", function () {
+    if (!offenerRekord || !rekordModus) return;
+    $("rekord-zeile").hidden = true;
+    zeigeNamensabfrage(rekordModus, offenerRekord);
+    $("name-eingabe").focus({ preventScroll: true });
+    $("rekord-name").scrollIntoView({ block: "nearest" });
+  });
 
   $("name-formular").addEventListener("submit", function (ev) {
     ev.preventDefault();
@@ -641,34 +673,70 @@
 
   /* ---------- Startseite ---------- */
 
+  /**
+   * Symbol eines Modus auf der Startseite (Kachel und Karte). Heute ein Emoji
+   * als Text (`modus.symbol`). Gezeichnete Symbole lassen sich hier an einer
+   * Stelle einsetzen; `data-symbol` trägt die Kennung des Modus, wie bei den
+   * Knöpfen mit der Klasse `knopf-symbol` in index.html.
+   */
+  function modusSymbol(modus) {
+    var el = element("span", "modus-symbol", modus.symbol || "");
+    el.dataset.symbol = modus.id;
+    el.setAttribute("aria-hidden", "true");
+    return el;
+  }
+
+  /**
+   * Baut die Startseite aus den angemeldeten Modi (js/modi.js):
+   * hauptspiel → großer Knopf „Noten üben“ (fest in index.html),
+   * startKarte → eigene Karte darunter (Tägliche Notenreise),
+   * alle anderen → Kacheln unter „Mehr Spiele“. Ein neuer Modus erscheint
+   * damit ohne Änderung hier.
+   */
   function baueStartseite() {
     var box = $("start-modi");
+    var karten = $("start-karten");
     box.innerHTML = "";
+    karten.innerHTML = "";
     window.Modi.liste().forEach(function (modus) {
       if (modus.hauptspiel) return;
-      // Kachel mit großem Symbol und kurzem Namen
-      var b = element("button", "knopf knopf-neben knopf-modus");
+      var b;
+      if (modus.startKarte) {
+        // Karte über die ganze Breite: Symbol links, Name, Kurzinfo und Status rechts daneben
+        b = element("button", "knopf start-karte");
+        var text = element("span", "karte-text");
+        text.appendChild(element("span", "karte-name", modus.name));
+        if (modus.karteInfo) text.appendChild(element("span", "karte-info", modus.karteInfo()));
+        if (modus.kachelInfo) text.appendChild(element("span", "modus-info karte-status"));
+        b.appendChild(modusSymbol(modus));
+        b.appendChild(text);
+        karten.appendChild(b);
+      } else {
+        // Kachel mit großem Symbol und kurzem Namen
+        b = element("button", "knopf knopf-neben knopf-modus");
+        b.appendChild(modusSymbol(modus));
+        b.appendChild(element("span", "modus-name", modus.name));
+        if (modus.kachelInfo) {
+          b.classList.add("knopf-modus-info");
+          b.appendChild(element("span", "modus-info"));
+        }
+        box.appendChild(b);
+      }
       b.type = "button";
       b.dataset.modus = modus.id;
-      if (modus.symbol) b.appendChild(element("span", "modus-symbol", modus.symbol)).setAttribute("aria-hidden", "true");
-      b.appendChild(element("span", "modus-name", modus.name));
-      if (modus.kachelInfo) {
-        b.classList.add("knopf-modus-info");
-        b.appendChild(element("span", "modus-info"));
-      }
       b.addEventListener("click", function () { starteModus(modus); });
-      box.appendChild(b);
     });
+    karten.hidden = karten.children.length === 0;
     box.hidden = box.children.length === 0;
     $("titel-modi").hidden = box.hidden;
   }
 
-  /** Kurze Zusatztexte auf den Kacheln, zum Beispiel „Heute geschafft ✓“. */
+  /** Kurze Zusatztexte auf Kacheln und Karten, zum Beispiel „Heute geschafft ✓“. */
   function aktualisiereKacheln() {
     var status = { tagesreise: L.tagesreiseStatus(stand, Date.now()) };
     window.Modi.liste().forEach(function (modus) {
       if (!modus.kachelInfo) return;
-      var info = document.querySelector('#start-modi [data-modus="' + modus.id + '"] .modus-info');
+      var info = document.querySelector('#ansicht-start [data-modus="' + modus.id + '"] .modus-info');
       if (info) info.textContent = modus.kachelInfo(status) || "";
     });
   }

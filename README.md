@@ -1,6 +1,6 @@
 # Notenzoo
 
-Ein Browserspiel zum Üben von Noten im Violin- und Bassschlüssel. Im Hauptspiel „Welche Note ist das?“ zeigt das Spiel eine Note im Notensystem, und das Kind tippt den passenden deutschen Notennamen an, zum Beispiel c¹, g oder F. Dazu kommen sieben Mini-Spiele. Für richtige Antworten gibt es Punkte und Sterne, mit gesammelten Sternen kommen neue Tiere dazu.
+Ein Browserspiel zum Üben von Noten im Violin- und Bassschlüssel. Im Hauptspiel „Welche Note ist das?“ (auf der Startseite der große Knopf **Noten üben** mit Aufgabenzahl und Notenbereich, zum Beispiel „10 Aufgaben · C bis G“) zeigt das Spiel eine Note im Notensystem, und das Kind tippt den passenden deutschen Notennamen an, zum Beispiel c¹, g oder F. Dazu kommen sieben Mini-Spiele. Für richtige Antworten gibt es Punkte und Sterne, mit gesammelten Sternen kommen neue Tiere dazu.
 
 Das Spiel ist eine statische Website aus HTML, CSS und JavaScript. Es braucht keinen Server, keinen Build-Schritt, keine Anmeldung und lädt nichts von fremden Diensten. Den Spielstand speichert der Browser lokal im `localStorage`.
 
@@ -76,13 +76,21 @@ Nach jeder Antwort zeigt das Spiel das Tier zum Buchstaben der Note, zum Beispie
 
 Auf Englisch gelten eigene Merktiere, passend zu den englischen Namen (`merktiereEnglisch` und `merktierAbEnglisch` in `js/noten-konfiguration.js`): C Cat, D Dolphin, E Elephant, F Frog (ab F5 Fox), G Giraffe, A Alligator, B Bear, F♯ Fish. Die Merkhilfe lautet dann zum Beispiel „D4 – D is for Dolphin“ oder „C♯4 – C is for Cat, just a half step higher“.
 
+## Startseite
+
+Ganz oben steht der Hauptknopf **Noten üben** für „Welche Note ist das?“ mit einer Zeile wie „10 Aufgaben · C bis G“; der Bereich kommt aus der Notenauswahl. Direkt darunter steht die **Tägliche Notenreise** als eigene Karte mit „3 Spiele à 5 Aufgaben“ und dem Stand (heute geschafft, Tage in Folge). Die übrigen Spiele folgen als Kacheln unter „Mehr Spiele“.
+
+## Ergebnis
+
+Die Überschrift nennt die Kernzahl der Runde, zum Beispiel „9 von 10 richtig“, beim Notenflug die richtigen Noten und beim Memory Paare und Züge. Darunter steht der Fortschritt zum nächsten Tier, etwa „2 von 5 Sternen bis zum nächsten Tier“, mit der grauen Silhouette des Tiers, das als Nächstes kommt. Schafft das Ergebnis die Top 5, erscheint der Knopf **Rekord speichern**, der die Namenseingabe öffnet.
+
 ## Meine Tiere
 
-Das Füchschen ist von Anfang an da. Alle 5 gesammelten Sterne kommt ein zufälliges neues Tier dazu, insgesamt gibt es 25. Die seltenen Tiere Einhorn, Drache und Phönix kommen erst ab 50 gesammelten Sternen in den Zufallstopf. Noch nicht entdeckte Tiere erscheinen als dunkle Silhouette. Jedes entdeckte Tier lässt sich als Begleiter auswählen.
+Das Füchschen ist von Anfang an da. Alle 5 gesammelten Sterne kommt ein zufälliges neues Tier dazu, insgesamt gibt es 25. Welches Tier als Nächstes kommt, steht schon vorher fest (seine Silhouette zeigt das Ergebnis). Die seltenen Tiere Einhorn, Drache und Phönix kommen erst ab 50 gesammelten Sternen in den Zufallstopf. Noch nicht entdeckte Tiere erscheinen als dunkle Silhouette. Jedes entdeckte Tier lässt sich als Begleiter auswählen.
 
 ## Rekorde und Namen
 
-Das Spiel führt für jedes Spiel die fünf besten Ergebnisse. Schafft ein Ergebnis die Top 5, fragt der Ergebnisbildschirm „Wer hat gespielt?“. Zuletzt benutzte Namen stehen als Schnellwahl bereit, der zuletzt gewählte ist vorausgewählt. Wer keinen Namen eintragen möchte, tippt auf „Ohne Namen“. Die Namen liegen nur im Browser des Geräts. Sterne und Tiere gehören allen Kindern auf dem Gerät gemeinsam.
+Das Spiel führt für jedes Spiel die fünf besten Ergebnisse. Schafft ein Ergebnis die Top 5, zeigt der Ergebnisbildschirm den Knopf **Rekord speichern**; er öffnet die Frage „Wer hat gespielt?“. Zuletzt benutzte Namen stehen als Schnellwahl bereit, der zuletzt gewählte ist vorausgewählt. Wer keinen Namen eintragen möchte, tippt auf „Ohne Namen“. Die Namen liegen nur im Browser des Geräts. Sterne und Tiere gehören allen Kindern auf dem Gerät gemeinsam.
 
 ## Spielregeln „Welche Note ist das?“
 
@@ -90,20 +98,22 @@ Das Spiel führt für jedes Spiel die fünf besten Ergebnisse. Schafft ein Ergeb
 - Eine richtige Antwort bringt 10 Punkte. Bei einem Fehler erlischt ein Stern, und das Spiel zeigt die richtige Antwort mit einem Hinweis.
 - Eine falsch beantwortete Note kommt nach zwei bis drei anderen Noten noch einmal. Fehlt dafür der Platz, kommt sie in der nächsten Runde früh dran.
 - Nach 10 Aufgaben gibt es 10 Bonuspunkte pro verbliebenem Stern, und die Sterne kommen in die Sammlung.
-- Der dritte Fehler beendet die Runde ohne Bonus und ohne neue Sterne. Die Punkte zählen für die Rekorde.
+- Die Runde geht immer bis zur zehnten Aufgabe, auch nach drei Fehlern. Die Sterne sinken pro Fehler bis auf 0; mit 0 Sternen gibt es keinen Bonus und keine neuen Sterne. Die Punkte zählen für die Rekorde. Das gilt genauso für Klaviertasten, Note setzen, Höher oder tiefer, das Hör-Spiel und die Etappen der Notenreise.
+- Auf einem Gerät mit Tastatur lassen sich die Antworten auch mit den Buchstabentasten geben, wie beim Notenflug (siehe unten).
 - Alle 5 gesammelten Sterne kommt ein neues Tier dazu.
 
 ## Mini-Spiele
 
 Alle Mini-Spiele nutzen die Einstellungen (Schlüssel, Notenauswahl, Merktiere, Antworten), sammeln Sterne in dieselbe Sammlung und haben eigene Rekorde.
 
-- **Notenflug:** Eine Note fliegt von rechts nach links über das Notensystem. Tippe ihren Namen, bevor sie den Schlüssel erreicht. Zu spät oder falsch kostet einen von drei Sternen, nach dem dritten Fehler ist das Spiel vorbei. Jedes Level hat 10 Noten und ist etwa 15 % schneller als das vorige. Eine richtige Note bringt 10 Punkte mal Level, jedes geschaffte Level einen neuen Stern (höchstens 3).
+- **Notenflug:** Eine Note fliegt von rechts nach links über das Notensystem. Tippe ihren Namen, bevor sie den Schlüssel erreicht. Zu spät oder falsch kostet einen von drei Sternen, nach dem dritten Fehler ist das Spiel vorbei. Jedes Level hat 10 Noten und ist etwa 15 % schneller als das vorige; beim Wechsel erscheint kurz „Level 3!“. Eine richtige Note bringt Level × Anzahl der gewählten Noten als Punkte (C, D, E auf Level 1 = 3 Punkte, auf Level 3 = 9 Punkte), jedes geschaffte Level einen neuen Stern (höchstens 3). Nach einer richtigen Antwort leuchtet der Knopf kurz grün, und die nächste Note startet sofort; nur nach einem Fehler oder „zu spät“ hält das Spiel an und zeigt Lösung und Hinweis. Ältere Notenflug-Rekorde mit der früheren Wertung bleiben stehen.
+  Tastatur: Bei **Einfach** antwortet der Buchstabe mit dem Stammton, Shift + Buchstabe mit der Note mit ♯ (Shift + F = Fis) oder, wenn es zum Buchstaben nur eine ♭-Note gibt, mit dieser (Shift + E = Es). Deutsch ist die Taste B die Note B (h mit ♭), H die Note H; englisch ist B die Note B und Shift + B die Note B♭. Bei **Genau** zählt ein Buchstabe sofort, wenn er unter den Antworten eindeutig ist; sonst wartet das Spiel bis zu 1 Sekunde auf die Oktavziffer: deutsch die Hochzahl (1 für c¹, 0 oder keine für c), englisch die Ziffer (4 für C4). Die Zeile unter den Knöpfen zeigt den getippten Anfang, zum Beispiel „d…“.
 - **Klaviertasten:** Unter der Note liegt eine Klaviatur von der tiefsten bis zur höchsten gewählten Note (bei Lücken mit allen weißen Tasten dazwischen), mindestens aber 7 weiße Tasten. Das mittlere C ist markiert. Tippe die passende Taste. Alle Tasten, auch die schwarzen, spielen beim Drücken ihren Ton. 10 Aufgaben, Wertung wie bei „Welche Note ist das?“.
 - **Note setzen:** Das Spiel nennt einen Notennamen, zum Beispiel `f1`. Tippe im Notensystem auf die passende Linie oder den Zwischenraum, verschiebe die Note bei Bedarf mit ▲ und ▼ und tippe auf **Prüfen**. Sind Vorzeichen-Noten gewählt, wählst du mit drei Knöpfen dazu ohne Vorzeichen, Kreuz oder B. 10 Aufgaben, Wertung wie bei „Welche Note ist das?“.
 - **Noten-Memory:** 6 Paare aus Notenkarte und Namenskarte liegen verdeckt. Decke zwei Karten auf und finde die Paare mit möglichst wenigen Zügen: bis 9 Züge gibt es 3 Sterne, bis 13 Züge 2, sonst 1. Hat der Tonumfang weniger als 6 Noten, gibt es entsprechend weniger Paare.
 - **Höher oder tiefer:** Zwei Noten stehen nebeneinander im selben System. Tippe die höhere an, oder die tiefere, wenn die Frage „Welche Note ist tiefer?“ lautet; anfangs liegen die Noten weit auseinander, später nur einen Schritt. 10 Aufgaben, Wertung wie bei „Welche Note ist das?“.
 - **Hör-Spiel:** Zum Einstieg erklingt c¹ als Bezugston, dann ein Ton, und du wählst aus drei gezeigten Noten die passende; „Nochmal hören“ spielt den Ton erneut. Der Ton entsteht im Browser, ohne Audiodateien. 10 Aufgaben, Wertung wie bei „Welche Note ist das?“.
-- **Tägliche Notenreise:** Jeden Tag drei Etappen mit je 5 Aufgaben aus „Welche Note ist das?“, „Klaviertasten“, „Note setzen“ und „Höher oder tiefer“; die Auswahl wechselt täglich. Wer alle drei Etappen ohne drei Fehler in einer Etappe schafft, bekommt den Durchschnitt der Etappensterne und einmal pro Tag einen Extrastern; die Startseite zeigt, ob die Reise heute geschafft ist und wie viele Tage in Folge.
+- **Tägliche Notenreise:** Jeden Tag drei Etappen mit je 5 Aufgaben aus „Welche Note ist das?“, „Klaviertasten“, „Note setzen“ und „Höher oder tiefer“; die Auswahl wechselt täglich. Jede Etappe wird bis zur letzten Aufgabe gespielt. Wer alle drei Etappen gespielt hat, hat die Reise geschafft und bekommt den Durchschnitt der Etappensterne und einmal pro Tag einen Extrastern; die Startseite zeigt, ob die Reise heute geschafft ist und wie viele Tage in Folge.
 
 ## Fehler üben
 

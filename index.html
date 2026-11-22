@@ -22,23 +22,26 @@
       </div>
       <div class="start-tier" id="start-tier"></div>
       <h1 id="titel-start" class="spieltitel" tabindex="-1" data-text="meta.titel">Notenzoo</h1>
+      <!-- Hauptspiel (Modus mit hauptspiel: true) -->
       <button type="button" class="knopf knopf-haupt knopf-start" id="knopf-start">
-        <span class="start-text" data-text="start.start">Start</span>
-        <span class="start-unterzeile" data-text="modus.klassisch">Welche Note ist das?</span>
+        <span class="start-text" data-text="start.ueben">Noten üben</span>
+        <span class="start-unterzeile" id="start-unterzeile"></span>
       </button>
       <p class="start-auswahl" id="start-auswahl"></p>
-      <!-- Weitere Spielmodi aus js/modi/ erscheinen hier automatisch. -->
+      <!-- Modi mit startKarte: true (Tägliche Notenreise) als eigene Karte direkt unter dem Hauptknopf -->
+      <div class="start-karten" id="start-karten" hidden></div>
+      <!-- Weitere Spielmodi aus js/modi/ erscheinen hier automatisch als Kacheln. -->
       <h2 class="start-modi-titel" id="titel-modi" data-text="start.mehrSpiele">Mehr Spiele</h2>
       <div class="start-modi" id="start-modi" role="group" aria-labelledby="titel-modi" hidden></div>
       <div class="start-menue">
         <button type="button" class="knopf knopf-neben" id="knopf-tiere">
-          <span aria-hidden="true">🐾</span> <span data-text="start.tiere">Meine Tiere</span>
+          <span class="knopf-symbol" data-symbol="tiere" aria-hidden="true">🐾</span> <span data-text="start.tiere">Meine Tiere</span>
         </button>
         <button type="button" class="knopf knopf-neben" id="knopf-rekorde">
-          <span aria-hidden="true">🏆</span> <span data-text="start.rekorde">Rekorde</span>
+          <span class="knopf-symbol" data-symbol="rekorde" aria-hidden="true">🏆</span> <span data-text="start.rekorde">Rekorde</span>
         </button>
         <button type="button" class="knopf knopf-neben" id="knopf-einstellungen">
-          <span aria-hidden="true">⚙️</span> <span data-text="start.einstellungen">Einstellungen</span>
+          <span class="knopf-symbol" data-symbol="einstellungen" aria-hidden="true">⚙️</span> <span data-text="start.einstellungen">Einstellungen</span>
         </button>
       </div>
       <p class="hinweis-speicher" id="hinweis-speicher" data-text="start.keinSpeicher" hidden>Dieser Browser kann den Spielstand nicht speichern. Du kannst trotzdem spielen.</p>
@@ -65,6 +68,8 @@
 
         <div class="runde-antworten">
           <div class="antworten" id="antworten" role="group" aria-label="Antworten" data-text-aria-label="runde.antwortenAria"></div>
+          <!-- Tipp zu den Buchstabentasten, beim Warten auf die Oktavziffer der getippte Anfang („d…“) -->
+          <p class="tasten-zeile" id="runde-tasten"></p>
           <div class="tier-zeile">
             <div class="tier-klein" id="runde-tier"></div>
             <div class="sprechblase" id="sprechblase">
@@ -99,9 +104,12 @@
           <p class="aufgabe-nr" id="flug-level"></p>
           <h1 id="titel-notenflug" class="frage" tabindex="-1" data-text="modus.notenflug">Notenflug</h1>
           <div class="notensystem notensystem-flug" id="flug-notensystem"></div>
+          <!-- Kurze Einblendung beim Levelwechsel, über dem Notensystem -->
+          <p class="level-einblendung" id="flug-level-einblendung" role="status" hidden></p>
         </div>
         <div class="runde-antworten">
           <div class="antworten" id="flug-antworten" role="group" aria-label="Antworten" data-text-aria-label="runde.antwortenAria"></div>
+          <p class="tasten-zeile" id="flug-tasten"></p>
           <div class="tier-zeile">
             <div class="tier-klein" id="flug-tier"></div>
             <div class="sprechblase">
@@ -375,13 +383,29 @@
 
     <!-- Ergebnis -->
     <section id="ansicht-ergebnis" class="ansicht ansicht-ergebnis" aria-labelledby="titel-ergebnis" hidden>
-      <h1 id="titel-ergebnis" class="titel" tabindex="-1"></h1>
+      <!-- Überschrift mit der Kernzahl, zum Beispiel „9 von 10 richtig“ -->
+      <h1 id="titel-ergebnis" class="titel ergebnis-ueberschrift" tabindex="-1"></h1>
       <div class="tier-zeile tier-zeile-gross">
         <div class="tier-mittel" id="ergebnis-tier"></div>
         <div class="sprechblase"><p id="ergebnis-spruch"></p></div>
       </div>
-      <dl class="ergebnis-liste" id="ergebnis-liste"></dl>
       <div class="neues-tier" id="neues-tier" hidden></div>
+      <!-- Fortschritt zum nächsten Tier mit grauer Silhouette -->
+      <div class="tier-fortschritt" id="tier-fortschritt" hidden>
+        <div class="tier-fortschritt-bild" id="tier-fortschritt-bild"></div>
+        <div class="tier-fortschritt-text">
+          <span class="sterne-reihe" id="tier-fortschritt-sterne" aria-hidden="true"></span>
+          <p id="tier-fortschritt-text"></p>
+        </div>
+      </div>
+      <dl class="ergebnis-liste" id="ergebnis-liste"></dl>
+      <!-- Bei einem Top-5-Rekord: Namenseingabe erst über „Rekord speichern“ -->
+      <div class="rekord-zeile" id="rekord-zeile" hidden>
+        <p class="rekord-zeile-info" id="rekord-zeile-info"></p>
+        <button type="button" class="knopf knopf-neben knopf-rekord-speichern" id="knopf-rekord-speichern">
+          <span class="knopf-symbol" data-symbol="rekorde" aria-hidden="true">🏆</span> <span data-text="rekordName.speichern">Rekord speichern</span>
+        </button>
+      </div>
       <section class="rekord-name" id="rekord-name" aria-labelledby="titel-rekord-name" hidden>
         <h2 id="titel-rekord-name" tabindex="-1" data-text="rekordName.titel">Wer hat gespielt?</h2>
         <p class="rekord-name-info" id="rekord-name-info"></p>
@@ -397,7 +421,7 @@
         <p class="rekord-name-fertig" id="rekord-name-fertig" role="status"></p>
       </section>
       <button type="button" class="knopf knopf-haupt knopf-ueben" id="knopf-ueben" hidden>
-        <span aria-hidden="true">🎯</span> <span data-text="ueben.knopf">Fehler üben</span>
+        <span class="knopf-symbol" data-symbol="ueben" aria-hidden="true">🎯</span> <span data-text="ueben.knopf">Fehler üben</span>
       </button>
       <div class="knopf-reihe">
         <button type="button" class="knopf knopf-haupt" id="knopf-nochmal" data-text="ergebnis.nochmal">Noch eine Runde</button>

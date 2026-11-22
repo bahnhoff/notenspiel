@@ -1362,3 +1362,106 @@ h1:focus { outline: none; }
   .start-tier { width: 120px; }
   .klaviatur { --taste-min: 90px; --taste-max: 120px; }
 }
+
+/* ---------- Startseite: Hauptknopf „Noten üben“ und Karte der Notenreise ---------- */
+
+.knopf-start { padding: 12px 28px; }
+.start-unterzeile:empty { display: none; }
+
+.start-karten {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  max-width: 520px;
+}
+
+/* Eigene Karte (Modus mit startKarte), deutlich abgesetzt von den Kacheln */
+.start-karte {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  min-height: 96px;
+  padding: 12px 18px;
+  text-align: left;
+  background: #fff3c4;
+  border: 3px solid var(--gelb);
+  box-shadow: 0 4px 0 #d39a00;
+}
+
+.start-karte .modus-symbol { flex: 0 0 auto; font-size: 2.8rem; }
+.karte-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.karte-name { font-size: 1.3rem; line-height: 1.15; }
+.karte-info { font-size: 1rem; font-weight: 600; color: var(--text); }
+.karte-status { font-size: 0.95rem; }
+
+/* ---------- Buchstabentasten: Tipp und getippter Anfang unter den Antworten ---------- */
+
+/* Nur auf Geräten mit Tastatur sichtbar, feste Höhe: Die Zeile wechselt den Text, ohne dass etwas springt. */
+.tasten-zeile { display: none; margin: -4px 0 0; font-size: 0.95rem; color: var(--text-leise); text-align: center; }
+.tasten-zeile.tasten-tipp-an { display: block; min-height: 1.5em; line-height: 1.5; }
+.tasten-zeile.tippt { font-size: 1.15rem; font-weight: 800; color: var(--akzent-dunkel); line-height: 1.3; }
+
+/* ---------- Notenflug: Einblendung beim Levelwechsel ---------- */
+
+.ansicht-notenflug .runde-noten { position: relative; }
+
+.level-einblendung {
+  position: absolute;
+  left: 50%;
+  top: 55%;
+  transform: translate(-50%, -50%);
+  margin: 0;
+  padding: 12px 28px;
+  border-radius: 999px;
+  background: var(--akzent);
+  border: 3px solid var(--akzent-dunkel);
+  color: #fff;
+  font-size: clamp(1.8rem, 7vw, 2.8rem);
+  font-weight: 800;
+  box-shadow: 0 4px 0 var(--akzent-dunkel);
+  pointer-events: none;
+  animation: level-auf 0.3s ease-out;
+}
+
+@keyframes level-auf {
+  from { transform: translate(-50%, -50%) scale(0.6); opacity: 0; }
+  to { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .level-einblendung { animation: none; }
+}
+
+/* ---------- Ergebnis: Überschrift, Fortschritt zum nächsten Tier, Rekord ---------- */
+
+.ergebnis-ueberschrift { font-size: clamp(2rem, 8.5vw, 3rem); }
+
+.tier-fortschritt {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: var(--karte);
+  border: 2px solid var(--rand);
+  border-radius: var(--radius);
+  padding: 10px 16px;
+  box-shadow: var(--schatten);
+}
+
+.tier-fortschritt-bild { flex: 0 0 76px; width: 76px; }
+/* Graue Silhouette des nächsten Tiers */
+.tier-fortschritt-bild .tier-silhouette { opacity: 0.28; }
+.tier-fortschritt-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.tier-fortschritt-text p { margin: 0; font-size: 1.1rem; font-weight: 700; }
+.tier-fortschritt .stern-leer { color: #c9b8a2; }
+
+.rekord-zeile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.rekord-zeile-info { margin: 0; text-align: center; font-weight: 700; color: var(--akzent-dunkel); }
+.knopf-rekord-speichern { font-size: 1.2rem; min-height: 56px; }
