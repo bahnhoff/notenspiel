@@ -238,3 +238,18 @@ test("Notenreise: Tagesserie zählt aufeinanderfolgende Tage, auch über den Mon
   assert.equal(reise(2026, 11, 3), 1); // ein Tag Pause: Serie beginnt neu
   assert.equal(L.bereinigeSpielstand(JSON.parse(JSON.stringify(stand))).reise.serie, 1);
 });
+
+test("Fehler üben: höchstens 3 verwechselte Noten, häufigste zuerst, je Note zwei Aufgaben", () => {
+  const [a, b, c, d] = NOTEN;
+  const v = (note, richtig) => ({ note, richtig });
+  const verlauf = [v(a, false), v(b, true), v(c, false), v(b, false), v(c, false), v(d, false), v(a, true)];
+  assert.deepEqual(L.uebungsNoten(verlauf).map((n) => n.id), [c.id, a.id, b.id]);
+  assert.deepEqual(L.uebungsNoten([v(a, true)]), []);
+  const u = L.neueUebung([c, a]);
+  assert.deepEqual(u.aufgaben.map((x) => x.art), ["erkennen", "klavier", "erkennen", "klavier"]);
+  // Eine falsche Antwort hängt die Aufgabe einmal ans Ende.
+  assert.equal(L.uebungsAntwort(u, false), false);
+  assert.equal(L.uebungsAntwort(u, true), null);
+  assert.equal(u.aufgaben.length, 5);
+  assert.deepEqual([u.aufgaben[4].note.id, u.aufgaben[4].art], [c.id, "erkennen"]);
+});

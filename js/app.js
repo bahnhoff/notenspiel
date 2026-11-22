@@ -22,6 +22,7 @@
   var startNr = 0;           // jede gestartete Runde bekommt eine neue Nummer
   var laufendeNr = -1;       // Nummer der Runde, die noch verbucht werden darf
   var offenerRekord = null;  // { modus, nr } für die Namensabfrage
+  var uebungsNoten = [];     // Noten für „Fehler üben“ aus der letzten Runde
 
   function $(id) { return document.getElementById(id); }
 
@@ -138,6 +139,7 @@
   function stoppeModus() {
     laufendeNr = -1;
     if (aktiverModus && aktiverModus.stoppe) aktiverModus.stoppe();
+    window.FehlerUeben.stoppe();
   }
 
   function zurStartseite() {
@@ -255,9 +257,42 @@
       box.innerHTML = "";
     }
 
+    // „Fehler üben“ nur bei Modi, die es anbieten, und mindestens einem Fehler
+    uebungsNoten = modus.fehlerUeben ? L.uebungsNoten(e.verlauf) : [];
+    $("knopf-ueben").hidden = uebungsNoten.length === 0;
+    // Mit „Fehler üben“ ist das der Hauptknopf, „Noch eine Runde“ tritt zurück.
+    $("knopf-nochmal").classList.toggle("knopf-haupt", uebungsNoten.length === 0);
+    $("knopf-nochmal").classList.toggle("knopf-neben", uebungsNoten.length > 0);
+
     zeigeAnsicht("ergebnis");
     if (v.rekord) zeigeNamensabfrage(modus, v.rekord);
     else $("rekord-name").hidden = true;
+  }
+
+  /* ---------- Fehler üben ---------- */
+
+  /**
+   * Startet die Übung zu den Fehlern der letzten Runde (js/fehler-ueben.js).
+   * Sie verbucht nichts: keine Punkte, Sterne oder Rekorde, Spielstand unverändert.
+   */
+  function starteUebung() {
+    var modus = aktiverModus;
+    var a = auswahl();
+    if (uebungsNoten.length === 0 || !auswahlReicht(a)) return;
+    stoppeModus();
+    offenerRekord = null;
+    window.FehlerUeben.starte({
+      noten: uebungsNoten.slice(),
+      antworten: a.antworten,
+      namen: a.namen,
+      antwortmodus: a.antwortmodus,
+      bereich: a.bereich,
+      zeigeAnsicht: function () { zeigeAnsicht("ueben"); },
+      zeigeTier: zeigeTier,
+      merkhilfe: merkhilfe,
+      nochmal: function () { starteModus(modus || hauptspiel); },
+      startseite: zurStartseite
+    });
   }
 
   /* ---------- Namen in den Rekorden ---------- */
@@ -672,6 +707,7 @@
   $("knopf-rekorde").addEventListener("click", zeigeRekorde);
   $("knopf-einstellungen").addEventListener("click", zeigeEinstellungen);
   $("knopf-ergebnis-start").addEventListener("click", zurStartseite);
+  $("knopf-ueben").addEventListener("click", starteUebung);
   Array.prototype.forEach.call(document.querySelectorAll(".knopf-zurueck"), function (b) {
     b.addEventListener("click", zurStartseite);
   });

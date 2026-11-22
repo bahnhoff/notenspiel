@@ -229,10 +229,7 @@
     if (a.richtig) {
       weiterTimer = setTimeout(naechsteAufgabe, PAUSE_NACH_RICHTIG);
     } else {
-      var weiter = $("ht-weiter");
-      weiter.hidden = false;
-      weiter.focus({ preventScroll: true });
-      if (weiter.scrollIntoView) weiter.scrollIntoView({ block: "nearest" });
+      H.zeigeWeiter($("ht-weiter"));
     }
   }
 

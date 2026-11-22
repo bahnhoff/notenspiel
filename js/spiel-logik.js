@@ -284,6 +284,71 @@
     };
   }
 
+  /* ---------- Fehler üben ---------- */
+
+  var UEBUNG = {
+    maxNoten: 3,           // höchstens 3 verschiedene Noten
+    arten: ["erkennen", "klavier"]  // je Note: im System erkennen, dann auf der Klaviatur finden
+  };
+
+  /**
+   * Noten für „Fehler üben“ aus einem Rundenverlauf ({ note, richtig }, siehe
+   * antworte): nur falsch beantwortete, je Kennung einmal, die häufigsten
+   * Fehler zuerst, bei Gleichstand die zuerst verwechselte. Höchstens 3.
+   */
+  function uebungsNoten(verlauf) {
+    var zaehler = {}, reihenfolge = [];
+    (verlauf || []).forEach(function (v) {
+      if (!v || v.richtig || !v.note) return;
+      var id = v.note.id;
+      if (!zaehler[id]) { zaehler[id] = { note: v.note, fehler: 0, erste: reihenfolge.length }; reihenfolge.push(id); }
+      zaehler[id].fehler += 1;
+    });
+    return reihenfolge.map(function (id) { return zaehler[id]; })
+      .sort(function (a, b) { return b.fehler - a.fehler || a.erste - b.erste; })
+      .slice(0, UEBUNG.maxNoten)
+      .map(function (z) { return z.note; });
+  }
+
+  /**
+   * Neue Übung: für jede Note zwei Aufgaben (erkennen, dann Klaviatur).
+   * Ohne Punkte, Sterne und vorzeitiges Ende.
+   */
+  function neueUebung(noten) {
+    var aufgaben = [];
+    noten.forEach(function (note) {
+      UEBUNG.arten.forEach(function (art) { aufgaben.push({ note: note, art: art, wiederholung: false }); });
+    });
+    return { aufgaben: aufgaben, nr: 0, gesperrt: false, beendet: aufgaben.length === 0 };
+  }
+
+  /** Aktuelle Aufgabe der Übung oder null. */
+  function uebungsAufgabe(uebung) {
+    return uebung.beendet ? null : uebung.aufgaben[uebung.nr];
+  }
+
+  /**
+   * Wertet eine Antwort der Übung aus. Falsch beantwortete Aufgaben kommen am
+   * Ende noch einmal (jede höchstens einmal, damit die Übung kurz bleibt).
+   * Liefert true/false oder null, wenn die Aufgabe schon beantwortet ist.
+   */
+  function uebungsAntwort(uebung, richtig) {
+    var a = uebungsAufgabe(uebung);
+    if (!a || uebung.gesperrt) return null;
+    uebung.gesperrt = true;
+    if (!richtig && !a.wiederholung) uebung.aufgaben.push({ note: a.note, art: a.art, wiederholung: true });
+    return !!richtig;
+  }
+
+  /** Nächste Aufgabe der Übung; { beendet } oder null bei doppeltem Aufruf. */
+  function uebungWeiter(uebung) {
+    if (uebung.beendet || !uebung.gesperrt) return null;
+    uebung.nr += 1;
+    uebung.gesperrt = false;
+    uebung.beendet = uebung.nr >= uebung.aufgaben.length;
+    return { beendet: uebung.beendet };
+  }
+
   /* ---------- Notenflug ---------- */
 
   var NOTENFLUG = {
@@ -633,6 +698,12 @@
     weiter: weiter,
     ergebnis: ergebnis,
     klassischesErgebnis: klassischesErgebnis,
+    UEBUNG: UEBUNG,
+    uebungsNoten: uebungsNoten,
+    neueUebung: neueUebung,
+    uebungsAufgabe: uebungsAufgabe,
+    uebungsAntwort: uebungsAntwort,
+    uebungWeiter: uebungWeiter,
     NOTENFLUG: NOTENFLUG,
     flugzeit: flugzeit,
     neuerFlug: neuerFlug,

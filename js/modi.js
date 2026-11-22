@@ -16,8 +16,10 @@
  *     stoppe: function () { … },          // optional: Runde verwerfen (Timer, Animation, Ton)
  *     reise: true,            // optional: taugt als Etappe der Täglichen Notenreise,
  *                             // beachtet dann umgebung.aufgaben
- *     kachelInfo: function (status) { … } // optional: kurzer Text unter dem Namen
+ *     kachelInfo: function (status) { … }, // optional: kurzer Text unter dem Namen
  *                             // auf der Startseite; status = { tagesreise }
+ *     fehlerUeben: true       // optional: Nach einer Runde mit Fehlern bietet das
+ *                             // Ergebnis „Fehler üben“ an (braucht `verlauf` im Ergebnis)
  *   });
  *
  * Die Datei wird in index.html vor js/app.js eingebunden. Die App zeigt den
@@ -76,10 +78,36 @@
  *   tagesreise    optional true: Die Tägliche Notenreise ist geschafft. Die App
  *                 vergibt dann den Extrastern (höchstens einmal pro Kalendertag)
  *                 und zählt die Tagesserie weiter.
+ *   verlauf       optional [{ note, richtig }, …] (runde.verlauf). Bei Modi mit
+ *                 `fehlerUeben: true` wählt die App daraus die Noten für
+ *                 „Fehler üben“ (SpielLogik.uebungsNoten).
  *
  * `klassischesEnde` (unten) liefert zusätzlich `geschafft` (Runde ohne dritten
- * Fehler beendet), `richtige` und `aufgaben`. Die Notenreise wertet damit
- * ihre Etappen aus; die App ignoriert diese Felder.
+ * Fehler beendet), `richtige`, `aufgaben` und immer `verlauf`. Die Notenreise
+ * wertet damit ihre Etappen aus und sammelt den Verlauf der Etappen, deren
+ * Modus `fehlerUeben` hat.
+ *
+ * Ruhige Spielfläche
+ * ------------------
+ * Reihenfolge in jeder Spielansicht: Kopfzeile, Notensystem, Antworten (Knöpfe,
+ * Klaviatur, Steuerung), darunter die Rückmeldung (Tier, Merkhilfe, Hinweis,
+ * „Weiter“). Zwischen Aufgabe und Rückmeldung bewegen sich Notensystem und
+ * Antworten nicht: Wächst die Rückmeldung, wächst nur der Bereich darunter.
+ * Dafür zeichnen die Modi das System mit `namensPlatz` (Hilfe namensPlatz
+ * unten), damit die Beschriftung nach der Antwort Breite und Höhe nicht
+ * ändert, und zeigen „Weiter“ über die Hilfe zeigeWeiter. Nach der Antwort
+ * hinterlegt `markiere: true` Linie oder Zwischenraum der Note.
+ *
+ * Fehler üben
+ * -----------
+ * Kein eigener Modus (erscheint nicht auf der Startseite und bei den
+ * Rekorden), sondern eine eigene Ansicht #ansicht-ueben mit der Datei
+ * js/fehler-ueben.js. Die App startet sie vom Ergebnis aus mit
+ * FehlerUeben.starte(umgebung) und bricht sie beim Verlassen mit
+ * FehlerUeben.stoppe() ab. Ablauf und Auswahl der Noten stehen in
+ * js/spiel-logik.js (uebungsNoten, neueUebung …). Die Übung nutzt die
+ * Antwortknöpfe (antwortKnoepfe unten) und die gemeinsame Klaviatur aus
+ * js/klaviatur.js, verbucht nichts und speichert nichts.
  *
  * Zurück-Knöpfe mit der Klasse `knopf-zurueck` führen zur Startseite. Die App
  * ruft dabei `stoppe()` auf und verwirft die Runde ohne Ergebnis.
@@ -245,10 +273,33 @@
         [t("ende.bonus"), e.bonus + (e.bonus > 0 ? " (" + sterneText(e.verbleibendeSterne) + " × " + L.REGELN.bonusProStern + ")" : "")]
       ],
       schwierig: e.schwierig,
+      verlauf: runde.verlauf.slice(),
       geschafft: !e.vorzeitig,
       richtige: e.richtige,
       aufgaben: e.aufgaben
     });
+  }
+
+  /**
+   * Zeichenzahl des längsten Notennamens der Auswahl (c¹ = 2, fis¹ = 4, F♯4 = 3)
+   * für Notensystem.zeichne(…, { namensPlatz }). So bleibt das System gleich
+   * groß, wenn nach der Antwort der Name neben der Note erscheint.
+   */
+  function namensPlatz(umgebung) {
+    return (umgebung.namen || []).reduce(function (max, n) {
+      return Math.max(max, String(n.anzeige || n.name || "").length);
+    }, 0);
+  }
+
+  /**
+   * Zeigt „Weiter“ nach einer falschen Antwort und setzt den Fokus darauf.
+   * Die Seite scrollt nur so weit wie nötig, damit der Knopf sichtbar wird.
+   * Notensystem und Antworten stehen darüber und bleiben so möglichst im Bild.
+   */
+  function zeigeWeiter(knopf) {
+    knopf.hidden = false;
+    knopf.focus({ preventScroll: true });
+    if (knopf.scrollIntoView) knopf.scrollIntoView({ block: "nearest" });
   }
 
   /** Zufällige Reihenfolge (Fisher-Yates), ändert die Liste nicht. */
@@ -276,6 +327,8 @@
       antwortKnoepfe: antwortKnoepfe,
       zeigeMerkhilfe: zeigeMerkhilfe,
       klassischesEnde: klassischesEnde,
+      namensPlatz: namensPlatz,
+      zeigeWeiter: zeigeWeiter,
       mische: mische
     }
   };

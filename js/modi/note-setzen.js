@@ -66,7 +66,8 @@
   }
 
   function zeichne(optionen) {
-    var o = { bereich: erlaubt, breite: FORM.breite, noteX: FORM.noteX, falschX: FORM.falschX, schluessel: note().schluessel };
+    var o = { bereich: erlaubt, breite: FORM.breite, noteX: FORM.noteX, falschX: FORM.falschX, schluessel: note().schluessel,
+      namensPlatz: H.namensPlatz(umgebung) };
     for (var k in optionen) o[k] = optionen[k];
     var n = optionen.note !== undefined ? optionen.note : null;
     $("setzen-notensystem").innerHTML = window.Notensystem.zeichne(n, o);
@@ -170,7 +171,8 @@
     system.classList.remove("ist-offen", "hat-vorschau");
     system.classList.add(a.richtig ? "ist-richtig" : "ist-falsch");
     // Bei falscher Antwort steht der Name oben, damit er die falsch gesetzte Note nicht verdeckt.
-    zeichne({ note: gezeigt, beschriftung: a.richtig ? gezeigt.anzeige : undefined, falsch: a.richtig ? undefined : gewaehlt, falschVorzeichen: vorzeichen });
+    zeichne({ note: gezeigt, beschriftung: a.richtig ? gezeigt.anzeige : undefined, falsch: a.richtig ? undefined : gewaehlt,
+      falschVorzeichen: vorzeichen, markiere: true });
     $("setzen-name").textContent = gezeigt.anzeige;
     zeigeStatus();
     H.zeigeMerkhilfe(umgebung, gezeigt, "setzen-merkhilfe");
@@ -182,10 +184,7 @@
     if (a.richtig) {
       weiterTimer = setTimeout(naechsteAufgabe, PAUSE_NACH_RICHTIG);
     } else {
-      var weiter = $("setzen-weiter");
-      weiter.hidden = false;
-      weiter.focus({ preventScroll: true });
-      if (weiter.scrollIntoView) weiter.scrollIntoView({ block: "nearest" });
+      H.zeigeWeiter($("setzen-weiter"));
     }
   }
 
@@ -229,6 +228,7 @@
     symbol: "✏️",
     ansicht: "setzen",
     reise: true,
+    fehlerUeben: true,
     starte: starte,
     stoppe: stoppe
   });

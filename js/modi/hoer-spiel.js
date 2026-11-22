@@ -173,6 +173,11 @@
       else if (k === i) { marke = "✗"; status = "ist-falsch"; }
       if (status) {
         b.classList.add(status);
+        // Bei der gesuchten Note Linie oder Zwischenraum hinterlegen
+        if (marke === "✓") {
+          b.querySelector("svg").outerHTML = window.Notensystem.zeichne(n,
+            { bereich: umgebung.bereich, breite: FORM.breite, noteX: FORM.noteX, markiere: true });
+        }
         b.querySelector(".hoer-marke").textContent = marke;
         b.querySelector(".hoer-name").textContent = n.anzeige;
         b.setAttribute("aria-label", T.t(marke === "✓" ? "runde.richtig" : "runde.falsch",
@@ -191,10 +196,7 @@
     } else {
       // Den richtigen Ton noch einmal vorspielen, damit Ton und Note zusammenpassen.
       spieleAufgabe();
-      var weiter = $("hoeren-weiter");
-      weiter.hidden = false;
-      weiter.focus({ preventScroll: true });
-      if (weiter.scrollIntoView) weiter.scrollIntoView({ block: "nearest" });
+      H.zeigeWeiter($("hoeren-weiter"));
     }
   }
 

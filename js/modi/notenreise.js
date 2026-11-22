@@ -13,6 +13,8 @@
  * dazu der Extrastern höchstens einmal pro Kalendertag (vergibt die App,
  * siehe SpielLogik.verbucheErgebnis). Verpatzt das Kind eine Etappe, endet
  * die Reise ohne Sterne.
+ * Danach bietet das Ergebnis „Fehler üben“ mit den Fehlern aus den Etappen
+ * an, deren Modus das kann (Welche Note ist das?, Klaviertasten, Note setzen).
  * Nutzt die Ansicht #ansicht-reise aus index.html.
  */
 (function () {
@@ -145,7 +147,9 @@
       aufgaben: e.aufgaben || AUFGABEN,
       gesamt: e.gesamt || 0,
       sterne: e.neueSterne || 0,
-      schwierig: e.schwierig
+      schwierig: e.schwierig,
+      // Für „Fehler üben“ nur Etappen aus Modi, die das anbieten (siehe js/modi.js)
+      verlauf: modus.fehlerUeben ? (e.verlauf || []) : []
     });
     if (!e.geschafft) beendeReise(false);
     else if (ergebnisse.length >= etappen.length) beendeReise(true);
@@ -158,7 +162,7 @@
 
   function beendeReise(geschafft) {
     var gesamt = 0, sterne = 0;
-    var gefragt = [], neu = [];
+    var gefragt = [], neu = [], verlauf = [];
     function merke(liste, ids) {
       (ids || []).forEach(function (id) { if (liste.indexOf(id) === -1) liste.push(id); });
     }
@@ -168,6 +172,7 @@
       gesamt += e.gesamt;
       sterne += e.sterne;
       if (e.schwierig) { merke(gefragt, e.schwierig.gefragt); merke(neu, e.schwierig.neu); }
+      verlauf = verlauf.concat(e.verlauf);
       return [modus.name, (e.geschafft ? "✓ " : "✗ ") + T.t("reise.richtig", { richtige: e.richtige, aufgaben: e.aufgaben })];
     });
     umgebung.beende({
@@ -178,6 +183,7 @@
       stimmung: geschafft ? "froh" : "normal",
       zeilen: zeilen,
       schwierig: { gefragt: gefragt, neu: neu },
+      verlauf: verlauf,
       tagesreise: geschafft
     });
   }
@@ -191,6 +197,7 @@
     ansicht: "reise",
     starte: starte,
     stoppe: stoppe,
+    fehlerUeben: true,
     kachelInfo: function (status) {
       var t = status.tagesreise;
       if (t.heute) return T.t("reise.kachelHeute") + (t.serie > 1 ? T.t("reise.inFolge", { n: t.serie }) : "");

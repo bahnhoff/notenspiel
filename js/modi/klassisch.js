@@ -47,7 +47,7 @@
 
   function zeigeAufgabe() {
     zeigeStatus();
-    $("notensystem").innerHTML = window.Notensystem.zeichne(runde.aktuell.note, { bereich: umgebung.bereich });
+    $("notensystem").innerHTML = window.Notensystem.zeichne(runde.aktuell.note, { bereich: umgebung.bereich, namensPlatz: H.namensPlatz(umgebung) });
     $("notensystem").classList.remove("ist-falsch", "ist-richtig");
     $("knopf-weiter").hidden = true;
     $("merkhilfe").hidden = true;
@@ -80,7 +80,8 @@
     });
 
     zeigeStatus();
-    $("notensystem").innerHTML = window.Notensystem.zeichne(a.note, { beschriftung: a.note.anzeige, bereich: umgebung.bereich });
+    $("notensystem").innerHTML = window.Notensystem.zeichne(a.note, { beschriftung: a.note.anzeige, bereich: umgebung.bereich,
+      markiere: true, namensPlatz: H.namensPlatz(umgebung) });
     $("notensystem").classList.add(a.richtig ? "ist-richtig" : "ist-falsch");
 
     H.zeigeMerkhilfe(umgebung, a.note, "merkhilfe");
@@ -90,11 +91,8 @@
     if (a.richtig) {
       weiterTimer = setTimeout(naechsteAufgabe, PAUSE_NACH_RICHTIG);
     } else {
-      var weiterKnopf = $("knopf-weiter");
-      weiterKnopf.hidden = false;
-      weiterKnopf.focus({ preventScroll: true });
       // Auf kleinen Bildschirmen den Hinweis und die Schaltfläche sichtbar machen.
-      if (weiterKnopf.scrollIntoView) weiterKnopf.scrollIntoView({ block: "nearest" });
+      H.zeigeWeiter($("knopf-weiter"));
     }
   }
 
@@ -139,6 +137,7 @@
     hauptspiel: true,
     ansicht: "runde",
     reise: true,
+    fehlerUeben: true,
     starte: starte,
     stoppe: stoppe
   });

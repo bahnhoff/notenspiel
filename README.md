@@ -105,6 +105,12 @@ Alle Mini-Spiele nutzen die Einstellungen (Schlüssel, Notenauswahl, Merktiere, 
 - **Hör-Spiel:** Zum Einstieg erklingt c¹ als Bezugston, dann ein Ton, und du wählst aus drei gezeigten Noten die passende; „Nochmal hören“ spielt den Ton erneut. Der Ton entsteht im Browser, ohne Audiodateien. 10 Aufgaben, Wertung wie bei „Welche Note ist das?“.
 - **Tägliche Notenreise:** Jeden Tag drei Etappen mit je 5 Aufgaben aus „Welche Note ist das?“, „Klaviertasten“, „Note setzen“ und „Höher oder tiefer“; die Auswahl wechselt täglich. Wer alle drei Etappen ohne drei Fehler in einer Etappe schafft, bekommt den Durchschnitt der Etappensterne und einmal pro Tag einen Extrastern; die Startseite zeigt, ob die Reise heute geschafft ist und wie viele Tage in Folge.
 
+## Fehler üben
+
+Nach einer Runde mit Fehlern in „Welche Note ist das?“, „Klaviertasten“, „Note setzen“ oder der Notenreise zeigt das Ergebnis den Knopf **Fehler üben**. Für jede verwechselte Note (höchstens 3, die häufigsten Fehler zuerst) gibt es zwei kurze Aufgaben: erst die Note im Notensystem erkennen, dann dieselbe Note auf dem Klavier finden. Es gibt keine Punkte, keine Sterne und keinen Rekord. Eine falsch beantwortete Aufgabe kommt am Ende noch einmal.
+
+In allen Spielen bleiben Notensystem und Antworten nach der Antwort an ihrer Stelle; die Rückmeldung des Tiers steht darunter, und Linie oder Zwischenraum der Note sind hinterlegt.
+
 Ältere Spielstände bleiben erhalten: Sterne und Rekorde zählen weiter, Häschen und Kätzchen bleiben, fehlende Tiere ergänzt das Spiel einmalig nach Sternzahl.
 
 ## Dateien
@@ -118,9 +124,11 @@ Alle Mini-Spiele nutzen die Einstellungen (Schlüssel, Notenauswahl, Merktiere, 
 - `js/notensystem.js`: das Notensystem mit Violin- und Bassschlüssel
 - `js/tiere.js`: die Tierzeichnungen
 - `js/klang.js`: der Klavierton für Hör-Spiel und Klaviertasten (Web Audio API, keine Audiodateien)
+- `js/klaviatur.js`: die Klaviatur für Klaviertasten und „Fehler üben“
 - `js/modi.js`: die gemeinsame Schnittstelle für Spielmodi
 - `js/modi/klassisch.js`: das Spiel „Welche Note ist das?“
 - `js/modi/notenflug.js`, `js/modi/klaviertasten.js`, `js/modi/note-setzen.js`, `js/modi/noten-memory.js`, `js/modi/hoeher-tiefer.js`, `js/modi/hoer-spiel.js`, `js/modi/notenreise.js`: die Mini-Spiele
+- `js/fehler-ueben.js`: die Übung „Fehler üben“ nach einer Runde
 - `js/app.js`: Startseite, Ergebnis, Einstellungen, Tiere, Rekorde und Speichern
 - `tests/spiel-logik.test.js`: automatische Tests der Spiellogik
 

@@ -73,7 +73,9 @@
 
   function zeichneSystem(note, beschriftung) {
     var box = $("flug-notensystem");
-    box.innerHTML = window.Notensystem.zeichne(note, { bereich: umgebung.bereich, beschriftung: beschriftung });
+    // Nach der Antwort (mit Beschriftung) Linie oder Zwischenraum hinterlegen; namensPlatz hält die Größe fest.
+    box.innerHTML = window.Notensystem.zeichne(note, { bereich: umgebung.bereich, beschriftung: beschriftung,
+      markiere: !!beschriftung, namensPlatz: H.namensPlatz(umgebung) });
     box.classList.remove("ist-richtig", "ist-falsch");
   }
 
@@ -195,9 +197,7 @@
       wartetAufWeiter = danach;
       var weiter = $("flug-weiter");
       weiter.textContent = e.beendet ? t("flug.zumErgebnis") : t("runde.weiter");
-      weiter.hidden = false;
-      weiter.focus({ preventScroll: true });
-      if (weiter.scrollIntoView) weiter.scrollIntoView({ block: "nearest" });
+      H.zeigeWeiter(weiter);
       if (!e.beendet) timer = setTimeout(weiterNachFehler, PAUSE_NACH_FEHLER);
     }
   }

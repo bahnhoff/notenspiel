@@ -111,6 +111,10 @@
    *           falschVorzeichen  Vorzeichen dieser Note (0, 1 oder -1)
    *           falschX      x-Mitte dieser Note (Standard noteX − 24)
    *           klasse       zusätzliche CSS-Klasse für das SVG
+   *           markiere     true: Linie oder Zwischenraum der Note dezent hinterlegen
+   *                        (nach der Antwort, auch bei Hilfslinien)
+   *           namensPlatz  Zeichenzahl, für die rechts immer Platz bleibt. So ist das
+   *                        System mit und ohne Beschriftung gleich breit und gleich hoch.
  *           weitere      [{ position, x, vorzeichen }]: weitere Noten im selben System,
  *                        je in <g class="note-weitere"> (Höher oder tiefer)
    * Die Note samt Hilfslinien liegt in <g class="note-gruppe">, damit ein Modus
@@ -133,6 +137,13 @@
     function hilfslinie(hy, x) {
       return '<line class="hilfslinie" x1="' + (x - 13) + '" x2="' + (x + 13) + '" y1="' + hy + '" y2="' + hy + '" stroke="currentColor" stroke-width="1.4"/>';
     }
+
+    // Hinterlegung der Lage hinter den Linien: im System über die ganze Breite,
+    // außerhalb (Hilfslinien) nur rund um die Note, dann in der note-gruppe,
+    // damit sie mitwandert, wenn ein Modus die Note verschiebt (Notenflug).
+    var markierung = note && optionen.markiere ? lageMarkierung(note.position, NOTE_X, RECHTS) : "";
+    var imSystem = note && note.position >= 0 && note.position <= 8;
+    if (markierung && imSystem) teile.push(markierung);
 
     // Fünf Linien
     for (i = 0; i < 5; i++) {
@@ -178,6 +189,7 @@
       var p = note.position;
       var ny = yVon(p);
       teile.push('<g class="note-gruppe">');
+      if (markierung && !imSystem) teile.push(markierung);
       teile.push(viertelnote(p, NOTE_X, note.vorzeichen));
 
       if (optionen.beschriftung) {
@@ -192,10 +204,29 @@
     var oben = Math.min(10, yVon(bereich[1]) - (bereich[1] < 4 ? 38 : 8));
     var unten = Math.max(94, yVon(bereich[0]) + (bereich[0] >= 4 ? 38 : 8));
     // Platz für den Namen rechts neben der Note, auch für längere wie „fis¹“
-    var breiteGesamt = Math.max(RECHTS + 4, optionen.beschriftung ? NOTE_X + 30 + String(optionen.beschriftung).length * 10 : 0);
+    function namensBreite(zeichen) { return zeichen ? NOTE_X + 30 + zeichen * 10 : 0; }
+    var breiteGesamt = Math.max(RECHTS + 4, namensBreite(optionen.beschriftung ? String(optionen.beschriftung).length : 0),
+      namensBreite(optionen.namensPlatz || 0));
     return '<svg class="notensystem-svg' + (optionen.klasse ? " " + optionen.klasse : "") + '" viewBox="0 ' + oben + " " + breiteGesamt + " " + (unten - oben) + '" role="img" aria-label="' +
       systemText(schluessel, optionen.beschriftung, note) +
       '" xmlns="http://www.w3.org/2000/svg">' + teile.join("") + "</svg>";
+  }
+
+  /**
+   * Weiche Farbfläche für die Lage einer Note: auf einer Linie ein schmales Band
+   * um die Linie, in einem Zwischenraum die Fläche zwischen den Linien.
+   * Innerhalb der fünf Linien (Position 0 bis 8) über die ganze Breite, sonst
+   * nur rund um die Note, damit klar ist, welche Hilfslinie gemeint ist.
+   */
+  function lageMarkierung(position, x, rechts) {
+    var y = yVon(position);
+    var aufLinie = position % 2 === 0;
+    var hoehe = aufLinie ? 5 : ABSTAND - 2;
+    var imSystem = position >= 0 && position <= 8;
+    var x0 = imSystem ? LINKS : x - 24;
+    var x1 = imSystem ? rechts : x + 24;
+    return '<rect class="lage-markierung" x="' + x0 + '" y="' + r2(y - hoehe / 2) + '" width="' + (x1 - x0) +
+      '" height="' + hoehe + '" rx="2.5"/>';
   }
 
   /** Beschreibung für Screenreader in der aktuellen Sprache, zum Beispiel „Violinschlüssel mit der Note c¹“. */

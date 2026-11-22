@@ -64,6 +64,7 @@
         </div>
 
         <div class="runde-antworten">
+          <div class="antworten" id="antworten" role="group" aria-label="Antworten" data-text-aria-label="runde.antwortenAria"></div>
           <div class="tier-zeile">
             <div class="tier-klein" id="runde-tier"></div>
             <div class="sprechblase" id="sprechblase">
@@ -77,7 +78,6 @@
               <button type="button" class="knopf knopf-haupt knopf-weiter" id="knopf-weiter" hidden data-text="runde.weiter">Weiter</button>
             </div>
           </div>
-          <div class="antworten" id="antworten" role="group" aria-label="Antworten" data-text-aria-label="runde.antwortenAria"></div>
         </div>
       </div>
     </section>
@@ -101,6 +101,7 @@
           <div class="notensystem notensystem-flug" id="flug-notensystem"></div>
         </div>
         <div class="runde-antworten">
+          <div class="antworten" id="flug-antworten" role="group" aria-label="Antworten" data-text-aria-label="runde.antwortenAria"></div>
           <div class="tier-zeile">
             <div class="tier-klein" id="flug-tier"></div>
             <div class="sprechblase">
@@ -114,7 +115,6 @@
               <button type="button" class="knopf knopf-haupt knopf-weiter" id="flug-weiter" hidden data-text="runde.weiter">Weiter</button>
             </div>
           </div>
-          <div class="antworten" id="flug-antworten" role="group" aria-label="Antworten" data-text-aria-label="runde.antwortenAria"></div>
         </div>
       </div>
     </section>
@@ -136,6 +136,7 @@
           <p class="aufgabe-nr" id="klavier-aufgabe"></p>
           <h1 id="titel-klavier" class="frage" tabindex="-1" data-text="klavier.frage">Welche Taste ist das?</h1>
           <div class="notensystem" id="klavier-notensystem"></div>
+          <div class="klaviatur" id="klaviatur" role="group" aria-label="Klaviatur" data-text-aria-label="klavier.aria"></div>
         </div>
         <div class="runde-antworten">
           <div class="tier-zeile">
@@ -153,7 +154,6 @@
           </div>
         </div>
       </div>
-      <div class="klaviatur" id="klaviatur" role="group" aria-label="Klaviatur" data-text-aria-label="klavier.aria"></div>
     </section>
 
     <!-- Note setzen -->
@@ -307,6 +307,55 @@
       </div>
     </section>
 
+    <!-- Fehler üben: nach einer Runde mit Fehlern, ohne Punkte und Sterne (js/fehler-ueben.js) -->
+    <section id="ansicht-ueben" class="ansicht ansicht-runde ansicht-ueben" aria-labelledby="titel-ueben" hidden>
+      <header class="runde-kopf">
+        <button type="button" class="knopf knopf-klein knopf-zurueck" aria-label="Zurück zur Startseite" data-text-aria-label="zurueck.aria">
+          <span aria-hidden="true">←</span> <span class="knopf-text" data-text="zurueck.startseite">Startseite</span>
+        </button>
+        <div class="runde-status">
+          <span class="punkte-anzeige ueben-marke" data-text="ueben.titel">Fehler üben</span>
+        </div>
+      </header>
+
+      <div class="runde-inhalt" id="ueben-inhalt">
+        <div class="runde-noten">
+          <p class="aufgabe-nr" id="ueben-aufgabe"></p>
+          <h1 id="titel-ueben" class="frage" tabindex="-1"></h1>
+          <div class="notensystem" id="ueben-notensystem"></div>
+          <div class="klaviatur" id="ueben-klaviatur" role="group" aria-label="Klaviatur" data-text-aria-label="klavier.aria" hidden></div>
+        </div>
+        <div class="runde-antworten">
+          <div class="antworten" id="ueben-antworten" role="group" aria-label="Antworten" data-text-aria-label="runde.antwortenAria"></div>
+          <div class="tier-zeile">
+            <div class="tier-klein" id="ueben-tier"></div>
+            <div class="sprechblase">
+              <div aria-live="polite">
+                <div class="merkhilfe" id="ueben-merkhilfe" hidden>
+                  <div class="merkhilfe-bild" id="ueben-merkhilfe-bild"></div>
+                  <p class="merkhilfe-text" id="ueben-merkhilfe-text"></p>
+                </div>
+                <p id="ueben-text"></p>
+              </div>
+              <button type="button" class="knopf knopf-haupt knopf-weiter" id="ueben-weiter" hidden data-text="runde.weiter">Weiter</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ueben-ende" id="ueben-ende" hidden>
+        <h1 id="titel-ueben-ende" class="titel" tabindex="-1" data-text="ueben.fertig">Übung geschafft!</h1>
+        <div class="tier-zeile tier-zeile-gross">
+          <div class="tier-mittel" id="ueben-ende-tier"></div>
+          <div class="sprechblase"><p id="ueben-ende-text"></p></div>
+        </div>
+        <div class="knopf-reihe">
+          <button type="button" class="knopf knopf-haupt" id="ueben-nochmal" data-text="ergebnis.nochmal">Noch eine Runde</button>
+          <button type="button" class="knopf knopf-neben" id="ueben-start" data-text="ergebnis.zurStartseite">Zur Startseite</button>
+        </div>
+      </div>
+    </section>
+
     <!-- Tägliche Notenreise: Übersicht vor und zwischen den Etappen -->
     <section id="ansicht-reise" class="ansicht ansicht-reise" aria-labelledby="titel-reise" hidden>
       <header class="seiten-kopf">
@@ -347,6 +396,9 @@
         <button type="button" class="knopf knopf-neben knopf-ohne-name" id="knopf-ohne-name" data-text="rekordName.ohne">Ohne Namen</button>
         <p class="rekord-name-fertig" id="rekord-name-fertig" role="status"></p>
       </section>
+      <button type="button" class="knopf knopf-haupt knopf-ueben" id="knopf-ueben" hidden>
+        <span aria-hidden="true">🎯</span> <span data-text="ueben.knopf">Fehler üben</span>
+      </button>
       <div class="knopf-reihe">
         <button type="button" class="knopf knopf-haupt" id="knopf-nochmal" data-text="ergebnis.nochmal">Noch eine Runde</button>
         <button type="button" class="knopf knopf-neben" id="knopf-ergebnis-start" data-text="ergebnis.zurStartseite">Zur Startseite</button>
@@ -397,6 +449,7 @@
   <script src="js/notensystem.js"></script>
   <script src="js/tiere.js"></script>
   <script src="js/klang.js"></script>
+  <script src="js/klaviatur.js"></script>
   <script src="js/modi.js"></script>
   <!-- Spielmodi: je Modus eine Datei, vor js/app.js -->
   <script src="js/modi/klassisch.js"></script>
@@ -407,6 +460,8 @@
   <script src="js/modi/hoeher-tiefer.js"></script>
   <script src="js/modi/hoer-spiel.js"></script>
   <script src="js/modi/notenreise.js"></script>
+  <!-- Fehler üben: eigene Ansicht, kein Modus (siehe js/modi.js) -->
+  <script src="js/fehler-ueben.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>

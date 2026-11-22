@@ -397,6 +397,9 @@ h1:focus { outline: none; }
 
 .notensystem.ist-richtig { border-color: var(--gruen); }
 .notensystem.ist-falsch { border-color: var(--rot); }
+/* Nach der Antwort: Linie oder Zwischenraum der Note weich hinterlegt (js/notensystem.js) */
+.lage-markierung { fill: var(--gelb); fill-opacity: 0.32; }
+
 .notensystem.ist-richtig .notenname { fill: var(--gruen); }
 .notensystem.ist-falsch .notenname { fill: var(--rot); }
 
@@ -1249,17 +1252,32 @@ h1:focus { outline: none; }
 }
 
 .hoer-option .notensystem-svg { width: 100%; max-height: 30vh; }
-.hoer-name { font-size: 1.3rem; line-height: 1; }
-.hoer-name:empty { display: none; }
+.hoer-name { font-size: 1.3rem; line-height: 1; min-height: 1em; }
+/* Der Name erscheint erst nach der Antwort; sein Platz bleibt frei, damit nichts springt. */
 .hoer-marke { position: absolute; top: 2px; right: 6px; font-size: 1.2rem; font-weight: 800; }
 
 .hoer-option.ist-richtig,
 .hoer-option.ist-loesung { background: var(--gruen-hell); border: 4px solid var(--gruen); color: var(--gruen); }
 .hoer-option.ist-loesung { outline: 3px dashed var(--gruen); outline-offset: 2px; }
 .hoer-option.ist-falsch { background: var(--rot-hell); border: 4px dashed var(--rot); color: var(--rot); }
+/* Dickerer Rand nach der Antwort, weniger Innenabstand: Das System in der Karte bleibt an seiner Stelle. */
+.hoer-option.ist-richtig, .hoer-option.ist-loesung, .hoer-option.ist-falsch { padding: 2px; }
 .hoeren-optionen.gesperrt .hoer-option { cursor: default; }
 .hoeren-optionen.gesperrt .hoer-option:not(.ist-richtig):not(.ist-falsch):not(.ist-loesung) { opacity: 0.55; }
 .hoeren-optionen.gesperrt .hoer-option:active { transform: none; box-shadow: var(--schatten); }
+
+/* ---------- Fehler üben ---------- */
+
+.knopf-ueben { font-size: 1.35rem; min-height: 64px; }
+.ueben-marke { font-weight: 700; }
+
+.ueben-ende {
+  max-width: 560px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
 
 /* ---------- Tägliche Notenreise ---------- */
 
@@ -1317,10 +1335,11 @@ h1:focus { outline: none; }
 
 /* Querformat mit genug Breite: Notensystem links, Antworten rechts */
 @media (orientation: landscape) and (min-width: 700px) {
+  /* Oben ausgerichtet: Wächst die Rückmeldung rechts, bleibt links alles stehen. */
   .runde-inhalt {
     display: grid;
     gap: 20px;
-    align-items: center;
+    align-items: start;
   }
   .ansicht-runde:not([hidden]):not(.ansicht-klavier) {
     display: flex;
@@ -1330,7 +1349,8 @@ h1:focus { outline: none; }
   .runde-inhalt { flex: 1 1 auto; grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr); }
   .runde-antworten { margin-top: 0; }
   .notensystem-svg { max-height: 62vh; }
-  .ansicht-klavier .notensystem-svg { max-height: 36vh; }
+  .ansicht-klavier .notensystem-svg,
+  .ansicht-ueben.ist-klavier .notensystem-svg { max-height: 36vh; }
 }
 
 /* Niedrige Querformat-Bildschirme (Handy quer) */
