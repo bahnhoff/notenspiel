@@ -8,7 +8,7 @@
  *                             der Klasse `knopf-symbol` in index.html)
  *
  * Kennungen: die Kennung des Spielmodus (klassisch, notenflug, klaviertasten,
- * note-setzen, noten-memory, hoeher-tiefer, hoer-spiel, notenreise, melodie)
+ * note-setzen, noten-memory, hoer-spiel, notenreise, melodie)
  * und die Menüknöpfe tiere, rekorde, einstellungen, ueben.
  * Alle Symbole liegen in einem Feld von 48 × 48 und sind nur Schmuck
  * (aria-hidden), der Text daneben trägt die Bedeutung.
@@ -119,13 +119,6 @@
           kreis(16, 23, 5, F.orangeDunkel, true) + "</g>" +
         '<g transform="rotate(10 31 25)">' + rechteck(20, 10, 22, 30, 4, F.creme) +
           note(29, 31, F.orange, 13) + "</g>";
-    },
-
-    // Höher oder tiefer: hohe und tiefe Note mit Doppelpfeil dazwischen
-    "hoeher-tiefer": function () {
-      return note(11, 21, F.orange, 13) + note(33, 39, F.blau, 13) +
-        linie("M24 10 L24 38", 2.6) +
-        form("M19 14 L24 7 L29 14 Z", BRAUN) + form("M19 34 L24 41 L29 34 Z", BRAUN);
     },
 
     // Hör-Spiel: Lautsprecher mit Schallwellen

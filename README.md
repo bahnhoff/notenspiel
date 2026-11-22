@@ -39,7 +39,7 @@ Alle sichtbaren Texte beider Sprachen stehen in `js/texte.js`. HTML-Elemente tra
 
 Unter **Einstellungen** auf der Startseite wählst du:
 
-- die Antworten mit zwei großen Knöpfen: **Einfach** (Standard) zeigt als Antwortknöpfe nur die Buchstaben C D E F G A H, die in der Notenauswahl vorkommen, und jede Oktave des richtigen Buchstabens zählt. Die Rückmeldung nennt danach den genauen Namen, zum Beispiel „Genau, das ist d²!“. **Genau** zeigt die Knöpfe mit Oktave (c¹, d² …). Bei „Klaviertasten“ zählt im einfachen Modus jede Taste mit dem richtigen Buchstaben, bei „Note setzen“ steht nur der Buchstabe da und jede passende Stelle zählt, beim „Noten-Memory“ zeigen die Namenskarten nur Buchstaben, jeder Buchstabe kommt höchstens einmal vor. „Höher oder tiefer“ und das „Hör-Spiel“ bleiben gleich. Ältere Spielstände starten mit **Einfach**.
+- die Antworten mit zwei großen Knöpfen: **Einfach** (Standard) zeigt als Antwortknöpfe nur die Buchstaben C D E F G A H, die in der Notenauswahl vorkommen, und jede Oktave des richtigen Buchstabens zählt. Die Rückmeldung nennt danach den genauen Namen, zum Beispiel „Genau, das ist d²!“. **Genau** zeigt die Knöpfe mit Oktave (c¹, d² …). Bei „Klaviertasten“ zählt im einfachen Modus jede Taste mit dem richtigen Buchstaben, bei „Note setzen“ steht nur der Buchstabe da und jede passende Stelle zählt, beim „Noten-Memory“ zeigen die Namenskarten nur Buchstaben, jeder Buchstabe kommt höchstens einmal vor. Das „Hör-Spiel“ bleibt gleich. Ältere Spielstände starten mit **Einfach**.
 - die Schlüssel: Kästchen für Violinschlüssel und Bassschlüssel, auch beide gleichzeitig. Ein Schlüssel bleibt immer angekreuzt.
 - die Noten je Schlüssel: Jede Note ist ein großer Ankreuz-Knopf, eine Reihe pro Oktave. Die Schnellwahl-Knöpfe „Erste Noten“, „1 Oktave“, „2 Oktaven“, „Alle“ und „Keine“ setzen die Häkchen auf einmal; danach kannst du einzelne Noten an- oder abwählen, auch mit Lücken (zum Beispiel nur c¹, e¹ und g¹).
 - Noten mit Vorzeichen: Unter den Stammtönen jeder Oktave stehen abgesetzte Zeilen „mit ♯“ (cis, dis, fis, gis, ais) und „mit ♭“ (des, es, ges, as, b). Deutsch heißt das h mit B-Vorzeichen „b“, H bleibt H; in der großen Oktave schreibt man Fis, Es, B. Zu Beginn ist keine Vorzeichen-Note gewählt. Die Schnellwahl setzt nur die Stammtöne, „Keine“ entfernt auch die Vorzeichen-Noten.
@@ -49,7 +49,7 @@ Es braucht mindestens 3 verschiedene Antworten, sonst zeigt das Spiel einen Hinw
 
 Die Notennamen folgen der deutschen Schreibweise mit hochgestellter Oktavziffer: C D E F G A H (große Oktave), c d e f g a h (kleine Oktave), c¹ bis h¹ (c¹ ist das mittlere C), danach c² bis h² und c³. In `js/noten-konfiguration.js` und in den Notenkennungen (zum Beispiel `violin-c1`, `violin-fis1`, `bass-B`) steht die Ziffer als normale Ziffer.
 
-Vorzeichen-Noten zeigt das Notensystem mit einem Kreuz oder B vor dem Notenkopf. Als Antwort zählt der Name, nicht der Klang: fis und ges sind verschiedene Antworten. Bei **Einfach** heißen die Knöpfe zum Beispiel C, D, Es, E, F, Fis, G. Nur bei „Klaviertasten“ (dieselbe schwarze Taste), „Höher oder tiefer“ und im „Hör-Spiel“ zählt der Klang; gleich klingende Noten kommen dort nicht zusammen vor.
+Vorzeichen-Noten zeigt das Notensystem mit einem Kreuz oder B vor dem Notenkopf. Als Antwort zählt der Name, nicht der Klang: fis und ges sind verschiedene Antworten. Bei **Einfach** heißen die Knöpfe zum Beispiel C, D, Es, E, F, Fis, G. Nur bei „Klaviertasten“ (dieselbe schwarze Taste) und im „Hör-Spiel“ zählt der Klang; gleich klingende Noten kommen dort nicht zusammen vor.
 
 ## Bereiche und Merktiere anpassen
 
@@ -100,7 +100,7 @@ Das Spiel führt für jedes Spiel die fünf besten Ergebnisse. Schafft ein Ergeb
 - Eine richtige Antwort bringt 10 Punkte. Bei einem Fehler erlischt ein Stern, und das Spiel zeigt die richtige Antwort mit einem Hinweis.
 - Eine falsch beantwortete Note kommt nach zwei bis drei anderen Noten noch einmal. Fehlt dafür der Platz, kommt sie in der nächsten Runde früh dran.
 - Nach 10 Aufgaben gibt es 10 Bonuspunkte pro verbliebenem Stern, und die Sterne kommen in die Sammlung.
-- Die Runde geht immer bis zur zehnten Aufgabe, auch nach drei Fehlern. Die Sterne sinken pro Fehler bis auf 0; mit 0 Sternen gibt es keinen Bonus und keine neuen Sterne. Die Punkte zählen für die Rekorde. Das gilt genauso für Klaviertasten, Note setzen, Höher oder tiefer, das Hör-Spiel und die Etappen der Notenreise.
+- Die Runde geht immer bis zur zehnten Aufgabe, auch nach drei Fehlern. Die Sterne sinken pro Fehler bis auf 0; mit 0 Sternen gibt es keinen Bonus und keine neuen Sterne. Die Punkte zählen für die Rekorde. Das gilt genauso für Klaviertasten, Note setzen, das Hör-Spiel und die Etappen der Notenreise.
 - Auf einem Gerät mit Tastatur lassen sich die Antworten auch mit den Buchstabentasten geben, wie beim Notenflug (siehe unten).
 - Alle 5 gesammelten Sterne kommt ein neues Tier dazu.
 
@@ -113,10 +113,9 @@ Alle Mini-Spiele nutzen die Einstellungen (Schlüssel, Notenauswahl, Merktiere, 
 - **Klaviertasten:** Unter der Note liegt eine Klaviatur von der tiefsten bis zur höchsten gewählten Note (bei Lücken mit allen weißen Tasten dazwischen), mindestens aber 7 weiße Tasten. Das mittlere C ist markiert. Tippe die passende Taste. Alle Tasten, auch die schwarzen, spielen beim Drücken ihren Ton. 10 Aufgaben, Wertung wie bei „Welche Note ist das?“.
 - **Note setzen:** Das Spiel nennt einen Notennamen, zum Beispiel `f1`. Tippe im Notensystem auf die passende Linie oder den Zwischenraum, verschiebe die Note bei Bedarf mit ▲ und ▼ und tippe auf **Prüfen**. Sind Vorzeichen-Noten gewählt, wählst du mit drei Knöpfen dazu ohne Vorzeichen, Kreuz oder B. 10 Aufgaben, Wertung wie bei „Welche Note ist das?“.
 - **Noten-Memory:** 6 Paare aus Notenkarte und Namenskarte liegen verdeckt. Decke zwei Karten auf und finde die Paare mit möglichst wenigen Zügen: bis 9 Züge gibt es 3 Sterne, bis 13 Züge 2, sonst 1. Hat der Tonumfang weniger als 6 Noten, gibt es entsprechend weniger Paare.
-- **Höher oder tiefer:** Zwei Noten stehen nebeneinander im selben System. Tippe die höhere an, oder die tiefere, wenn die Frage „Welche Note ist tiefer?“ lautet; anfangs liegen die Noten weit auseinander, später nur einen Schritt. 10 Aufgaben, Wertung wie bei „Welche Note ist das?“.
 - **Hör-Spiel:** Zum Einstieg erklingt c¹ als Bezugston, dann ein Ton, und du wählst aus drei gezeigten Noten die passende; „Nochmal hören“ spielt den Ton erneut. Der Ton entsteht im Browser, ohne Audiodateien. 10 Aufgaben, Wertung wie bei „Welche Note ist das?“.
 - **Spiel eine Melodie:** Im Notensystem stehen 4 bis 7 Noten, darunter liegt die Klaviatur. Die orange hinterlegte Note ist dran; spiele die Noten der Reihe nach, jede Taste klingt. Eine falsche Taste leuchtet kurz rot, die Note bleibt markiert, und ab dem zweiten Fehler an derselben Note nennt der Fuchs die Lage. Nach der letzten Note erklingt die ganze Melodie, die Noten leuchten dabei nacheinander auf, danach steht der Name des Lieds da. Die Melodien sind Anfänge bekannter Kinderlieder (Hänschen klein, Alle meine Entchen, Mary Had a Little Lamb, Morgen kommt der Weihnachtsmann, Freude, schöner Götterfunken, Bruder Jakob), verschoben in die Notenauswahl; passt keins, spielt das Kind eine zufällige Folge aus kleinen Schritten. Für die Taste gilt der Antwortmodus wie bei „Klaviertasten“. 5 Melodien pro Runde; bis 2 falsche Tasten gibt es 3 Sterne, bis 5 falsche Tasten 2, sonst 1. Punkte: 10 pro Melodie plus 10 pro Stern.
-- **Tägliche Notenreise:** Jeden Tag drei Etappen mit je 5 Aufgaben aus „Welche Note ist das?“, „Klaviertasten“, „Note setzen“ und „Höher oder tiefer“; die Auswahl wechselt täglich. Jede Etappe wird bis zur letzten Aufgabe gespielt. Wer alle drei Etappen gespielt hat, hat die Reise geschafft und bekommt den Durchschnitt der Etappensterne und einmal pro Tag einen Extrastern; die Startseite zeigt, ob die Reise heute geschafft ist und wie viele Tage in Folge.
+- **Tägliche Notenreise:** Jeden Tag drei Etappen mit je 5 Aufgaben: „Welche Note ist das?“, „Klaviertasten“ und „Note setzen“; die Reihenfolge wechselt täglich. Jede Etappe wird bis zur letzten Aufgabe gespielt. Wer alle drei Etappen gespielt hat, hat die Reise geschafft und bekommt den Durchschnitt der Etappensterne und einmal pro Tag einen Extrastern; die Startseite zeigt, ob die Reise heute geschafft ist und wie viele Tage in Folge.
 
 ## Fehler üben
 
@@ -141,7 +140,7 @@ In allen Spielen bleiben Notensystem und Antworten nach der Antwort an ihrer Ste
 - `js/klaviatur.js`: die Klaviatur für Klaviertasten, „Spiel eine Melodie“ und „Fehler üben“
 - `js/modi.js`: die gemeinsame Schnittstelle für Spielmodi
 - `js/modi/klassisch.js`: das Spiel „Welche Note ist das?“
-- `js/modi/notenflug.js`, `js/modi/klaviertasten.js`, `js/modi/note-setzen.js`, `js/modi/noten-memory.js`, `js/modi/hoeher-tiefer.js`, `js/modi/hoer-spiel.js`, `js/modi/melodie.js`, `js/modi/notenreise.js`: die Mini-Spiele
+- `js/modi/notenflug.js`, `js/modi/klaviertasten.js`, `js/modi/note-setzen.js`, `js/modi/noten-memory.js`, `js/modi/hoer-spiel.js`, `js/modi/melodie.js`, `js/modi/notenreise.js`: die Mini-Spiele
 - `js/fehler-ueben.js`: die Übung „Fehler üben“ nach einer Runde
 - `js/app.js`: Startseite, Ergebnis, Einstellungen, Tiere, Rekorde und Speichern
 - `tests/spiel-logik.test.js`: automatische Tests der Spiellogik

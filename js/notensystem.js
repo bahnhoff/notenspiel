@@ -116,8 +116,8 @@
    *           namensPlatz  Zeichenzahl, für die rechts immer Platz bleibt. So ist das
    *                        System mit und ohne Beschriftung gleich breit und gleich hoch.
  *           weitere      [{ position, x, vorzeichen, klasse, nr, marke }]: weitere Noten
- *                        im selben System, je in <g class="note-weitere"> (Höher oder
- *                        tiefer, Spiel eine Melodie). `klasse` kommt an die Gruppe dazu,
+ *                        im selben System, je in <g class="note-weitere"> (Spiel eine
+ *                        Melodie). `klasse` kommt an die Gruppe dazu,
  *                        `nr` als data-nr, `marke: true` legt eine zunächst unsichtbare
  *                        Fläche <rect class="note-marke"> hinter die Note, die das CSS
  *                        einfärben kann (aktuelle Note der Melodie).
@@ -257,5 +257,5 @@
     return Math.round((UNTERSTE_LINIE - y) / (ABSTAND / 2));
   }
 
-  root.Notensystem = { zeichne: zeichne, yVon: yVon, positionVon: positionVon, NOTE_X: NOTE_X_STANDARD, symbol: symbol };
+  root.Notensystem = { zeichne: zeichne, positionVon: positionVon, NOTE_X: NOTE_X_STANDARD, symbol: symbol };
 })(this);

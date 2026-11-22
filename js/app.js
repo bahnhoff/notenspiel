@@ -419,6 +419,7 @@
   function zeigeRekorde() {
     var inhalt = $("rekorde-inhalt");
     inhalt.innerHTML = "";
+    // Nur angemeldete Modi: Rekorde entfernter Modi bleiben im Spielstand, erscheinen hier aber nicht.
     window.Modi.liste().forEach(function (modus) {
       var abschnitt = element("section", "rekord-abschnitt");
       var titelId = "rekorde-" + modus.id;

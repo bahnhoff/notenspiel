@@ -1190,29 +1190,6 @@ h1:focus { outline: none; }
   .knopf-modus-info { grid-column: auto; }
 }
 
-/* ---------- Höher oder tiefer ---------- */
-
-.ht-wort {
-  display: inline-block;
-  padding: 0 10px;
-  border-radius: 12px;
-  background: var(--akzent);
-  color: #fff;
-  white-space: nowrap;
-}
-.ht-wort-tiefer { background: #1f5f8b; }
-
-.ht-ziel { cursor: pointer; outline: none; }
-.ht-ziel rect { fill: transparent; stroke: none; }
-.ht-ziel:focus-visible rect { stroke: var(--fokus); stroke-width: 2.5; }
-.ht-ziel[aria-disabled="true"] { cursor: default; }
-.ht-feld-richtig, .ht-feld-loesung { fill: var(--gruen-hell); stroke: var(--gruen); stroke-width: 1.5; }
-.ht-feld-loesung { stroke-dasharray: 3 2; }
-.ht-feld-falsch { fill: var(--rot-hell); stroke: var(--rot); stroke-width: 1.5; stroke-dasharray: 3 2; }
-.ht-note-richtig, .ht-name-richtig, .ht-name-loesung { color: var(--gruen); }
-.ht-note-falsch, .ht-name-falsch { color: var(--rot); }
-.notensystem-hoeher { touch-action: manipulation; }
-
 /* ---------- Hör-Spiel ---------- */
 
 .hoeren-steuerung {
