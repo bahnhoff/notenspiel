@@ -4,8 +4,8 @@
  * Notenauswahl Lücken, zeigt die Klaviatur trotzdem alle weißen Tasten von der
  * tiefsten bis zur höchsten gewählten Note, damit sie wie ein Klavier aussieht.
  * Schwarze Tasten sind nur für gewählte Vorzeichen-Noten tippbar, sonst
- * Dekoration. Für eine schwarze Taste zählt die Tonhöhe: fis¹ und ges¹ sind
- * dieselbe Taste. Das mittlere C ist markiert.
+ * Dekoration, aber genauso groß. Alle Tasten liegen in einer Reihe. Für eine
+ * schwarze Taste zählt die Tonhöhe: fis¹ und ges¹ sind dieselbe Taste. Das mittlere C ist markiert.
  * Im einfachen Antwortmodus zählt jede Taste mit dem richtigen Buchstaben.
  * 10 Aufgaben, Wertung wie im klassischen Spiel (js/spiel-logik.js).
  * Nutzt die Ansicht #ansicht-klavier aus index.html.
@@ -16,8 +16,6 @@
   var L = window.SpielLogik;
   var H = window.Modi.hilfen;
   var PAUSE_NACH_RICHTIG = 1200; // Millisekunden
-  var MIN_TASTE = 48;            // kleinste Breite einer weißen Taste in Pixeln
-  var MAX_TASTE = 80;            // größte Breite, damit wenige Tasten nicht riesig werden
   var SCHWARZ_NACH = { c: true, d: true, f: true, g: true, a: true };
 
   var umgebung = null;
@@ -25,7 +23,6 @@
   var weiterTimer = null;
   var tasten = [];               // alle Tasten: { art, el, toene, halbton, name, … }
   var weisse = [];               // nur die weißen Tasten, tief nach hoch
-  var tastenProReihe = 0;
   var letzteTaste = -1;
 
   function $(id) { return document.getElementById(id); }
@@ -42,7 +39,7 @@
     baueKlaviatur(u.namen);
     u.zeigeTier($("klavier-tier"), "normal");
     u.zeigeAnsicht();
-    ordneTasten(true);
+    ordneTasten();
     zeigeAufgabe();
     var mitSchwarz = tasten.some(function (t) { return t.art === "schwarz"; });
     $("klavier-text").textContent = mitSchwarz ? "Welche Taste passt zu dieser Note?" : "Welche weiße Taste passt zu dieser Note?";
@@ -60,7 +57,7 @@
    * Jede Taste kennt ihre Töne (`toene`, Noten.ton): eine weiße Taste einen,
    * eine schwarze zwei gleich klingende (fis¹ und ges¹). Schwarze Tasten
    * werden nur für gewählte Vorzeichen-Noten zu Knöpfen, sonst bleiben sie
-   * Dekoration an der weißen Taste davor.
+   * Dekoration (ordneTasten zeichnet sie).
    */
   function baueKlaviatur(namen) {
     var N = window.Noten;
@@ -102,8 +99,7 @@
     b.className = "taste";
     var mitte = t.toene[0].stufe === 28; // c¹, das mittlere C
     if (mitte) b.classList.add("taste-mitte");
-    b.innerHTML = '<span class="taste-schwarz" aria-hidden="true"></span>' +
-      '<span class="taste-marke" aria-hidden="true"></span>' +
+    b.innerHTML = '<span class="taste-marke" aria-hidden="true"></span>' +
       '<span class="taste-name" aria-hidden="true"></span>' +
       (mitte ? '<span class="taste-mitte-zeichen" aria-hidden="true">c¹</span>' : "");
     b.setAttribute("aria-label", "Taste " + t.name + (mitte ? ", mittleres C" : ""));
@@ -120,67 +116,34 @@
   }
 
   /**
-   * Verteilt die weißen Tasten auf Reihen, damit jede mindestens 48 px breit
-   * ist und nichts seitlich scrollt. Passt alles in eine Reihe, bleibt es bei
-   * einer. Sonst kommen ganze Oktaven (ab c) in eine Reihe, solange sie
-   * hineinpassen; zu lange Oktaven werden zwischen e und f geteilt, wo keine
-   * schwarze Taste liegt. Tiefe Reihen stehen unten, hohe oben. Wählbare
-   * schwarze Tasten liegen als eigene Knöpfe über der Fuge zur nächsten Taste.
+   * Legt alle Tasten in eine einzige Reihe wie bei einem echten Klavier. Die
+   * weißen Tasten teilen sich die volle Breite gleichmäßig (CSS-Raster mit
+   * --tasten Spalten), die Höhe regelt das CSS. Jede schwarze Taste, ob
+   * wählbar oder Dekoration, liegt gleich breit über der Fuge zur nächsten
+   * weißen Taste.
    */
-  function ordneTasten(erzwingen) {
+  function ordneTasten() {
     var box = $("klaviatur");
-    var breite = box.parentNode.clientWidth || 320;
-    var proReihe = Math.max(1, Math.floor(breite / MIN_TASTE));
-    if (!erzwingen && proReihe === tastenProReihe) return;
-    tastenProReihe = proReihe;
-
-    var oktaven = [];
-    weisse.forEach(function (t) {
-      var letzte = oktaven[oktaven.length - 1];
-      if (!letzte || t.buchstabe === "c") oktaven.push([t]);
-      else letzte.push(t);
-    });
-    var teile = [];
-    oktaven.forEach(function (o) {
-      if (o.length <= proReihe) { teile.push(o); return; }
-      var f = -1;
-      o.forEach(function (t, i) { if (t.buchstabe === "f") f = i; });
-      (f > 0 ? [o.slice(0, f), o.slice(f)] : [o]).forEach(function (stueck) {
-        for (var k = 0; k < stueck.length; k += proReihe) teile.push(stueck.slice(k, k + proReihe));
-      });
-    });
-    var reihen = [];
-    teile.forEach(function (o) {
-      var letzte = reihen[reihen.length - 1];
-      if (letzte && letzte.length + o.length <= proReihe) reihen[reihen.length - 1] = letzte.concat(o);
-      else reihen.push(o);
-    });
     box.innerHTML = "";
-    box.classList.toggle("klaviatur-mehrreihig", reihen.length > 1);
-    // Alle Reihen gleich breit aufteilen, damit die Tasten untereinander gleich groß sind.
-    var spalten = Math.max.apply(null, reihen.map(function (r) { return r.length; }));
-    box.style.maxWidth = (spalten * MAX_TASTE) + "px";
-    reihen.forEach(function (reihe) {
-      var div = document.createElement("div");
-      div.className = "klavier-reihe";
-      div.style.gridTemplateColumns = "repeat(" + spalten + ", minmax(0, 1fr))";
-      div.style.setProperty("--spalten", String(spalten));
-      reihe.forEach(function (t, i) {
-        var schwarz = reihe[i + 1] ? t.schwarz : null;
-        t.el.classList.toggle("mit-schwarz", !!schwarz && !schwarz.waehlbar);
-        div.appendChild(t.el);
-        if (schwarz && schwarz.waehlbar) {
-          schwarz.el.style.left = ((i + 1) * 100 / spalten) + "%";
-          div.appendChild(schwarz.el);
-        }
-      });
-      box.appendChild(div);
+    var anzahl = weisse.length;
+    if (anzahl === 0) return;
+    var div = document.createElement("div");
+    div.className = "klavier-reihe";
+    box.style.setProperty("--tasten", String(anzahl));
+    weisse.forEach(function (t, i) {
+      div.appendChild(t.el);
+      var schwarz = i < anzahl - 1 ? t.schwarz : null;
+      if (!schwarz) return;
+      var el = schwarz.waehlbar ? schwarz.el : document.createElement("span");
+      if (!schwarz.waehlbar) {
+        el.className = "taste-schwarz";
+        el.setAttribute("aria-hidden", "true");
+      }
+      el.style.left = ((i + 1) * 100 / anzahl) + "%";
+      div.appendChild(el);
     });
+    box.appendChild(div);
   }
-
-  window.addEventListener("resize", function () {
-    if (runde && !$("ansicht-klavier").hidden) ordneTasten(false);
-  });
 
   /* ---------- Ablauf ---------- */
 

@@ -898,17 +898,25 @@ h1:focus { outline: none; }
 
 /* ---------- Klaviertasten ---------- */
 
+/*
+ * Eine einzige Reihe wie bei einem echten Klavier. Die weißen Tasten teilen
+ * sich die volle Breite (--tasten setzt js/modi/klaviertasten.js). Die Höhe
+ * wächst mit der Tastenbreite, begrenzt durch --taste-min und --taste-max.
+ */
 .klaviatur {
-  display: flex;
-  flex-direction: column-reverse; /* tiefe Reihe unten, hohe oben */
-  gap: 10px;
-  margin: 14px auto 0;
+  --tasten: 7;
+  --taste-min: 130px;
+  --taste-max: 190px;
+  container-type: inline-size;
+  width: 100%;
+  margin: 14px 0 0;
 }
 
 .klavier-reihe {
   position: relative;
   z-index: 0;
   display: grid;
+  grid-template-columns: repeat(var(--tasten), minmax(0, 1fr));
   gap: 0;
 }
 
@@ -916,11 +924,14 @@ h1:focus { outline: none; }
   position: relative;
   min-width: 0;
   min-height: 48px;
-  height: 128px;
+  height: 150px;
+  height: clamp(var(--taste-min), calc(100cqw / var(--tasten) * 4), var(--taste-max));
   padding: 0 0 8px;
+  overflow: visible;
   font: inherit;
   font-weight: 800;
   font-size: 1.2rem;
+  font-size: clamp(0.7rem, calc(100cqw / var(--tasten) * 0.42), 1.2rem);
   color: var(--text);
   background: #fff;
   border: 2px solid #4a3a2e;
@@ -932,6 +943,7 @@ h1:focus { outline: none; }
   flex-direction: column;
   align-items: center;
   justify-content: flex-end;
+  white-space: nowrap;
   cursor: pointer;
   touch-action: manipulation;
   user-select: none;
@@ -941,41 +953,37 @@ h1:focus { outline: none; }
 .taste:active { background: #fff3df; box-shadow: inset 0 -2px 0 #eadfce; }
 .taste:focus-visible { outline: 4px solid var(--fokus); outline-offset: -4px; z-index: 3; }
 
-/* Schwarze Taste: nur Dekoration, Tippen geht an die weiße Taste darunter. */
-.taste-schwarz {
-  display: none;
-  position: absolute;
-  top: -2px;
-  right: -28%;
-  width: 56%;
-  height: 58%;
-  background: #2a1d14;
-  border-radius: 0 0 6px 6px;
-  z-index: 2;
-  pointer-events: none;
-}
-.taste.mit-schwarz .taste-schwarz { display: block; }
-
-/* Wählbare schwarze Taste: eigener Knopf über der Fuge zwischen zwei weißen Tasten */
+/*
+ * Schwarze Tasten: alle gleich breit (58 % einer weißen Taste) und gleich hoch,
+ * mittig über der Fuge zur nächsten weißen Taste (left setzt das Skript).
+ * Dekorative sind reine Flächen, Tippen geht an die weiße Taste darunter.
+ */
+.taste-schwarz,
 .taste-schwarz-knopf {
   position: absolute;
   top: 0;
-  z-index: 2;
-  width: calc(100% / var(--spalten, 7) * 0.7);
-  min-width: 30px;
-  height: 64%;
+  z-index: 4;
+  box-sizing: border-box;
+  width: calc(100% / var(--tasten) * 0.58);
+  height: 60%;
   transform: translateX(-50%);
-  padding: 0 0 6px;
+  background: #2a1d14;
+  border: 2px solid #2a1d14;
+  border-radius: 0 0 6px 6px;
+}
+.taste-schwarz { pointer-events: none; }
+
+/* Wählbare schwarze Taste: gleich groß, nur der orange Rand unten zeigt, dass man sie antippen kann. */
+.taste-schwarz-knopf {
+  padding: 0 0 8px;
   font: inherit;
   font-weight: 800;
   font-size: 0.8rem;
+  font-size: clamp(0.6rem, calc(100cqw / var(--tasten) * 0.3), 0.85rem);
   line-height: 1.1;
+  white-space: nowrap;
   color: #fff;
-  background: #2a1d14;
-  border: 2px solid #2a1d14;
-  border-radius: 0 0 7px 7px;
-  /* Orangefarbener Rand unten: Diese Taste kann man antippen. */
-  box-shadow: inset 0 -7px 0 var(--akzent), 0 2px 0 rgba(0, 0, 0, 0.25);
+  box-shadow: inset 0 -7px 0 var(--akzent), inset 0 0 0 1px var(--akzent);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -985,38 +993,42 @@ h1:focus { outline: none; }
   user-select: none;
   -webkit-user-select: none;
 }
+/* Unsichtbar etwas größere Trefferfläche, die die Nachbartasten nicht erreicht. */
+.taste-schwarz-knopf::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -15%;
+  right: -15%;
+  bottom: -10px;
+}
 .taste-schwarz-knopf:active { background: #4a3a2e; }
-.taste-schwarz-knopf:focus-visible { outline: 4px solid var(--fokus); outline-offset: 1px; z-index: 4; }
+.taste-schwarz-knopf:focus-visible { outline: 4px solid var(--fokus); outline-offset: 1px; z-index: 5; }
 .taste-schwarz-knopf .taste-name:empty,
 .taste-schwarz-knopf .taste-marke:empty { display: none; }
-.taste-schwarz-knopf .taste-marke { font-size: 1.1rem; }
-.taste-schwarz-knopf .taste-name { font-size: 0.8rem; }
+.taste-schwarz-knopf .taste-marke { font-size: 1.4em; }
+.taste-schwarz-knopf .taste-name { font-size: 1em; }
 .taste-schwarz-knopf.ist-richtig,
 .taste-schwarz-knopf.ist-loesung { background: var(--gruen); border: 3px solid #fff; outline: 3px solid var(--gruen); }
 .taste-schwarz-knopf.ist-loesung { outline-style: dashed; }
 .taste-schwarz-knopf.ist-falsch { background: var(--rot); border: 3px dashed #fff; }
 .klaviatur.gesperrt .taste-schwarz-knopf { cursor: default; }
 
-/* Mehrere Reihen: flachere Tasten, damit die Klaviatur auf das Handy passt */
-.klaviatur-mehrreihig { gap: 8px; }
-.klaviatur-mehrreihig .taste { height: 84px; }
-.klaviatur-mehrreihig .taste-schwarz { height: 52%; }
-
 .taste-mitte { background: #fff8d6; }
 .taste-mitte-zeichen {
-  font-size: 0.85rem;
+  font-size: max(0.65rem, 0.75em);
   font-weight: 800;
   color: #fff;
   background: var(--akzent);
   border-radius: 999px;
-  padding: 1px 6px;
+  padding: 1px 0.35em;
   margin-top: 2px;
 }
 
-.taste-name { font-size: 1.3rem; }
+.taste-name { font-size: 1.1em; }
 .taste-name:empty { display: none; }
 
-.taste-marke { font-size: 1.3rem; line-height: 1; }
+.taste-marke { font-size: 1.1em; line-height: 1; }
 .taste-marke:empty { display: none; }
 
 .taste.ist-richtig,
@@ -1123,8 +1135,7 @@ h1:focus { outline: none; }
 
 @media (min-width: 700px) {
   .memory-karte { flex-basis: calc((100% - 24px) / 4); height: clamp(110px, 20vh, 170px); }
-  .taste { height: 150px; }
-  .klaviatur-mehrreihig .taste { height: 104px; }
+  .klaviatur { --taste-min: 150px; --taste-max: 220px; }
 }
 
 /* ---------- Startseite: Kachel mit Zusatztext (Notenreise) ---------- */
@@ -1296,6 +1307,5 @@ h1:focus { outline: none; }
   .tier-klein { width: 64px; flex-basis: 64px; }
   .ansicht-start { padding-top: 0; gap: 10px; }
   .start-tier { width: 120px; }
-  .taste,
-  .klaviatur-mehrreihig .taste { height: 80px; }
+  .klaviatur { --taste-min: 90px; --taste-max: 120px; }
 }
