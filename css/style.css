@@ -1062,7 +1062,16 @@ h1:focus { outline: none; }
 
 /* ---------- Notenflug ---------- */
 
-.notensystem-flug { overflow: hidden; }
+/* Himmel hinter dem System wie im Stitch-Entwurf: oben hellblau, unten warm, rechts oben eine Wolke */
+.notensystem-flug {
+  overflow: hidden;
+  border-color: #d9ebf3;
+  background:
+    radial-gradient(ellipse 34px 14px at calc(100% - 64px) 30px, rgba(255, 255, 255, 0.95) 98%, transparent),
+    radial-gradient(circle 17px at calc(100% - 72px) 22px, rgba(255, 255, 255, 0.95) 98%, transparent),
+    radial-gradient(circle 12px at calc(100% - 52px) 24px, rgba(255, 255, 255, 0.95) 98%, transparent),
+    linear-gradient(180deg, #ddf0fa 0%, #eef7f8 45%, #fffaf0 100%);
+}
 
 /* ---------- Klaviertasten ---------- */
 
