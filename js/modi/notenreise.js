@@ -85,15 +85,25 @@
 
   function statusText() {
     var t = umgebung.tagesreise || { heute: false, serie: 0 };
-    if (t.heute) {
-      return T.t("reise.heute") + (t.serie > 1 ? T.t("reise.inFolge", { n: t.serie }) : "") + T.t("reise.nurEinmal");
-    }
-    return (t.serie > 0 ? T.t("reise.serie", { serie: T.t("tage", { n: t.serie }) }) : "") + T.t("reise.extrastern");
+    // Die Serie steht in der Kopfkarte („4 Tage in Folge“), hier nur der Extrastern.
+    return t.heute ? T.t("reise.heute") + T.t("reise.nurEinmal") : T.t("reise.extrastern");
+  }
+
+  /** Unterzeile der Kopfkarte: „4 Tage in Folge“, ohne Serie „3 Etappen · je 5 Aufgaben“. */
+  function unterzeile() {
+    var t = umgebung.tagesreise || { serie: 0 };
+    return t.serie > 0 ? T.t("tage", { n: t.serie }) : T.t("reise.unterzeile", { etappen: ETAPPEN, aufgaben: AUFGABEN });
   }
 
   function zeigeUebersicht() {
     var n = ergebnisse.length;
     $("reise-status").textContent = statusText();
+    $("reise-unterzeile").textContent = unterzeile();
+    // Pille mit geschafften Etappen (Baustein aus js/bausteine.js)
+    var platz = $("reise-pille");
+    platz.innerHTML = "";
+    platz.appendChild(window.Bausteine.pille({ symbol: "notenreise", art: "gruen",
+      text: T.t("reise.pille", { n: n, gesamt: etappen.length }), aria: T.t("reise.pilleAria", { n: n, gesamt: etappen.length }) }));
     var liste = $("reise-etappen");
     liste.innerHTML = "";
     etappen.forEach(function (modus, i) {
@@ -189,7 +199,7 @@
       richtige: richtige,
       aufgaben: aufgaben,
       titel: T.t("ende.richtigVon", { richtige: richtige, aufgaben: aufgaben }),
-      spruch: T.t("reise.geschafft") + " " + T.t("reise.bisMorgen"),
+      spruch: T.t("reise.bisMorgen"),
       stimmung: "froh",
       zeilen: zeilen,
       schwierig: { gefragt: gefragt, neu: neu },

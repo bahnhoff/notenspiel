@@ -815,3 +815,9 @@ Abweichungen:
 - „Rekorde“ öffnet die Rekordseite und rollt zum Abschnitt des gespielten Spiels.
 - Die Notenreise gibt jetzt `richtige` mit; ihre richtigen Antworten zählen damit für die gelesenen Noten.
 - Memory-Spruch wie im Entwurf: „Hurra! Du hast alle 6 Paare in nur 14 Zügen gefunden!“ (drei Sterne), sonst ohne „Hurra“ und „nur“.
+
+### Paket 14: Fehler üben und Tägliche Notenreise
+
+- Fehler üben hatte Kopfkarte, farbige Tasten mit Silbe und die Klaviatur als Karte schon. Neu: Das Ende ist das Ergebnisfenster mit „Geübte Noten“ und „Aufgaben“, ohne Sterne, Rekord und Fortschrittskarte (`umgebung.ende` statt `nochmal` und `startseite`, `#ueben-ende` entfällt). „Nochmal spielen“ startet das Spiel der Runde, „Rekorde“ zeigt dessen Abschnitt.
+- Notenreise: Kopfkarte mit Zoo-Pille, Titel mit Kompass und Unterzeile „4 Tage in Folge“ (ohne Serie „3 Etappen · je 5 Aufgaben“). Ergänzt: rechts eine grüne Pille mit den geschafften Etappen („1/3“, Screenreader „1 von 3 Etappen geschafft“). Die Zeile unter der Kopfkarte nennt nur noch den Extrastern, weil die Serie oben steht.
+- Das Ergebnis der Reise heißt „Reise geschafft!“; der Spruch des Begleiters wiederholt das nicht mehr.

@@ -2019,24 +2019,11 @@ h1:focus { outline: none; }
 .knopf-ueben { font-size: 1.35rem; min-height: 64px; }
 .ueben-marke { font-weight: 800; background: #fff1e8; border-color: #fbdcc9; color: var(--akzent-dunkel); }
 
-/* Ende der Übung als Karte wie das Ergebnis */
-.ueben-ende {
-  max-width: 560px;
-  margin: 4px auto 0;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  background: var(--karte);
-  border: 2px solid var(--rand-weich);
-  border-radius: 28px;
-  padding: 18px 14px 20px;
-  box-shadow: var(--schatten-weich);
-}
 
 /* ---------- Tägliche Notenreise ---------- */
 
 .ansicht-reise {
-  max-width: 560px;
+  max-width: 720px;
   margin: 0 auto;
   display: flex;
   flex-direction: column;

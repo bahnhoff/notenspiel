@@ -362,7 +362,7 @@
     var reise = v.tagesreise;
     var anzahl = (e.neueSterne || 0) + (reise && reise.extrastern ? 1 : 0);
     var titel = e.art === "flug" ? t("ergebnis.flugVorbei")
-      : (e.art === "reise" ? t("ergebnis.reiseGeschafft") : t("ergebnis.geschafft"));
+      : (e.art === "reise" ? t("reise.geschafft") : t("ergebnis.geschafft"));
     fuelleFenster({
       modusId: modus.id,
       etikett: modus.name,
@@ -456,9 +456,31 @@
       zeigeAnsicht: function () { zeigeAnsicht("ueben"); },
       zeigeTier: zeigeTier,
       merkhilfe: merkhilfe,
-      nochmal: function () { starteModus(modus || hauptspiel); },
-      startseite: zurStartseite
+      ende: function (e) { zeigeUebungsEnde(modus || hauptspiel, e); }
     });
+  }
+
+  /** Ergebnisfenster nach „Fehler üben“: zwei Kärtchen, keine Sterne, kein Rekord. */
+  function zeigeUebungsEnde(modus, e) {
+    aktiverModus = modus;   // „Nochmal spielen“ startet das Spiel der Runde
+    fuelleFenster({
+      modusId: "ueben",
+      etikett: t("ueben.titel"),
+      titel: t("ueben.fertig"),
+      sterne: null,
+      stimmung: "froh",
+      spruch: e.spruch,
+      kaertchen: L.ergebnisKaertchen({ art: "ueben", geuebt: e.geuebt, aufgaben: e.aufgaben }, null)
+    });
+    ergebnisModusId = modus.id;
+    $("neues-tier").hidden = true;
+    $("tier-fortschritt").hidden = true;
+    $("rekord-zeile").hidden = true;
+    $("rekord-name").hidden = true;
+    $("knopf-ueben").hidden = true;
+    uebungsNoten = [];
+    offenerRekord = null;
+    zeigeAnsicht("ergebnis");
   }
 
   /* ---------- Namen in den Rekorden ---------- */
@@ -982,7 +1004,7 @@
     // In der Übersicht der Notenreise erst, wenn eine Etappe geschafft ist.
     rundeLaeuft: function () {
       if (ansichtJetzt === "reise") return laufendeNr !== -1 && !!document.querySelector("#reise-etappen .ist-geschafft");
-      return laufendeNr !== -1 || (ansichtJetzt === "ueben" && $("ueben-ende").hidden);
+      return laufendeNr !== -1 || ansichtJetzt === "ueben";
     },
     reiseAktiv: function () { return laufendeNr !== -1 && !!aktiverModus && aktiverModus.id === "notenreise"; },
     pausiere: function (an) {

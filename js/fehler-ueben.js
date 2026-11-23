@@ -15,8 +15,9 @@
  *   noten, antworten, namen, antwortmodus, bereich   wie bei den Modi (js/modi.js);
  *                  `noten` sind hier die Noten der Übung (SpielLogik.uebungsNoten)
  *   zeigeAnsicht(), zeigeTier(el, stimmung), merkhilfe(note)   wie bei den Modi
- *   nochmal()      startet den Modus der Runde neu („Noch eine Runde“)
- *   startseite()   zurück zur Startseite
+ *   ende({ geuebt, aufgaben, spruch })   zeigt das Ergebnisfenster der App mit
+ *                  zwei Werte-Kärtchen und ohne Sterne („Nochmal spielen“
+ *                  startet den Modus der Runde neu)
  * Nutzt die Ansicht #ansicht-ueben aus index.html.
  */
 (function () {
@@ -47,9 +48,6 @@
     uebung = L.neueUebung(u.noten);
     knoepfe = H.antwortKnoepfe($("ueben-antworten"), u.antworten, beantworteName);
     klaviatur = window.Klaviatur.baue($("ueben-klaviatur"), u.namen, beantworteTaste);
-    $("ueben-inhalt").hidden = false;
-    $("ueben-titel").hidden = false;
-    $("ueben-ende").hidden = true;
     u.zeigeTier($("ueben-tier"), "normal");
     u.zeigeAnsicht();
     zeigeAufgabe();
@@ -156,21 +154,17 @@
     return namen.slice(0, -1).join(", ") + t("ueben.undLetzte") + namen[namen.length - 1];
   }
 
+  /** Ende: Ergebnisfenster über der Übung mit „Geübte Noten“ und „Aufgaben“. */
   function zeigeEnde() {
     clearTimeout(timer);
-    $("ansicht-ueben").classList.remove("ist-klavier");
-    $("ueben-inhalt").hidden = true;
-    $("ueben-titel").hidden = true;   // Am Ende steht nur die Überschrift „Übung geschafft!“
-    $("ueben-ende").hidden = false;
-    umgebung.zeigeTier($("ueben-ende-tier"), "froh");
-    $("ueben-ende-text").textContent = t("ueben.ende", { namen: namensListe(umgebung.noten.map(function (n) { return n.anzeige; })) });
-    window.scrollTo(0, 0);
-    $("titel-ueben-ende").focus({ preventScroll: true });
+    umgebung.ende({
+      geuebt: umgebung.noten.length,
+      aufgaben: uebung.aufgaben.length,
+      spruch: t("ueben.ende", { namen: namensListe(umgebung.noten.map(function (n) { return n.anzeige; })) })
+    });
   }
 
   $("ueben-weiter").addEventListener("click", naechste);
-  $("ueben-nochmal").addEventListener("click", function () { if (umgebung) umgebung.nochmal(); });
-  $("ueben-start").addEventListener("click", function () { if (umgebung) umgebung.startseite(); });
 
   /* Tastatur wie in den Modi: Buchstabe für einen eindeutigen Antwortknopf oder eine weiße Taste. */
   document.addEventListener("keydown", function (ev) {

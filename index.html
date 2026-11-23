@@ -520,27 +520,25 @@
           </div>
         </div>
       </div>
-
-      <div class="ueben-ende" id="ueben-ende" hidden>
-        <h1 id="titel-ueben-ende" class="titel" tabindex="-1" data-text="ueben.fertig">Übung geschafft!</h1>
-        <div class="tier-zeile tier-zeile-gross">
-          <div class="tier-mittel" id="ueben-ende-tier"></div>
-          <div class="sprechblase"><p id="ueben-ende-text"></p></div>
-        </div>
-        <div class="knopf-reihe">
-          <button type="button" class="knopf knopf-haupt" id="ueben-nochmal" data-text="ergebnis.nochmal">Noch eine Runde</button>
-          <button type="button" class="knopf knopf-neben" id="ueben-start" data-text="ergebnis.zurStartseite">Zur Startseite</button>
-        </div>
-      </div>
     </section>
 
     <!-- Tägliche Notenreise: Übersicht vor und zwischen den Etappen -->
     <section id="ansicht-reise" class="ansicht ansicht-reise" aria-labelledby="titel-reise" hidden>
-      <header class="seiten-kopf">
+      <!-- Kopfkarte wie in den Spielen: Zoo, Titel mit Kompass, darunter „4 Tage in Folge“, rechts geschaffte Etappen -->
+      <header class="runde-kopf kopfkarte">
         <button type="button" class="knopf knopf-klein knopf-zurueck" aria-label="Zurück zur Startseite" data-text-aria-label="zurueck.aria">
-          <span aria-hidden="true">←</span> <span data-text="zurueck.text">Zurück</span>
+          <span aria-hidden="true">←</span> <span class="knopf-text" data-text="zurueck.zoo">Zoo</span>
         </button>
-        <h1 id="titel-reise" class="titel" tabindex="-1" data-text="reise.titel">Notenreise</h1>
+        <div class="runde-titel runde-titel-unten">
+          <div class="runde-titel-zeile">
+            <h1 id="titel-reise" class="frage" tabindex="-1" data-text="reise.titel">Notenreise</h1>
+            <span class="runde-symbol" data-symbol="notenreise" aria-hidden="true"></span>
+          </div>
+          <p class="aufgabe-nr" id="reise-unterzeile"></p>
+        </div>
+        <div class="runde-status">
+          <span class="reise-pille" id="reise-pille"></span>
+        </div>
       </header>
       <p class="reise-status" id="reise-status"></p>
       <ol class="reise-etappen" id="reise-etappen"></ol>
