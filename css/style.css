@@ -978,7 +978,13 @@ h1:focus { outline: none; }
 }
 
 .seiten-kopf::after { content: ""; width: 1px; }
-.seiten-kopf .titel { margin: 0; }
+.seiten-kopf .titel { margin: 0; font-weight: 800; letter-spacing: -0.01em; }
+
+/* Ab 520 px steht die Überschrift genau in der Mitte wie im Stitch-Entwurf */
+@media (min-width: 520px) {
+  .seiten-kopf { grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); gap: 12px; }
+  .seiten-kopf .knopf-zurueck { justify-self: start; }
+}
 
 .sterne-gesamt {
   text-align: center;
@@ -987,6 +993,8 @@ h1:focus { outline: none; }
 }
 
 .sterne-gesamt .stern { font-size: 1.8rem; }
+.sterne-gesamt { font-weight: 800; }
+.sterne-gesamt strong { color: var(--gold); font-size: 1.15em; }
 
 .naechstes-tier {
   text-align: center;
@@ -1008,11 +1016,11 @@ h1:focus { outline: none; }
 
 .tier-karte {
   background: var(--karte);
-  border: 2px solid var(--rand);
-  border-radius: var(--radius);
+  border: 2px solid var(--rand-weich);
+  border-radius: 24px;
   padding: 14px;
   text-align: center;
-  box-shadow: var(--schatten);
+  box-shadow: var(--schatten-weich);
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -1022,7 +1030,14 @@ h1:focus { outline: none; }
 .tier-karte .knopf { width: 100%; }
 .tier-name { margin: 0; font-weight: 700; font-size: 1.2rem; }
 .tier-info { margin: 0; color: var(--text-leise); }
-.tier-karte.gesperrt { background: #f6efe5; }
+.tier-karte.gesperrt { background: #f6efe5; box-shadow: none; }
+/* Noch nicht entdeckte Tiere: weichere Silhouette als im Ergebnis */
+.tier-karte.gesperrt .tier-silhouette { opacity: 0.6; }
+.tier-karte.gesperrt .tier-name { color: var(--text-leise); letter-spacing: 0.12em; }
+/* Gewähltes Begleittier: mintgrüner Rahmen */
+.tier-karte:has(.knopf-gewaehlt) { border-color: #8fd8b0; box-shadow: 0 0 0 3px #dff3e4, var(--schatten-weich); }
+.tier-karte .knopf { border-radius: 14px; padding: 8px 6px; }
+.tier-karte .knopf-neben { box-shadow: var(--schatten-taste); }
 .tier-karte.selten { border-color: #c9a6f2; }
 .tier-karte.selten:not(.gesperrt) { background: linear-gradient(180deg, #faf4ff, #fff); }
 
