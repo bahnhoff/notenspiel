@@ -73,6 +73,8 @@
  *   zeigeAnsicht(name)        blendet die Ansicht des Modus ein, mit `name`
  *                             eine andere Ansicht (für die Notenreise)
  *   zeigeTier(el, stimmung)   zeichnet das gewählte Begleittier ("normal", "froh", "oje")
+ *   tier                      Kennung des Begleittiers (für Bausteine.sprechZeile, Tiere.kopf)
+ *   flugTempo                 gemerkter Tempofaktor des Notenflugs (stand.flugTempo)
  *   merkhilfe(note)           { tier, name, text, zusatz } oder null, wenn Merktiere aus sind.
  *                             zusatz (optional): „nur einen Halbton höher“ bei Vorzeichen-Noten
  *   laeuft()                  false, sobald die Runde verworfen oder beendet ist
@@ -416,6 +418,8 @@
    *   beiAntwort(name) wie ein Klick auf den Antwortknopf
    *   anzeige          Element unter den Knöpfen: Tipp auf Geräten mit Tastatur,
    *                    beim Warten auf die Ziffer der getippte Anfang
+   *   tipp, tippTouch  optional: Textschlüssel des Tipps mit Tastatur (Standard
+   *                    „tasten.tipp“) und ohne Tastatur (Standard: kein Tipp)
    * Liefert { taste(ev), zuruecksetzen() }. Der Modus ruft taste(ev) im
    * keydown-Handler auf, wenn seine Ansicht sichtbar ist, und zuruecksetzen()
    * bei jeder neuen Aufgabe.
@@ -427,9 +431,11 @@
     function zeige() {
       var el = optionen.anzeige;
       if (!el) return;
+      // Tipp: mit Tastatur optionen.tipp (Standard „tasten.tipp“), ohne Tastatur optionen.tippTouch (Standard keiner)
+      var tipp = tastaturGeraet() ? (optionen.tipp || "tasten.tipp") : optionen.tippTouch;
       el.classList.toggle("tippt", !!wartend);
-      el.classList.toggle("tasten-tipp-an", !!wartend || tastaturGeraet());
-      el.textContent = wartend ? wartend.text + "…" : (tastaturGeraet() ? t("tasten.tipp") : "");
+      el.classList.toggle("tasten-tipp-an", !!wartend || !!tipp);
+      el.textContent = wartend ? wartend.text + "…" : (tipp ? t(tipp) : "");
     }
 
     function zuruecksetzen() {

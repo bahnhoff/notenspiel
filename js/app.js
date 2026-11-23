@@ -194,6 +194,8 @@
       },
       zeigeAnsicht: function (name) { zeigeAnsicht(name || modus.ansicht || modus.id); },
       zeigeTier: zeigeTier,
+      tier: stand.tier,
+      flugTempo: stand.flugTempo,
       merkhilfe: merkhilfe,
       laeuft: function () { return laufendeNr === nr; },
       beende: function (ergebnis) {

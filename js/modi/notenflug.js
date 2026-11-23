@@ -1,33 +1,49 @@
 /*
  * Modus „Notenflug“: Eine Note gleitet von rechts nach links über das
- * Notensystem. Das Kind tippt den Namen, bevor die Note den Schlüssel
- * erreicht. Zu spät oder falsch kostet einen von drei Sternen.
- * Level mit je 10 Noten, jedes Level etwa 15 % schneller. Punkte pro Note =
- * Level × Anzahl der gewählten Noten.
- * Nach einer richtigen Antwort leuchtet der Knopf kurz grün, und die nächste
- * Note startet sofort, ohne Merktier und Sprechblase. Nur nach einem Fehler
- * oder „zu spät“ hält das Spiel an (Lösung, Hinweis, „Weiter“). Beim
- * Levelwechsel erscheint kurz „Level 3!“.
+ * Notensystem auf die Rakete mit dem Begleiter zu. Das Kind tippt den Namen,
+ * bevor die Note die Rakete erreicht. Zu spät oder falsch kostet eines von
+ * drei Herzen. Wellen mit je 10 Noten, jede Welle etwa 15 % schneller.
+ * Punkte pro Note = Welle × Anzahl der gewählten Noten × Combo (x1 bis x5).
+ *
+ * Aufbau nach dem Stitch-Entwurf (docs/plan-v3.md, Abschnitt Notenflug):
+ * Kopfkarte mit Welle und Tempostufe, Combo, Punkten und Herzen; Balken für
+ * die Flugzeit; Bühne mit Schildern („Note 3 von 10“ beziehungsweise nach
+ * einem Fehler die Lage, rechts die Schlüssel-Bahn), Rakete, leuchtender
+ * Note, „Fang mich!“ (nur Welle 1) und Sprechzeile; Hinweiszeile mit Ton an
+ * oder aus; Buchstabentasten, die ihren Ton spielen.
+ * Nach einer richtigen Antwort macht die Rakete einen Satz, und die nächste
+ * Note startet sofort. Nur nach einem Fehler oder „zu spät“ hält das Spiel
+ * an (Lösung, Hinweis, Merkhilfe, „Weiter“ unter den Tasten).
  * Buchstabentasten antworten über Modi.hilfen.tastenEingabe.
- * Regeln und Wertung: js/spiel-logik.js (NOTENFLUG, flugAntwort, flugPunkteProNote).
+ * Regeln und Wertung: js/spiel-logik.js (NOTENFLUG, flugAntwort, flugTrefferPunkte).
  * Nutzt die Ansicht #ansicht-notenflug aus index.html.
  */
 (function () {
   "use strict";
 
   var L = window.SpielLogik;
-  var t = window.Texte.t;
+  var T = window.Texte;
+  var t = T.t;
+  var N = window.Noten;
   var H = window.Modi.hilfen;
-  var START_DX = 34;          // Startversatz der Note nach rechts (SVG-Einheiten)
-  var ZIEL_DX = -46;          // hier erreicht die Note den Schlüssel
+  var B = window.Bausteine;
+
+  // Geometrie im Koordinatensystem von js/notensystem.js: breites System für die Flugbahn
+  var BREITE = 200;           // Ende der Linien rechts
+  var NOTE_X = 150;           // x-Mitte der Note ohne Versatz
+  var START_DX = 36;          // Startversatz der Note nach rechts
+  var RAKETE_X = 76;          // Mitte der Rakete, direkt vor dem Schlüssel (auch vor den Punkten des Bassschlüssels)
+  var RAKETE_Y = 52;          // Mittellinie
+  var ZIEL_DX = RAKETE_X + 22 - NOTE_X; // hier berührt der Notenkopf die Nase der Rakete
   var PAUSE_VOR_START = 1400; // Millisekunden
-  var PAUSE_NACH_RICHTIG = 150;  // nur kurz grün, dann die nächste Note
-  var LEVEL_EINBLENDUNG = 1000;   // „Level 3!“
+  var PAUSE_NACH_RICHTIG = 300;  // Funkeln und Raketensatz, ohne Halt
+  var LEVEL_EINBLENDUNG = 1000;  // „Welle 3!“
   var PAUSE_NACH_FEHLER = 4500;
+  var KNAPP = 0.25;           // unter 25 % Restzeit wird der Balken orange
 
   var umgebung = null;
   var flug = null;
-  var zustand = null;   // aktuelle Note: { note, vergangen, dauer, offen, dx }
+  var zustand = null;   // aktuelle Note: { note, vergangen, dauer, offen, dx, level, nr }
   var knoepfe = [];
   var timer = null;
   var raf = null;
@@ -36,12 +52,17 @@
   var angehalten = false;     // angehalten über pausiere(true), zum Beispiel Fenster „Runde beenden?“
   var wartetAufWeiter = null; // Funktion, die nach „Weiter“ läuft
   var tasten = null;          // Buchstabentasten (Modi.hilfen.tastenEingabe)
+  var sprech = null;          // Sprechzeile in der Bühne
+  var fangMass = null;        // Umrechnung SVG → Bühne für „Fang mich!“: { links, skala }
 
   function $(id) { return document.getElementById(id); }
 
   function aktiv() {
     return flug && umgebung && umgebung.laeuft();
   }
+
+  // Ton-Knopf in der Hinweiszeile („Ton an“ oder „Ton aus“)
+  $("flug-ton").replaceWith(B.tonKnopf({ mitText: true }));
 
   function starte(u) {
     stoppe();
@@ -50,19 +71,25 @@
     knoepfe = H.antwortKnoepfe($("flug-antworten"), u.antworten, beantworte);
     tasten = H.tastenEingabe({
       antworten: function () { return umgebung.antworten; },
-      offen: function () { return aktiv() && !!zustand && zustand.offen && !$("ansicht-notenflug").hidden; },
+      offen: function () { return aktiv() && !!zustand && zustand.offen && !angehalten && !$("ansicht-notenflug").hidden; },
       beiAntwort: beantworte,
-      anzeige: $("flug-tasten")
+      anzeige: $("flug-tasten"),
+      tipp: "flug.tastenTipp",
+      tippTouch: "flug.tastenTippTouch"
     });
+    if (!sprech) {
+      sprech = B.sprechZeile({ tier: u.tier, text: "" });
+      $("flug-sprech").appendChild(sprech);
+    }
+    sage(t("flug.start"));
     $("flug-level-einblendung").hidden = true;
-    u.zeigeTier($("flug-tier"), "normal");
     u.zeigeAnsicht();
-    $("flug-merkhilfe").hidden = true;
-    $("flug-weiter").hidden = true;
+    zeigeRueckmeldung(false);
     zeigeStatus();
+    zeigeZeit(1);
+    zeigeSchilder(null);
     zeichneSystem(null);
     sperreKnoepfe(true);
-    $("flug-text").textContent = t("flug.start");
     timer = setTimeout(naechsteNote, PAUSE_VOR_START);
   }
 
@@ -79,32 +106,163 @@
     if (tasten) tasten.zuruecksetzen();
   }
 
-  function zeigeStatus() {
-    var leben = L.NOTENFLUG.leben;
-    H.zeigeSterne($("flug-sterne"), $("flug-punkte"), leben - flug.fehler, leben, flug.punkte);
-    // Während eine Note fliegt oder ausgewertet wird, zählt ihre eigene Nummer.
+  function sage(text) {
+    B.setzeSprechZeile(sprech, umgebung.tier, text);
+  }
+
+  /* ---------- Kopfkarte: Welle, Combo, Punkte, Herzen ---------- */
+
+  function zeigeStatus(comboHuepft) {
     var level = zustand ? zustand.level : flug.level;
+    $("flug-level").textContent = t("flug.level", { level: level, stufe: t(L.flugTempoStufe(level)) });
+
+    var combo = $("flug-combo");
+    B.setzePille(combo, t("flug.combo", { n: flug.combo }), t("flug.comboAria", { n: flug.serie }));
+    combo.classList.toggle("ist-voll", flug.combo >= L.NOTENFLUG.maxCombo);
+    if (comboHuepft) {
+      combo.classList.remove("huepft");
+      void combo.offsetWidth; // Animation neu starten
+      combo.classList.add("huepft");
+    }
+
+    $("flug-punkte").textContent = H.punkteText(flug.punkte);
+
+    var leben = L.NOTENFLUG.leben;
+    var rest = Math.max(0, leben - flug.fehler);
+    var herzen = $("flug-herzen");
+    herzen.innerHTML = "";
+    for (var i = 0; i < leben; i++) {
+      var h = document.createElement("span");
+      h.className = "flug-herz" + (i < rest ? "" : " ist-leer");
+      h.innerHTML = window.Symbole.zeichne(i < rest ? "herz" : "herz-leer");
+      herzen.appendChild(h);
+    }
+    herzen.setAttribute("aria-label", t("flug.herzenAria", { n: rest }));
+  }
+
+  /** Balken für die Flugzeit: `rest` = Anteil der verbleibenden Zeit (1 bis 0). */
+  function zeigeZeit(rest) {
+    var b = $("flug-zeit");
+    B.setzeFortschritt(b, Math.round(rest * 100), 100);
+    b.classList.toggle("fortschritt-orange", rest < KNAPP);
+    b.classList.toggle("fortschritt-blau", rest >= KNAPP);
+  }
+
+  /* ---------- Bühne ---------- */
+
+  /** Schilder: links „Note 3 von 10“ oder nach einem Fehler die Lage, rechts die Schlüssel-Bahn. */
+  function zeigeSchilder(note, mitLage) {
     var nr = zustand ? zustand.nr : flug.imLevel + 1;
-    $("flug-level").textContent = t("flug.level", { level: level, nr: nr, anzahl: L.NOTENFLUG.notenProLevel });
+    $("flug-ziel-text").textContent = mitLage && note
+      ? t("flug.ziel", { lage: lageText(note.position), name: note.anzeige })
+      : t("flug.schildNote", { nr: nr, anzahl: L.NOTENFLUG.notenProLevel });
+    $("flug-schild-ziel").classList.toggle("zeigt-lage", !!mitLage);
+    var schluessel = (note && note.schluessel) || (umgebung.noten[0] && umgebung.noten[0].schluessel) || "violin";
+    var bahn = $("flug-schild-bahn");
+    if (bahn.dataset.schluessel !== schluessel) {
+      $("flug-bahn-symbol").innerHTML = window.Notensystem.schluesselSymbol(schluessel);
+      bahn.dataset.schluessel = schluessel;
+    }
+    $("flug-bahn-text").textContent = t("flug.bahn." + schluessel);
+  }
+
+  /** Kurze Lage einer Position (0 = unterste Linie), zum Beispiel „2. Linie“ oder „1. Hilfslinie unten“. */
+  function lageText(p) {
+    var ord = T.liste("flug.ord");
+    function o(n) { return ord[n - 1] || n + "."; }
+    if (p >= 0 && p <= 8) return t(p % 2 === 0 ? "flug.lage.linie" : "flug.lage.raum", { ord: o(p % 2 === 0 ? p / 2 + 1 : (p + 1) / 2) });
+    if (p === -1) return t("flug.lage.unter");
+    if (p === 9) return t("flug.lage.ueber");
+    if (p < 0) {
+      return p % 2 === 0 ? t("flug.lage.hilfUnten", { ord: o(-p / 2) }) : t("flug.lage.unterHilf", { ord: o((-p - 1) / 2) });
+    }
+    return p % 2 === 0 ? t("flug.lage.hilfOben", { ord: o((p - 8) / 2) }) : t("flug.lage.ueberHilf", { ord: o((p - 9) / 2) });
+  }
+
+  /** Rakete mit dem Kopf des Begleiters im Fenster, Nase nach rechts zur Note. */
+  function rakete() {
+    var kopf = window.Tiere.kopf(umgebung.tier, "normal", "")
+      .replace("<svg ", '<svg x="-6.4" y="-6.2" width="11" height="11" ');
+    return '<defs><radialGradient id="flug-schein-verlauf">' +
+        '<stop offset="0" stop-color="#ffd54a" stop-opacity="0.9"/><stop offset="0.6" stop-color="#ffe58a" stop-opacity="0.45"/>' +
+        '<stop offset="1" stop-color="#fff3c4" stop-opacity="0"/></radialGradient></defs>' +
+      '<g class="flug-rakete" transform="translate(' + RAKETE_X + " " + RAKETE_Y + ')" aria-hidden="true"><g class="flug-rakete-innen">' +
+        '<path class="rakete-flamme" d="M-15 -3.2 L-23 0 L-15 3.2 Z"/>' +
+        '<path class="rakete-fluegel" d="M-8 -5.5 L-14 -11 L-3 -5.5 Z M-8 5.5 L-14 11 L-3 5.5 Z"/>' +
+        '<path class="rakete-rumpf" d="M-15 -6.5 L5 -6.5 C12 -6.5 18 -3 21 0 C18 3 12 6.5 5 6.5 L-15 6.5 Z"/>' +
+        '<path class="rakete-nase" d="M10 -5.2 C15 -3.8 18.5 -1.8 21 0 C18.5 1.8 15 3.8 10 5.2 Z"/>' +
+        '<circle class="rakete-fenster" cx="-1" cy="-0.7" r="6"/>' + kopf +
+      "</g></g>";
   }
 
   function zeichneSystem(note, beschriftung) {
     var box = $("flug-notensystem");
     // Nach der Antwort (mit Beschriftung) Linie oder Zwischenraum hinterlegen; namensPlatz hält die Größe fest.
-    box.innerHTML = window.Notensystem.zeichne(note, { bereich: umgebung.bereich, beschriftung: beschriftung,
-      markiere: !!beschriftung, namensPlatz: H.namensPlatz(umgebung) });
-    box.classList.remove("ist-richtig", "ist-falsch");
+    var svg = window.Notensystem.zeichne(note, { bereich: umgebung.bereich, beschriftung: beschriftung,
+      markiere: !!beschriftung, namensPlatz: H.namensPlatz(umgebung), breite: BREITE, noteX: NOTE_X });
+    if (note) {
+      // Weicher Schein hinter dem fliegenden Notenkopf (nicht nach der Antwort)
+      var schein = beschriftung ? "" : '<circle class="note-schein" cx="' + NOTE_X + '" cy="' + (72 - note.position * 5) +
+        '" r="16" fill="url(#flug-schein-verlauf)"/>';
+      svg = svg.replace('<g class="note-gruppe">', rakete() + '<g class="note-gruppe">' + schein);
+    } else {
+      svg = svg.replace("</svg>", rakete() + "</svg>");
+    }
+    box.innerHTML = svg;
+    $("flug-buehne").classList.remove("ist-richtig", "ist-falsch");
+    messeFang();
+  }
+
+  /** Merkt sich, wo das SVG in der Bühne liegt, damit „Fang mich!“ unter der Note mitfliegt. */
+  function messeFang() {
+    var svg = $("flug-notensystem").querySelector("svg");
+    var buehne = $("flug-buehne").getBoundingClientRect();
+    if (!svg || !buehne.width) { fangMass = null; return; }
+    var r = svg.getBoundingClientRect();
+    var vb = svg.viewBox.baseVal;
+    var skala = Math.min(r.width / vb.width, r.height / vb.height);
+    var fang = $("flug-fang");
+    var zeile = fang.parentNode.getBoundingClientRect();
+    fangMass = { links: r.left - zeile.left + (r.width - vb.width * skala) / 2 - vb.x * skala, skala: skala,
+      breite: fang.offsetWidth, max: zeile.width };
   }
 
   function setzeVersatz(dx) {
     var g = $("flug-notensystem").querySelector(".note-gruppe");
     if (g) g.setAttribute("transform", "translate(" + dx.toFixed(2) + " 0)");
+    var fang = $("flug-fang");
+    if (!fang.hidden && fangMass) {
+      // Mitte unter dem Notenkopf, aber nie über den Rand der Bühne hinaus
+      var x = fangMass.links + (NOTE_X + dx) * fangMass.skala - fangMass.breite / 2;
+      x = Math.max(0, Math.min(fangMass.max - fangMass.breite, x));
+      fang.style.transform = "translateX(" + x.toFixed(1) + "px)";
+    }
+  }
+
+  function raketeAnimiere(klasse) {
+    var r = $("flug-notensystem").querySelector(".flug-rakete-innen");
+    if (!r) return;
+    r.classList.remove("satz", "wackeln");
+    void r.getBoundingClientRect();
+    r.classList.add(klasse);
   }
 
   function sperreKnoepfe(gesperrt) {
     $("flug-antworten").classList.toggle("gesperrt", gesperrt);
     knoepfe.forEach(function (b) { b.setAttribute("aria-disabled", gesperrt ? "true" : "false"); });
   }
+
+  /** Rückmeldung nach einem Fehler unter den Tasten ein- oder ausblenden. */
+  function zeigeRueckmeldung(an) {
+    $("flug-rueckmeldung").hidden = !an;
+    if (!an) {
+      $("flug-merkhilfe").hidden = true;
+      $("flug-weiter").hidden = true;
+      $("flug-text").textContent = "";
+    }
+  }
+
+  /* ---------- Ablauf ---------- */
 
   function waehleNote() {
     var vorher = zustand && zustand.note;
@@ -120,20 +278,23 @@
     $("flug-level-einblendung").hidden = true;
     tasten.zuruecksetzen();
     var note = waehleNote();
+    var nachFehler = !$("flug-rueckmeldung").hidden;
     zustand = { note: note, vergangen: 0, dauer: L.flugzeit(flug.level, flug.tempo), offen: true, dx: START_DX,
       level: flug.level, nr: flug.imLevel + 1 };
+    zeigeRueckmeldung(false);
     zeigeStatus();
+    zeigeZeit(1);
+    zeigeSchilder(note, false);
+    // „Fang mich!“ nur in Welle 1, danach kennt das Kind das Spiel
+    $("flug-fang").hidden = zustand.level !== 1;
     zeichneSystem(note);
     setzeVersatz(START_DX);
-    $("flug-weiter").hidden = true;
-    $("flug-merkhilfe").hidden = true;
     knoepfe.forEach(function (b) {
       b.classList.remove("ist-richtig", "ist-falsch", "ist-loesung");
       H.markiereAntwort(b);
     });
     sperreKnoepfe(false);
-    umgebung.zeigeTier($("flug-tier"), "normal");
-    $("flug-text").textContent = t("flug.schnell");
+    if (nachFehler || zustand.nr === 1) sage(t("flug.schnell"));
     letzteZeit = null;
     if (!document.hidden && !angehalten) raf = requestAnimationFrame(schritt);
     else pausiert = true;
@@ -146,10 +307,11 @@
     var dt = letzteZeit === null ? 0 : Math.min(zeit - letzteZeit, 100);
     letzteZeit = zeit;
     zustand.vergangen += dt;
-    var t = Math.min(1, zustand.vergangen / zustand.dauer);
-    zustand.dx = START_DX + (ZIEL_DX - START_DX) * t;
+    var anteil = Math.min(1, zustand.vergangen / zustand.dauer);
+    zustand.dx = START_DX + (ZIEL_DX - START_DX) * anteil;
     setzeVersatz(zustand.dx);
-    if (t >= 1) {
+    zeigeZeit(1 - anteil);
+    if (anteil >= 1) {
       werte(null);
       return;
     }
@@ -176,14 +338,27 @@
     if (document.hidden) halteAn(); else laufWeiter();
   });
 
+  window.addEventListener("resize", function () { if (aktiv()) messeFang(); });
+
   /** Hält den Flug an (true) oder lässt ihn weiterlaufen (false), siehe js/modi.js. */
   function pausiere(an) {
     angehalten = !!an;
     if (angehalten) halteAn(); else laufWeiter();
   }
 
+  /** Ton der getippten Antwort: genau die gewählte Note, im Modus „Einfach“ der Buchstabe in der Oktave der Note. */
+  function spieleAntwort(name, note) {
+    if (!window.Klang.an()) return;
+    var a = umgebung.antworten.filter(function (x) { return x.name === name; })[0];
+    if (!a) return;
+    var stufe = typeof a.stufe === "number" ? a.stufe : Math.floor(note.stufe / 7) * 7 + N.BUCHSTABEN.indexOf(a.buchstabe);
+    var ton = N.ton(stufe, a.vorzeichen || 0);
+    if (ton && window.Klang.bereit()) window.Klang.spiele(ton.halbton);
+  }
+
   function beantworte(name) {
-    if (!aktiv() || !zustand || !zustand.offen) return; // eine Antwort pro Note
+    if (!aktiv() || !zustand || !zustand.offen || angehalten) return; // eine Antwort pro Note
+    spieleAntwort(name, zustand.note);
     werte(name);
   }
 
@@ -206,10 +381,14 @@
 
     var danach = e.beendet ? beende : (e.levelGeschafft ? zeigeLevel : naechsteNote);
 
-    // Richtig: kein Halt. Punkte zählen hoch, die Note bleibt stehen, gleich kommt die nächste.
+    // Richtig: kein Halt. Die Note funkelt, die Rakete macht einen Satz, gleich kommt die nächste.
     if (richtig) {
-      $("flug-notensystem").classList.add("ist-richtig");
-      zeigeStatus();
+      $("flug-notensystem").querySelector(".note-gruppe").classList.add("funkelt");
+      $("flug-buehne").classList.add("ist-richtig");
+      raketeAnimiere("satz");
+      zeigeStatus(true);
+      var lob = T.liste("rueckmeldung.lob", { name: note.anzeige });
+      sage(lob[Math.floor(Math.random() * lob.length)]);
       timer = setTimeout(danach, PAUSE_NACH_RICHTIG);
       return;
     }
@@ -217,12 +396,17 @@
     // Lösung an der Stelle zeigen, an der die Note gerade ist (Name passt rechts daneben).
     zeichneSystem(note, note.anzeige);
     setzeVersatz(Math.min(0, zustand.dx));
-    $("flug-notensystem").classList.add(richtig ? "ist-richtig" : "ist-falsch");
+    $("flug-buehne").classList.add("ist-falsch");
+    $("flug-fang").hidden = true;
+    sage(t("flug.sprechFehler"));
+    raketeAnimiere("wackeln");
     zeigeStatus();
+    zeigeSchilder(note, true);
+    zeigeRueckmeldung(true);
     H.zeigeMerkhilfe(umgebung, note, "flug-merkhilfe");
 
-    var werte = { name: note.anzeige, hinweis: note.hinweis };
-    var text = t(name === null ? "flug.zuSpaet" : "flug.falsch", werte);
+    var werteText = { name: note.anzeige, hinweis: note.hinweis };
+    var text = t(name === null ? "flug.zuSpaet" : "flug.falsch", werteText);
     if (e.levelGeschafft) text += t("flug.levelGeschafft", { level: zustand.level });
     if (e.beendet) text += t("flug.dritterFehler");
     $("flug-text").textContent = text;
@@ -235,7 +419,7 @@
     if (!e.beendet) timer = setTimeout(weiterNachFehler, PAUSE_NACH_FEHLER);
   }
 
-  /** Kurze Einblendung „Level 3!“ ohne Knopf, danach die erste Note des neuen Levels. */
+  /** Kurze Einblendung „Welle 3!“ ohne Knopf, danach die erste Note der neuen Welle. */
   function zeigeLevel() {
     clearTimeout(timer);
     wartetAufWeiter = null;
@@ -271,7 +455,7 @@
       zeilen: [
         [t("flug.erreicht"), String(f.level)],
         [t("flug.geschaffte"), String(f.levelGeschafft)],
-        // Rechnung zum erreichten Level, zum Beispiel „3 Noten × Level 2 = 6 Punkte pro Note“
+        // Rechnung zur erreichten Welle, zum Beispiel „3 Noten × Welle 2 = 6“
         [t("flug.proNote"), t("flug.rechnung", { noten: f.notenAnzahl, level: f.level, punkte: L.flugPunkteProNote(f) })]
       ]
     });

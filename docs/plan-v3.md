@@ -732,3 +732,13 @@ Abweichungen:
 - Das Spaltenverhältnis war mit 1,4 zu 1 schon 7 zu 5, es steht jetzt ausdrücklich so in css/style.css.
 - Die Buchstabentasten im Modus „Einfach“ bekommen ihre Spaltenzahl aus `Modi.hilfen.antwortKnoepfe` (CSS-Variablen `--tasten-handy`, `--tasten-breit`, `--tasten-alle`): unter 700 px höchstens 5 je Reihe und gleichmäßig verteilt (7 = 4 + 3, 6 = 3 + 3), ab 700 px höchstens 6 wie im Entwurf. Das gilt auch für Fehler üben; der Notenflug nutzt `--tasten-alle` (Paket 6).
 - Das obere Menü war seit Paket 2 schon da.
+
+### Paket 6: Notenflug, Teil Spiel
+
+- Der Notenflug hat jetzt auf allen Breiten eine Spalte wie im Entwurf (höchstens 800 px breit): Kopfkarte, Flugzeit-Balken, Bühne, Hinweiszeile, Tasten. Ab 700 px stehen alle Buchstaben in einer Reihe (`--tasten-alle`).
+- Für die Rakete zeichnet der Notenflug ein breiteres System (`breite: 200`, `noteX: 150`); die Rakete steht vor dem Schlüssel, auch vor den Punkten des Bassschlüssels. Die Flugzeit je Note ändert sich nicht. Rakete, Schein und Kopf des Begleiters liegen im SVG; dafür bekommt `umgebung` das Feld `tier` (und schon `flugTempo` für Paket 7). `Notensystem.schluesselSymbol(art)` zeichnet das Schlüsselsymbol für das Bahn-Schild.
+- „Fang mich!“ steht in einer eigenen Zeile unter dem System und fliegt dort mit; die Zeile ist in jeder Welle reserviert, damit die Bühne ihre Höhe behält. Am Rand der Bühne bleibt das Schild stehen.
+- Nach einem Fehler sagt die Sprechzeile „Oje! Unten steht die Lösung.“ („Oops! The answer is down below.“), damit kein altes Lob stehen bleibt.
+- Die Rückmeldung nach einem Fehler (Tier, Merkhilfe, „Weiter“) ist während des Flugs ausgeblendet und erscheint nur nach einem Fehler unter den Tasten.
+- Der Ton-Knopf „Ton an“ steht rechts in der Hinweiszeile. `Modi.hilfen.tastenEingabe` kennt dafür die Optionen `tipp` und `tippTouch`.
+- Nach einer richtigen Antwort dauert der Übergang 300 ms (Funkeln und Raketensatz) statt 150 ms.

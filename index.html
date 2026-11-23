@@ -126,13 +126,14 @@
       </div>
     </section>
 
-    <!-- Notenflug -->
+    <!-- Notenflug (Aufbau nach dem Stitch-Entwurf, js/modi/notenflug.js) -->
     <section id="ansicht-notenflug" class="ansicht ansicht-runde ansicht-notenflug" aria-labelledby="titel-notenflug" hidden>
       <header class="runde-kopf kopfkarte">
         <button type="button" class="knopf knopf-klein knopf-zurueck" aria-label="Zurück zur Startseite" data-text-aria-label="zurueck.aria">
           <span aria-hidden="true">←</span> <span class="knopf-text" data-text="zurueck.zoo">Zoo</span>
         </button>
         <div class="runde-titel runde-titel-unten">
+          <!-- „Welle 1 · Tempo: Gemütlich“ -->
           <p class="aufgabe-nr" id="flug-level"></p>
           <div class="runde-titel-zeile">
             <h1 id="titel-notenflug" class="frage" tabindex="-1" data-text="modus.notenflug">Notenflug</h1>
@@ -140,32 +141,52 @@
           </div>
         </div>
         <div class="runde-status">
-          <span class="pille pille-gold sterne-anzeige" id="flug-sterne" role="img"></span>
+          <span class="pille pille-gold flug-combo" id="flug-combo" role="img">
+            <span class="pille-symbol" data-symbol="flamme" aria-hidden="true"></span><span class="pille-zahl"></span>
+          </span>
           <span class="pille punkte-anzeige" id="flug-punkte"></span>
+          <!-- Drei Herzen = drei Leben, ein leeres Herz bleibt als Kontur -->
+          <span class="pille pille-rosa flug-herzen" id="flug-herzen" role="img"></span>
         </div>
       </header>
 
-      <div class="runde-inhalt">
-        <div class="runde-noten">
+      <!-- Verbleibende Flugzeit der aktuellen Note -->
+      <div class="fortschritt fortschritt-blau flug-zeit" id="flug-zeit" role="progressbar" aria-label="Flugzeit" data-text-aria-label="flug.zeitAria"><span class="fortschritt-fuellung"></span></div>
+
+      <div class="flug-inhalt">
+        <!-- Bühne: Himmel mit Schildern, Notensystem mit Rakete, „Fang mich!“ und Sprechzeile -->
+        <div class="flug-buehne runde-noten" id="flug-buehne">
+          <div class="flug-schilder">
+            <span class="flug-schild" id="flug-schild-ziel"><span class="flug-schild-symbol" data-symbol="note" aria-hidden="true"></span><span id="flug-ziel-text"></span></span>
+            <span class="flug-schild flug-schild-bahn" id="flug-schild-bahn"><span class="flug-schild-symbol" id="flug-bahn-symbol" aria-hidden="true"></span><span class="flug-bahn-text" id="flug-bahn-text"></span></span>
+          </div>
           <div class="notensystem notensystem-flug" id="flug-notensystem"></div>
-          <!-- Kurze Einblendung beim Levelwechsel, über dem Notensystem -->
+          <div class="flug-fang-zeile" aria-hidden="true"><span class="flug-fang" id="flug-fang" data-text="flug.fangMich" hidden>Fang mich!</span></div>
+          <!-- Sprechzeile des Begleiters (Bausteine.sprechZeile) -->
+          <div class="flug-sprech" id="flug-sprech" aria-live="polite"></div>
+          <!-- Kurze Einblendung beim Wellenwechsel, über dem Notensystem -->
           <p class="level-einblendung" id="flug-level-einblendung" role="status" hidden></p>
         </div>
-        <div class="runde-antworten">
-          <div class="antworten" id="flug-antworten" role="group" aria-label="Antworten" data-text-aria-label="runde.antwortenAria"></div>
+
+        <!-- Hinweiszeile: Tipp zu den Tasten links, Ton an oder aus rechts -->
+        <div class="flug-hinweis-zeile">
           <p class="tasten-zeile" id="flug-tasten"></p>
-          <div class="tier-zeile">
-            <div class="tier-klein" id="flug-tier"></div>
-            <div class="sprechblase">
-              <div aria-live="polite">
-                <div class="merkhilfe" id="flug-merkhilfe" hidden>
-                  <div class="merkhilfe-bild" id="flug-merkhilfe-bild"></div>
-                  <p class="merkhilfe-text" id="flug-merkhilfe-text"></p>
-                </div>
-                <p id="flug-text"></p>
+          <span id="flug-ton"></span>
+        </div>
+        <div class="antworten" id="flug-antworten" role="group" aria-label="Antworten" data-text-aria-label="runde.antwortenAria"></div>
+
+        <!-- Rückmeldung nach einem Fehler oder „zu spät“: Lösung, Merkhilfe, Weiter -->
+        <div class="tier-zeile flug-rueckmeldung" id="flug-rueckmeldung" hidden>
+          <div class="tier-klein" id="flug-tier"></div>
+          <div class="sprechblase">
+            <div aria-live="polite">
+              <div class="merkhilfe" id="flug-merkhilfe" hidden>
+                <div class="merkhilfe-bild" id="flug-merkhilfe-bild"></div>
+                <p class="merkhilfe-text" id="flug-merkhilfe-text"></p>
               </div>
-              <button type="button" class="knopf knopf-haupt knopf-weiter" id="flug-weiter" hidden data-text="runde.weiter">Weiter</button>
+              <p id="flug-text"></p>
             </div>
+            <button type="button" class="knopf knopf-haupt knopf-weiter" id="flug-weiter" hidden data-text="runde.weiter">Weiter</button>
           </div>
         </div>
       </div>

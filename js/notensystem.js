@@ -259,5 +259,13 @@
     return Math.round((UNTERSTE_LINIE - y) / (ABSTAND / 2));
   }
 
-  root.Notensystem = { zeichne: zeichne, positionVon: positionVon, NOTE_X: NOTE_X_STANDARD, symbol: symbol };
+  /** Kleines Schlüsselsymbol ohne Linien, zum Beispiel für das Bahn-Schild im Notenflug. */
+  function schluesselSymbol(schluessel) {
+    var bass = schluessel === "bass";
+    return '<svg class="schluessel-symbol" viewBox="' + (bass ? "6 26 48 48" : "4 8 48 88") + '" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">' +
+      (bass ? BASSSCHLUESSEL : VIOLINSCHLUESSEL) + "</svg>";
+  }
+
+  root.Notensystem = { zeichne: zeichne, positionVon: positionVon, NOTE_X: NOTE_X_STANDARD, symbol: symbol,
+    schluesselSymbol: schluesselSymbol };
 })(this);

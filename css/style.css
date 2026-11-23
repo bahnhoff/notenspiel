@@ -1174,15 +1174,134 @@ h1:focus { outline: none; }
 
 /* ---------- Notenflug ---------- */
 
-/* Himmel hinter dem System wie im Stitch-Entwurf: oben hellblau, unten warm, rechts oben eine Wolke */
-.notensystem-flug {
-  overflow: hidden;
-  border-color: #d9ebf3;
+/* Aufbau nach dem Entwurf: eine Spalte mit Kopfkarte, Flugzeit, Bühne, Hinweiszeile, Tasten */
+.ansicht-notenflug { max-width: 800px; margin-left: auto; margin-right: auto; width: 100%; }
+.flug-zeit { margin: -4px 6px 14px; }
+.flug-zeit .fortschritt-fuellung { transition: none; }
+.flug-inhalt { display: flex; flex-direction: column; gap: 12px; }
+
+/* Bühne: Himmel wie im Entwurf, oben hellblau, unten warm, rechts eine Wolke */
+.flug-buehne {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 14px 12px;
+  border-radius: 28px;
+  border: 2px solid #d9ebf3;
+  box-shadow: var(--schatten-weich);
   background:
-    radial-gradient(ellipse 34px 14px at calc(100% - 64px) 30px, rgba(255, 255, 255, 0.95) 98%, transparent),
-    radial-gradient(circle 17px at calc(100% - 72px) 22px, rgba(255, 255, 255, 0.95) 98%, transparent),
-    radial-gradient(circle 12px at calc(100% - 52px) 24px, rgba(255, 255, 255, 0.95) 98%, transparent),
-    linear-gradient(180deg, #ddf0fa 0%, #eef7f8 45%, #fffaf0 100%);
+    radial-gradient(ellipse 34px 14px at calc(100% - 64px) 74px, rgba(255, 255, 255, 0.95) 98%, transparent),
+    radial-gradient(circle 17px at calc(100% - 72px) 66px, rgba(255, 255, 255, 0.95) 98%, transparent),
+    radial-gradient(circle 12px at calc(100% - 52px) 68px, rgba(255, 255, 255, 0.95) 98%, transparent),
+    linear-gradient(180deg, #ddf0fa 0%, #eef7f8 50%, #fff6ea 100%);
+}
+.flug-buehne.ist-richtig { border-color: var(--gruen); }
+.flug-buehne.ist-falsch { border-color: var(--rot); }
+.flug-buehne.ist-falsch .notenname { fill: var(--rot); }
+.notensystem-flug { background: transparent; border: 0; box-shadow: none; padding: 0; }
+.notensystem-flug .notensystem-svg { max-height: 250px; }
+
+/* Schilder oben in der Bühne */
+.flug-schilder { display: flex; justify-content: space-between; align-items: center; gap: 8px; min-width: 0; }
+.flug-schild {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  min-height: 34px;
+  padding: 4px 14px 4px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.94);
+  border: 2px solid #eee3d3;
+  box-shadow: 0 2px 0 #e7dccb;
+  font-weight: 700;
+  font-size: 0.92rem;
+  white-space: nowrap;
+}
+.flug-schild > span:last-child { overflow: hidden; text-overflow: ellipsis; }
+.flug-schild.zeigt-lage { color: var(--rot); border-color: #f3c3c3; }
+.flug-schild-bahn { flex: 0 1 auto; background: #fff8e1; border-color: #f3d27a; box-shadow: 0 2px 0 #f2c94c; color: #7a4f00; }
+.flug-schild-symbol { flex: 0 0 auto; line-height: 0; color: var(--akzent-dunkel); }
+.flug-schild-symbol .symbol-svg { width: 20px; height: 20px; }
+.flug-schild-bahn .flug-schild-symbol { color: #3d2b1f; }
+.schluessel-symbol { display: block; width: auto; height: 22px; }
+
+/* „Fang mich!“ fliegt unter dem System mit der Note mit (Position: js/modi/notenflug.js) */
+.flug-fang-zeile { position: relative; height: 26px; margin-top: -6px; }
+.flug-fang {
+  position: absolute;
+  left: 0;
+  top: 0;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: #fff;
+  border: 2px solid #f8d77a;
+  color: var(--akzent-dunkel);
+  font-size: 0.85rem;
+  font-weight: 800;
+  white-space: nowrap;
+  will-change: transform;
+}
+.flug-sprech { display: flex; min-width: 0; }
+.flug-sprech .sprech-zeile { box-shadow: 0 2px 0 #e7dccb; }
+
+/* Rakete mit Begleiter im Fenster */
+.rakete-rumpf { fill: #fff; stroke: #3d2b1f; stroke-width: 1; }
+.rakete-nase { fill: var(--akzent); }
+.rakete-fluegel { fill: var(--akzent); stroke: #3d2b1f; stroke-width: 0.8; stroke-linejoin: round; }
+.rakete-flamme { fill: #fbbf24; }
+.rakete-fenster { fill: #e0f2fe; stroke: #3d2b1f; stroke-width: 1; }
+.flug-rakete-innen.satz { animation: rakete-satz 0.3s ease-out; }
+.flug-rakete-innen.wackeln { animation: rakete-wackeln 0.45s ease-in-out; }
+@keyframes rakete-satz { 45% { transform: translateX(6px); } }
+@keyframes rakete-wackeln { 20% { transform: rotate(-14deg); } 50% { transform: rotate(10deg); } 80% { transform: rotate(-5deg); } }
+
+/* Leuchtende Note; nach einer richtigen Antwort verschwindet sie mit einem Funkeln */
+.note-schein { transform-box: fill-box; transform-origin: center; }
+.note-gruppe.funkelt { animation: note-weg 0.3s ease-out forwards; }
+.note-gruppe.funkelt .note-schein { animation: schein-auf 0.3s ease-out forwards; }
+@keyframes note-weg { to { opacity: 0; } }
+@keyframes schein-auf { to { transform: scale(1.9); } }
+
+/* Kopfkarte: Combo hüpft beim Erhöhen, bei x5 goldene Kante; Herzen */
+.flug-combo { white-space: nowrap; }
+.flug-combo.huepft { animation: combo-huepfen 0.35s ease-out; }
+.flug-combo.ist-voll { border-color: var(--gold); box-shadow: 0 3px 0 #c27803; }
+@keyframes combo-huepfen { 40% { transform: translateY(-5px) scale(1.06); } }
+.flug-herzen { gap: 2px; padding: 0 10px; }
+.flug-herz { line-height: 0; }
+.flug-herz .symbol-svg { width: 20px; height: 20px; }
+
+/* Hinweiszeile über den Tasten, rechts „Ton an“ */
+.flug-hinweis-zeile { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 44px; }
+.flug-hinweis-zeile .tasten-zeile {
+  margin: 0;
+  text-align: left;
+  font-size: 0.85rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-leise);
+}
+.flug-hinweis-zeile .tasten-zeile.tippt { text-transform: none; letter-spacing: 0; }
+.flug-hinweis-zeile .ton-knopf { flex: 0 0 auto; font-size: 0.95rem; border-color: transparent; background: transparent; box-shadow: none; }
+
+/* Alle Buchstaben in einer Reihe wie im Entwurf (Handy: höchstens 5 je Reihe, siehe .antworten-einfach) */
+@media (min-width: 700px) {
+  .ansicht-notenflug .antworten-einfach .antwort-reihe { grid-template-columns: repeat(var(--tasten-alle, 7), minmax(0, 1fr)); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flug-rakete-innen.satz, .flug-rakete-innen.wackeln, .flug-combo.huepft { animation: none; }
+}
+
+@media (max-width: 599px) {
+  .flug-buehne { padding: 8px 8px 8px; border-radius: 22px; }
+  .flug-schild { font-size: 0.8rem; min-height: 30px; padding: 3px 10px 3px 7px; }
+  /* Schlüssel-Schild nur als Schlüsselsymbol */
+  .flug-bahn-text { display: none; }
+  .flug-schild-bahn { padding: 3px 9px; }
 }
 
 /* ---------- Klaviertasten ---------- */
