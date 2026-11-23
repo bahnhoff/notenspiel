@@ -226,6 +226,14 @@
     liste.forEach(function (eintraege) {
       var reihe = document.createElement("div");
       reihe.className = "antwort-reihe";
+      if (einfach) {
+        // Spaltenzahl für css/style.css: Handy höchstens 5 je Reihe, gleichmäßig verteilt
+        // (7 Tasten = 4 + 3), ab Tablet-Breite höchstens 6 (Entwurf), Notenflug alle in einer Reihe.
+        var n = eintraege.length;
+        reihe.style.setProperty("--tasten-alle", String(n));
+        reihe.style.setProperty("--tasten-handy", String(Math.ceil(n / Math.ceil(n / 5))));
+        reihe.style.setProperty("--tasten-breit", String(Math.min(6, n)));
+      }
       eintraege.forEach(function (a) {
         var b = document.createElement("button");
         b.type = "button";

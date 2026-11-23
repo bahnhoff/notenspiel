@@ -559,6 +559,12 @@ h1:focus { outline: none; }
   gap: 8px;
 }
 
+/* Einfacher Modus: Handy höchstens 5 Tasten je Reihe (7 = 4 + 3), ab 700 px höchstens 6 wie im Entwurf */
+.antworten-einfach .antwort-reihe { grid-template-columns: repeat(var(--tasten-handy, 5), minmax(0, 1fr)); }
+@media (min-width: 700px) {
+  .antworten-einfach .antwort-reihe { grid-template-columns: repeat(var(--tasten-breit, 6), minmax(0, 1fr)); }
+}
+
 .antworten-oktaven { gap: 6px; }
 
 .antworten-oktaven .antwort-reihe {
@@ -1714,7 +1720,8 @@ h1:focus { outline: none; }
     flex-direction: column;
     min-height: calc(100dvh - 28px);
   }
-  .runde-inhalt { flex: 1 1 auto; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 28px; }
+  /* Spalten 7 zu 5 wie im Entwurf */
+  .runde-inhalt { flex: 1 1 auto; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: 28px; }
   .notensystem { padding: 12px 16px; }
   .runde-antworten .tasten-zeile { text-align: left; }
   .runde-antworten { margin-top: 0; }

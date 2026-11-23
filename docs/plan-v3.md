@@ -726,3 +726,9 @@ Abweichungen:
 
 - Neue Kopfzeile `.start-oben`: links der Schriftzug „Notenzoo“ mit Pfotensymbol in einem gelben Kästchen (wie das Kästchen mit Tierkopf im Entwurf), rechts der Ton-Knopf (`Bausteine.tonKnopf()`, eingesetzt in js/app.js) und der Sprachumschalter. Der Umschalter steht nicht mehr absolut oben rechts.
 - `Bausteine.menue.aktualisiere()` frischt jetzt auch die Ton-Knöpfe auf, damit ihr Aria-Text nach einem Sprachwechsel stimmt.
+
+### Paket 5: Welche Note ist das?
+
+- Das Spaltenverhältnis war mit 1,4 zu 1 schon 7 zu 5, es steht jetzt ausdrücklich so in css/style.css.
+- Die Buchstabentasten im Modus „Einfach“ bekommen ihre Spaltenzahl aus `Modi.hilfen.antwortKnoepfe` (CSS-Variablen `--tasten-handy`, `--tasten-breit`, `--tasten-alle`): unter 700 px höchstens 5 je Reihe und gleichmäßig verteilt (7 = 4 + 3, 6 = 3 + 3), ab 700 px höchstens 6 wie im Entwurf. Das gilt auch für Fehler üben; der Notenflug nutzt `--tasten-alle` (Paket 6).
+- Das obere Menü war seit Paket 2 schon da.
