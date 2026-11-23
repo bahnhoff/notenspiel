@@ -293,15 +293,15 @@
                aria-label="Notensystem: Tippe auf eine Linie oder einen Zwischenraum" data-text-aria-label="setzen.systemAria" aria-valuemin="-20" aria-valuemax="20" aria-valuenow="0"></div>
         </div>
         <div class="runde-antworten">
-          <div class="setzen-vorzeichen" id="setzen-vorzeichen" role="group" aria-label="Vorzeichen" data-text-aria-label="setzen.vorzeichenAria" hidden>
-            <button type="button" class="knopf knopf-neben knopf-vorzeichen" data-vorzeichen="0" aria-pressed="true" aria-label="Ohne Vorzeichen" data-text-aria-label="setzen.ohne">♮</button>
-            <button type="button" class="knopf knopf-neben knopf-vorzeichen" data-vorzeichen="1" aria-pressed="false" aria-label="Kreuz" data-text-aria-label="setzen.kreuz">♯</button>
-            <button type="button" class="knopf knopf-neben knopf-vorzeichen" data-vorzeichen="-1" aria-pressed="false" aria-label="B" data-text-aria-label="setzen.b">♭</button>
-          </div>
           <div class="setzen-steuerung">
             <button type="button" class="knopf knopf-neben knopf-schritt" id="setzen-tiefer" aria-label="Note eine Stufe tiefer" data-text-aria-label="setzen.tiefer">▼</button>
             <button type="button" class="knopf knopf-neben knopf-schritt" id="setzen-hoeher" aria-label="Note eine Stufe höher" data-text-aria-label="setzen.hoeher">▲</button>
             <button type="button" class="knopf knopf-haupt knopf-pruefen" id="setzen-pruefen" disabled data-text="setzen.pruefen">Prüfen</button>
+          </div>
+          <div class="setzen-vorzeichen" id="setzen-vorzeichen" role="group" aria-label="Vorzeichen" data-text-aria-label="setzen.vorzeichenAria" hidden>
+            <button type="button" class="knopf knopf-neben knopf-vorzeichen" data-vorzeichen="0" aria-pressed="true" aria-label="Ohne Vorzeichen" data-text-aria-label="setzen.ohne">♮</button>
+            <button type="button" class="knopf knopf-neben knopf-vorzeichen" data-vorzeichen="1" aria-pressed="false" aria-label="Kreuz" data-text-aria-label="setzen.kreuz">♯</button>
+            <button type="button" class="knopf knopf-neben knopf-vorzeichen" data-vorzeichen="-1" aria-pressed="false" aria-label="B" data-text-aria-label="setzen.b">♭</button>
           </div>
           <div class="tier-zeile">
             <div class="tier-klein" id="setzen-tier"></div>
@@ -318,6 +318,7 @@
           </div>
         </div>
       </div>
+      <p class="setzen-status" id="setzen-status"></p>
     </section>
 
     <!-- Noten-Memory -->

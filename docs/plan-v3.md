@@ -783,3 +783,10 @@ Abweichungen:
 - Klavierkarte mit Kopf „Spiel die passende Taste“ und Pille „Oktave: c¹ bis g¹“; die Pille zeigt die tiefste und höchste gewählte Note (nicht die ganze Klaviatur).
 - Aktionszeile: „Melodie anhören“ (jederzeit beim Spielen und am Ende, ersetzt „Nochmal hören“), „Tipp“ und „Neu starten“. Am Ende einer Melodie ersetzt „Weiter“ die Knöpfe „Tipp“ und „Neu starten“. Der Tipp lässt die Zieltaste 1,5 Sekunden gelb mit Namensschild leuchten (Klasse `ist-tipp`); der erste Tipp der Runde erklärt den Preis gleichzeitig mit dem Tipp, nicht davor. Neues Symbol `neustart` in `js/symbole.js`.
 - Die Zahl der Tipps steht noch nicht im Ergebnis; das kommt mit den Werte-Kärtchen in Paket 13.
+
+### Paket 11: Note setzen
+
+- Zweispaltig war die Seite im Querformat ab 700 px schon; das Verhältnis ist jetzt 8 zu 4 wie im Entwurf. Im Hochformat (auch Tablet hochkant) bleiben die Teile untereinander.
+- Namensschild: neue Option `schild` in `Notensystem.zeichne` (dunkles Kästchen rechts am Notenkopf). Es zeigt den gesuchten Namen, solange die Note gesetzt, aber noch nicht geprüft ist; nach „Prüfen“ steht wie bisher der echte Name daneben.
+- Statuszeile `#setzen-status` unter dem Inhalt: „Violinschlüssel · Note d“ und „Treble clef · Note D“; nach dem Prüfen mit dem genauen Namen.
+- Die Vorzeichen-Knöpfe stehen jetzt unter ▼ ▲ Prüfen.

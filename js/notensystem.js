@@ -104,6 +104,8 @@
    *           vorzeichen 1 (♯) oder -1 (♭) zeichnet ein Versetzungszeichen vor den Kopf.
    * optionen: bereich      [tiefste, höchste Position] für einen festen Ausschnitt
    *           beschriftung Text neben der Note (zum Beispiel nach der Antwort)
+   *           schild       kleines dunkles Namensschild rechts am Notenkopf (Note setzen:
+   *                        der gesuchte Name, nicht der Name der Position)
    *           schluessel   "violin" oder "bass", sonst der Schlüssel der Note
    *           breite       Ende der Linien rechts (Standard 146), für schmale Systeme
    *           noteX        x-Mitte der Note (Standard 98)
@@ -214,6 +216,12 @@
       if (markierung && !imSystem) teile.push(markierung);
       teile.push(viertelnote(p, NOTE_X, note.vorzeichen));
 
+      if (optionen.schild) {
+        var sb = 7 + String(optionen.schild).length * 6.5;
+        teile.push('<g class="noten-schild"><rect x="' + (NOTE_X + 14) + '" y="' + (ny - 6.5) + '" width="' + sb +
+          '" height="13" rx="3"/><text x="' + (NOTE_X + 14 + sb / 2) + '" y="' + (ny + 3.6) +
+          '" font-size="10" font-weight="800" text-anchor="middle">' + optionen.schild + "</text></g>");
+      }
       if (optionen.beschriftung) {
         teile.push('<text class="notenname" x="' + (NOTE_X + 22) + '" y="' + (ny + 5.5) + '" font-size="18" font-weight="700" fill="currentColor">' + optionen.beschriftung + "</text>");
       }

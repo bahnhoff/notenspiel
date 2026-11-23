@@ -1689,6 +1689,17 @@ h1:focus { outline: none; }
 .vorzeichen-symbol { width: 22px; height: 34px; }
 .knopf-vorzeichen.ist-an { border-color: var(--akzent); background: #fff1e6; box-shadow: inset 0 0 0 2px var(--akzent); }
 .setzen-vorzeichen[hidden] { display: none; }
+/* Namensschild an der gesetzten Note (gesuchter Name) und Statuszeile über der Fußzeile */
+.noten-schild rect { fill: #3d2b1f; }
+.noten-schild text { fill: #fff; }
+.setzen-status { margin: 18px 0 0; padding-top: 10px; border-top: 2px solid var(--rand-weich); text-align: right; font-size: 0.95rem; font-weight: 700; color: var(--text-leise); }
+@media (orientation: landscape) and (min-width: 700px) {
+  /* Notenkarte und Bedienung 8 zu 4 wie im Entwurf */
+  .ansicht-setzen .runde-inhalt { grid-template-columns: minmax(0, 8fr) minmax(0, 4fr); }
+}
+@media (max-width: 599px) {
+  .setzen-status { text-align: center; font-size: 0.88rem; margin-top: 12px; }
+}
 
 /* ---------- Noten-Memory ---------- */
 

@@ -9,6 +9,9 @@
  * Sind Vorzeichen-Noten gewählt, gibt es Knöpfe ♮, ♯ und ♭: Das Vorzeichen
  * gehört zur Antwort (fis¹ ist nicht f¹, und auch nicht ges¹).
  * 10 Aufgaben, Wertung wie im klassischen Spiel (js/spiel-logik.js).
+ * Aufbau wie im Entwurf (Plan Version 3): ab Tablet-Breite Notenkarte und
+ * Bedienung im Verhältnis 8 zu 4, an der gesetzten Note ein kleines Schild mit
+ * dem gesuchten Namen (verrät nichts), Statuszeile „Violinschlüssel · Note d“.
  * Nutzt die Ansicht #ansicht-setzen aus index.html.
  */
 (function () {
@@ -73,6 +76,11 @@
     $("setzen-notensystem").innerHTML = window.Notensystem.zeichne(n, o);
   }
 
+  /** Zeile über der Fußzeile: Schlüssel und gesuchte Note. */
+  function zeigeStatuszeile(name) {
+    $("setzen-status").textContent = T.t("setzen.status", { schluessel: T.t("schluessel." + note().schluessel), name: name });
+  }
+
   function zeigeStatus() {
     $("setzen-aufgabe").textContent = H.aufgabeText(runde);
     H.zeigeSterne($("setzen-sterne"), $("setzen-punkte"), runde.sterne, L.REGELN.startSterne, runde.punkte);
@@ -100,6 +108,7 @@
     zeigeVorzeichenKnoepfe(false);
     zeigeStatus();
     $("setzen-name").textContent = note().antwortAnzeige || note().anzeige;
+    zeigeStatuszeile(note().antwortAnzeige || note().anzeige);
     var system = $("setzen-notensystem");
     system.classList.remove("ist-falsch", "ist-richtig", "hat-vorschau");
     system.classList.add("ist-offen");
@@ -126,7 +135,9 @@
     gewaehlt = position;
     var system = $("setzen-notensystem");
     system.classList.add("hat-vorschau");
-    zeichne({ note: { position: position, schluessel: note().schluessel, vorzeichen: vorzeichen } });
+    // Das Schild zeigt den gesuchten Namen, nicht den der Position.
+    zeichne({ note: { position: position, schluessel: note().schluessel, vorzeichen: vorzeichen },
+      schild: note().antwortAnzeige || note().anzeige });
     system.setAttribute("aria-valuenow", String(position));
     system.setAttribute("aria-valuetext", N.hinweis(note().schluessel, stufeVon(position), vorzeichen));
     $("setzen-pruefen").disabled = false;
@@ -174,6 +185,7 @@
     zeichne({ note: gezeigt, beschriftung: a.richtig ? gezeigt.anzeige : undefined, falsch: a.richtig ? undefined : gewaehlt,
       falschVorzeichen: vorzeichen, markiere: true });
     $("setzen-name").textContent = gezeigt.anzeige;
+    zeigeStatuszeile(gezeigt.anzeige);
     zeigeStatus();
     H.zeigeMerkhilfe(umgebung, gezeigt, "setzen-merkhilfe");
     $("setzen-text").textContent = a.richtig

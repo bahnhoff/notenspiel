@@ -234,6 +234,7 @@
 
       /* Note setzen */
       "setzen.frage": "Setze die Note",
+      "setzen.status": "{schluessel} · Note {name}",
       "setzen.systemAria": "Notensystem: Tippe auf eine Linie oder einen Zwischenraum",
       "setzen.vorzeichenAria": "Vorzeichen",
       "setzen.ohne": "Ohne Vorzeichen",
@@ -660,6 +661,7 @@
       "klavier.schwarz": "Black key {name}",
 
       "setzen.frage": "Place the note",
+      "setzen.status": "{schluessel} · Note {name}",
       "setzen.systemAria": "Staff: tap a line or a space",
       "setzen.vorzeichenAria": "Sharp or flat",
       "setzen.ohne": "No sharp or flat",
