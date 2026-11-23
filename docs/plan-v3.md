@@ -841,3 +841,7 @@ Abweichungen:
 - Reihenfolge: Hinweiskarte, Antworten, Schlüssel, Merktiere, Hinweis zu wenigen Noten, Noten je Schlüssel.
 - Feste Leiste: Im Modus „Einfach“ zählt „Wähle mindestens 3 Noten.“ wie bisher die Buchstaben, deshalb kann „3 Noten gewählt, 2 Buchstaben“ zu wenig sein. Auf dem Handy heißt die Taste nur „Spielen“ („Play“), damit Zähler und Text daneben Platz haben.
 - Handy: Die Oktavblöcke stehen jetzt auch unter 440 px in 7 Spalten (vorher 4 und 3); „mit ♯“ und „mit ♭“ stehen über ihrer Reihe. Die Schnellwahl bleibt als fließende Reihe (2 und 3 Knöpfe) statt im Raster mit 2 Spalten.
+
+### Paket 18: README
+
+- Neue Abschnitte „Gestaltung“ und „Oberes Menü, Ton und gelesene Noten“; Ergebnis, Notenflug (Herzen, Wellen, Combo, Punkte, Tempo, Pause), Melodie (Tipp, Neu starten, Melodie anhören), Einstellungen (Leiste, Zurücksetzen) und Rekorde beschreiben den heutigen Stand. Die englische Fassung steht als kurze Zusammenfassung „Design and new rules“ vor „Dateien“, der übrige README bleibt deutsch.

@@ -45,7 +45,9 @@ Unter **Einstellungen** auf der Startseite wählst du:
 - Noten mit Vorzeichen: Unter den Stammtönen jeder Oktave stehen abgesetzte Zeilen „mit ♯“ (cis, dis, fis, gis, ais) und „mit ♭“ (des, es, ges, as, b). Deutsch heißt das h mit B-Vorzeichen „b“, H bleibt H; in der großen Oktave schreibt man Fis, Es, B. Zu Beginn ist keine Vorzeichen-Note gewählt. Die Schnellwahl setzt nur die Stammtöne, „Keine“ entfernt auch die Vorzeichen-Noten.
 - mit einem Schalter, ob nach der Antwort ein Merktier erscheint
 
-Es braucht mindestens 3 verschiedene Antworten, sonst zeigt das Spiel einen Hinweis, und die Spiele starten nicht: bei **Einfach** 3 verschiedene Buchstaben (c¹ und c² sind beide ein C, Fis oder Es zählen extra), bei **Genau** 3 verschiedene Noten. Die Einstellungen gelten für alle Spiele und bleiben auf dem Gerät gespeichert. Ältere Einstellungen mit Tonumfang werden automatisch in die passende Notenauswahl übersetzt. Bei beiden Schlüsseln enthalten die Antwortschaltflächen die Noten beider Schlüssel. Umfasst die Auswahl mehrere Oktaven, steht jede Oktave in einer eigenen Reihe: tiefe Noten unten, hohe oben.
+Jede Änderung speichert sich sofort. Die feste Leiste unten zeigt die Zahl der gewählten Noten (bei **Einfach** auch die Zahl der Buchstaben, wenn sie kleiner ist) und die Taste **Speichern und spielen**, die „Welche Note ist das?“ startet; auf dem Handy heißt sie nur **Spielen**. **Zurücksetzen** oben rechts setzt nach einer Rückfrage Schlüssel, Notenauswahl, Antworten und Merktiere auf den Anfang zurück; Sterne, Tiere, Rekorde, Sprache und Ton bleiben.
+
+Es braucht mindestens 3 verschiedene Antworten, sonst zeigt das Spiel einen Hinweis, die Leiste bittet „Wähle mindestens 3 Noten.“, und die Spiele starten nicht: bei **Einfach** 3 verschiedene Buchstaben (c¹ und c² sind beide ein C, Fis oder Es zählen extra), bei **Genau** 3 verschiedene Noten. Die Einstellungen gelten für alle Spiele und bleiben auf dem Gerät gespeichert. Ältere Einstellungen mit Tonumfang werden automatisch in die passende Notenauswahl übersetzt. Bei beiden Schlüsseln enthalten die Antwortschaltflächen die Noten beider Schlüssel. Umfasst die Auswahl mehrere Oktaven, steht jede Oktave in einer eigenen Reihe: tiefe Noten unten, hohe oben.
 
 Die Notennamen folgen der deutschen Schreibweise mit hochgestellter Oktavziffer: C D E F G A H (große Oktave), c d e f g a h (kleine Oktave), c¹ bis h¹ (c¹ ist das mittlere C), danach c² bis h² und c³. In `js/noten-konfiguration.js` und in den Notenkennungen (zum Beispiel `violin-c1`, `violin-fis1`, `bass-B`) steht die Ziffer als normale Ziffer.
 
@@ -82,18 +84,35 @@ Ganz oben steht der Hauptknopf **Noten üben** für „Welche Note ist das?“ m
 
 Schrift ist Nunito Sans (SIL Open Font License), lokal als `fonts/nunito-sans-latin.woff2`, damit die Seite keine fremden Server anfragt.
 
-Auch alle übrigen Seiten folgen im Stil den Stitch-Entwürfen (Projekt „Modern Note Learning App“); Aufbau und Abläufe sind geblieben. Gemeinsame Bausteine in `css/style.css`:
+## Gestaltung
 
-- Kopfzeile der Spiele: Zurück-Knopf, darüber klein „AUFGABE 3 VON 10“ und die Überschrift, rechts Sterne in Gold und Punkte als Pille. Ab 700 Pixel steht alles in einer Reihe mit fester Mitte, auf dem Handy die Überschrift unter Zurück und Stand.
-- Notensystem als weiße Karte mit weichem Schatten (`--schatten-weich`), Antworttasten mit fühlbarer Unterkante (`--schatten-taste`), Klaviatur in einer beigen Mulde, ab Tabletbreite in einer weißen Karte.
-- Ergebnis und Ende von „Fehler üben“ als große weiße Karte, Werte als Kacheln, Gesamtpunktzahl golden.
-- Notenflug mit hellem Himmel hinter dem System, Hör-Spiel mit Ziffernschild 1 bis 3 auf Geräten mit Tastatur, Rekorde mit dem Spielsymbol vor jeder Liste.
+Alle Seiten folgen im Aufbau den Stitch-Entwürfen (Projekt „Modern Note Learning App“): warme Creme-Töne, weiße Karten mit weichem Schatten (`--schatten-weich`), Tasten mit fühlbarer Unterkante (`--schatten-taste`) und Orange als Akzentfarbe. Funktionen aus den Entwürfen, die die App vorher nicht hatte, sind nachgebaut. Was die Lösung vor der Antwort verraten würde, zeigt die App erst nach der Antwort, zum Beispiel die Namen auf den Karten im Hör-Spiel oder die Lage der Note im Notenflug. Plan und Abweichungen stehen in `docs/plan-v3.md`.
+
+Gemeinsame Bausteine stehen in `js/bausteine.js` (Gebrauchsanweisung im Kopfkommentar):
+
+- Oberes Menü auf allen Seiten außer der Startseite (siehe unten).
+- Kopfkarte der Spiele: Zurück-Pille „Zoo“, Überschrift mit Spielsymbol, darunter „Aufgabe 3 von 10“, rechts Sterne und Punkte als Pillen. Nur die Melodie hat einen eigenen Kopfbereich mit Begleiter und Sprechblase.
+- Sprechzeile „Füchschen sagt: …“ mit dem gewählten Begleiter; ihre Höhe ist reserviert, damit nichts verrutscht, während das Kind tippt.
+- Buchstabentasten in einer eigenen Farbe je Stammton, bei reinen Stammtönen mit Silbe darunter (Do, Re, Mi …, englisch mit „Sol“ und „Ti“).
+- Ergebnisfenster über dem Spielfeld (siehe Ergebnis).
+- Rückfrage als kleines Fenster mit zwei Tasten, zum Beispiel „Runde beenden?“ oder „Alle Einstellungen zurücksetzen?“.
+
+## Oberes Menü, Ton und gelesene Noten
+
+- Das obere Menü zeigt links den Begleiter als Zoo-Knopf und die Reiter **Zoo**, **Notenreise** und **Meine Tiere**, in der Mitte einen goldenen Balken bis zum nächsten Tier, rechts die gesammelten Sterne, die richtig gelesenen Noten und ein Zahnrad für die Einstellungen. Unter 800 Pixel Breite entfallen die Reiter.
+- Läuft eine Runde, fragt ein Tipp im Menü erst „Runde beenden?“. Die Punkte dieser Runde zählen dann nicht. „Weiterspielen“ ist die Haupttaste, Escape spielt weiter. Der Notenflug und die Spielzeit halten während der Frage an.
+- **Gelesene Noten:** Die Noten-Pille zählt alle richtig gelesenen Noten über alle Spiele, auch gefangene Noten im Notenflug, gefundene Memory-Paare und Noten der Melodie, die beim ersten Versuch stimmen. Die Zahl steht im Spielstand als `notenGesamt`.
+- **Ton an oder aus:** Der Lautsprecher oben rechts auf der Startseite und der Knopf „Ton an“ im Notenflug schalten alle Töne der App ein oder aus. Die Wahl bleibt gespeichert. Im Hör-Spiel erscheint bei ausgeschaltetem Ton der Knopf „Ton einschalten“, damit das Spiel nicht stumm bleibt.
 
 Spielkacheln, Notenreise und die Knöpfe **Meine Tiere**, **Rekorde**, **Einstellungen**, **Rekord speichern** und **Fehler üben** zeigen gezeichnete Symbole statt Emojis, im Stil der Tiere: warme Farben und dunkelbraune, runde Umrisse. So sehen sie auf jedem Gerät gleich aus. Die Zeichnungen stehen in `js/symbole.js`, je eine pro Kennung des Spiels oder Knopfs.
 
 ## Ergebnis
 
-Die Überschrift nennt die Kernzahl der Runde, zum Beispiel „9 von 10 richtig“, beim Notenflug die richtigen Noten und beim Memory Paare und Züge. Darunter steht der Fortschritt zum nächsten Tier, etwa „2 von 5 Sternen bis zum nächsten Tier“, mit der grauen Silhouette des Tiers, das als Nächstes kommt. Schafft das Ergebnis die Top 5, erscheint der Knopf **Rekord speichern**, der die Namenseingabe öffnet.
+Am Ende jedes Spiels öffnet sich ein Fenster über dem Spielfeld; das Spielfeld bleibt unscharf dahinter. Oben stehen der Name des Spiels, „Runde geschafft!“ (Notenflug „Flug beendet!“, Notenreise „Reise geschafft!“) und die verdienten Sterne in drei Kästchen. Bei drei Sternen lobt die Unterzeile das Spiel („Memory-Meister!“), sonst nennt sie die Kernzahl, zum Beispiel „9 von 10 richtig“. Darunter sagt der Begleiter einen Satz zur Runde.
+
+Bis zu vier Werte-Kärtchen zeigen die Zahlen des Spiels: richtig, Fehler, Zeit und Punkte; im Memory Zeit, Züge, Paare und Punkte; im Notenflug Wellen, gefangene Noten, beste Combo und Punkte; in der Melodie Melodien, Fehler, Tipps und Punkte. Die Zeit misst die App selbst; ein verborgener Tab und die Rückfrage „Runde beenden?“ zählen nicht mit. Die Fortschrittskarte zeigt alle gesammelten Sterne, einen goldenen Balken und die graue Silhouette des nächsten Tiers.
+
+Schafft das Ergebnis die Top 5, erscheint der Knopf **Rekord speichern**, der die Namenseingabe öffnet. Unten stehen **Nochmal spielen** (bleibt auf dem Handy beim Scrollen sichtbar), bei Fehlern **Fehler üben**, **Zoo** für die Startseite und **Rekorde** mit dem Abschnitt des gespielten Spiels.
 
 ## Meine Tiere
 
@@ -101,7 +120,7 @@ Das Füchschen ist von Anfang an da. Alle 5 gesammelten Sterne kommt ein zufäll
 
 ## Rekorde und Namen
 
-Das Spiel führt für jedes Spiel die fünf besten Ergebnisse. Schafft ein Ergebnis die Top 5, zeigt der Ergebnisbildschirm den Knopf **Rekord speichern**; er öffnet die Frage „Wer hat gespielt?“. Zuletzt benutzte Namen stehen als Schnellwahl bereit, der zuletzt gewählte ist vorausgewählt. Wer keinen Namen eintragen möchte, tippt auf „Ohne Namen“. Die Namen liegen nur im Browser des Geräts. Sterne und Tiere gehören allen Kindern auf dem Gerät gemeinsam.
+Das Spiel führt für jedes Spiel die fünf besten Ergebnisse. Auf der Rekordseite steht das zuletzt gespielte Spiel oben mit dem Etikett „Zuletzt gespielt“. Ein Spiel ohne Rekord zeigt eine leere Karte mit einem Knopf, der das Spiel startet; die große Taste unten startet „Welche Note ist das?“. Schafft ein Ergebnis die Top 5, zeigt der Ergebnisbildschirm den Knopf **Rekord speichern**; er öffnet die Frage „Wer hat gespielt?“. Zuletzt benutzte Namen stehen als Schnellwahl bereit, der zuletzt gewählte ist vorausgewählt. Wer keinen Namen eintragen möchte, tippt auf „Ohne Namen“. Die Namen liegen nur im Browser des Geräts. Sterne und Tiere gehören allen Kindern auf dem Gerät gemeinsam.
 
 ## Spielregeln „Welche Note ist das?“
 
@@ -117,7 +136,14 @@ Das Spiel führt für jedes Spiel die fünf besten Ergebnisse. Schafft ein Ergeb
 
 Alle Mini-Spiele nutzen die Einstellungen (Schlüssel, Notenauswahl, Merktiere, Antworten), sammeln Sterne in dieselbe Sammlung und haben eigene Rekorde.
 
-- **Notenflug:** Eine Note fliegt von rechts nach links über das Notensystem. Tippe ihren Namen, bevor sie den Schlüssel erreicht. Zu spät oder falsch kostet einen von drei Sternen, nach dem dritten Fehler ist das Spiel vorbei. Jedes Level hat 10 Noten und ist etwa 15 % schneller als das vorige; beim Wechsel erscheint kurz „Level 3!“. Eine richtige Note bringt Level × Anzahl der gewählten Noten als Punkte (C, D, E auf Level 1 = 3 Punkte, auf Level 3 = 9 Punkte), jedes geschaffte Level einen neuen Stern (höchstens 3). Nach einer richtigen Antwort leuchtet der Knopf kurz grün, und die nächste Note startet sofort; nur nach einem Fehler oder „zu spät“ hält das Spiel an und zeigt Lösung und Hinweis. Ältere Notenflug-Rekorde mit der früheren Wertung bleiben stehen.
+- **Notenflug:** Eine Note fliegt von rechts nach links über das Notensystem auf die Rakete zu. Tippe ihren Namen, bevor sie den Schlüssel erreicht.
+  - **Herzen:** Der Flug beginnt mit drei Herzen. Zu spät oder falsch kostet ein Herz, nach dem dritten Fehler ist der Flug vorbei.
+  - **Wellen:** Jede Welle hat 10 Noten und ist etwa 15 % schneller als die vorige; der Balken „Flugzeit“ zeigt, wie viel Zeit für die Note bleibt, die Unterzeile die Welle und die Stufe (gemütlich, flott, schnell, rasant). Jede geschaffte Welle bringt einen Stern, höchstens 3.
+  - **Combo:** Jede richtige Note in Folge erhöht die Combo um eins, bis x5; ein Fehler oder „zu spät“ setzt sie auf x1 zurück.
+  - **Punkte** pro richtiger Note: Welle × Anzahl der gewählten Noten × Combo × Tempo, gerundet, mindestens 1 (C, D, E in Welle 1 mit Combo x2 bei Tempo 1 = 6 Punkte).
+  - **Tempo:** Der Knopf „Tempo“ wechselt zwischen 0,5-, 0,75-, 1- und 1,25-fach. Bei 0,5 hat jede Note doppelt so viel Zeit, gibt aber nur halb so viele Punkte. Das neue Tempo gilt ab der nächsten Note und bleibt gespeichert.
+  - **Pause:** Der Knopf „Pause“, die Leertaste oder Escape halten den Flug an und legen eine Fläche über die Bühne; derselbe Knopf spielt weiter. Ein verborgener Tab startet die Pause von selbst.
+  - Der Klavier-Lotse unter den Tasten (ab 768 Pixel offen, sonst zugeklappt) antwortet auch per Klaviertaste; der Merkspruch für Linien und Zwischenräume folgt dem Schlüssel der fliegenden Note. Nach einer richtigen Antwort leuchtet der Knopf kurz grün, und die nächste Note startet sofort; nur nach einem Fehler oder „zu spät“ hält das Spiel an und zeigt Lösung und Hinweis. Ältere Notenflug-Rekorde mit der früheren Wertung bleiben stehen.
   Tastatur: Bei **Einfach** antwortet der Buchstabe mit dem Stammton, Shift + Buchstabe mit der Note mit ♯ (Shift + F = Fis) oder, wenn es zum Buchstaben nur eine ♭-Note gibt, mit dieser (Shift + E = Es). Deutsch ist die Taste B die Note B (h mit ♭), H die Note H; englisch ist B die Note B und Shift + B die Note B♭. Bei **Genau** zählt ein Buchstabe sofort, wenn er unter den Antworten eindeutig ist; sonst wartet das Spiel bis zu 1 Sekunde auf die Oktavziffer: deutsch die Hochzahl (1 für c¹, 0 oder keine für c) oder derselbe Buchstabe noch einmal für die große Oktave (dd für D), englisch die Ziffer (4 für C4). Die Zeile unter den Knöpfen zeigt den getippten Anfang, zum Beispiel „d…“.
 - **Klaviertasten:** Unter der Note liegt eine Klaviatur von der tiefsten bis zur höchsten gewählten Note (bei Lücken mit allen weißen Tasten dazwischen), mindestens aber 7 weiße Tasten. Das mittlere C ist markiert. Tippe die passende Taste. Alle Tasten, auch die schwarzen, spielen beim Drücken ihren Ton. 10 Aufgaben, Wertung wie bei „Welche Note ist das?“.
 - **Note setzen:** Das Spiel nennt einen Notennamen, zum Beispiel `f1`. Tippe im Notensystem auf die passende Linie oder den Zwischenraum, verschiebe die Note bei Bedarf mit ▲ und ▼ und tippe auf **Prüfen**. Sind Vorzeichen-Noten gewählt, wählst du mit drei Knöpfen dazu ohne Vorzeichen, Kreuz oder B. 10 Aufgaben, Wertung wie bei „Welche Note ist das?“.
@@ -126,7 +152,7 @@ Alle Mini-Spiele nutzen die Einstellungen (Schlüssel, Notenauswahl, Merktiere, 
   - **Schwer:** 10 Paare im Raster 4 × 5. Bis 16 Züge gibt es 3 Sterne, bis 22 Züge 2, sonst 1. Punkte: 15 pro Paar plus 20 pro Stern (höchstens 210). Braucht 10 verschiedene Namenskarten (im Modus Einfach 10 verschiedene Buchstaben oder Vorzeichen-Namen); sonst ist der Knopf ausgegraut, und ein Hinweis bittet, in den Einstellungen mehr Noten zu wählen.
   - Beide Stufen teilen sich eine Rekordliste; schwere Rekorde tragen das Schild „Schwer“.
 - **Hör-Spiel:** Zum Einstieg erklingt c¹ als Bezugston, dann ein Ton, und du wählst aus drei gezeigten Noten die passende; „Nochmal hören“ spielt den Ton erneut. Der Ton entsteht im Browser, ohne Audiodateien. 10 Aufgaben, Wertung wie bei „Welche Note ist das?“.
-- **Spiel eine Melodie:** Im Notensystem stehen 4 bis 7 Noten, darunter liegt die Klaviatur. Die orange hinterlegte Note ist dran; spiele die Noten der Reihe nach, jede Taste klingt. Eine falsche Taste leuchtet kurz rot, die Note bleibt markiert, und ab dem zweiten Fehler an derselben Note nennt der Fuchs die Lage. Nach der letzten Note erklingt die ganze Melodie, die Noten leuchten dabei nacheinander auf, danach steht der Name des Lieds da. Die Melodien sind Anfänge bekannter Kinderlieder (Hänschen klein, Alle meine Entchen, Mary Had a Little Lamb, Morgen kommt der Weihnachtsmann, Freude, schöner Götterfunken, Bruder Jakob), verschoben in die Notenauswahl; passt keins, spielt das Kind eine zufällige Folge aus kleinen Schritten. Für die Taste gilt der Antwortmodus wie bei „Klaviertasten“. 5 Melodien pro Runde; bis 2 falsche Tasten gibt es 3 Sterne, bis 5 falsche Tasten 2, sonst 1. Punkte: 10 pro Melodie plus 10 pro Stern.
+- **Spiel eine Melodie:** Im Notensystem stehen 4 bis 7 Noten, darunter liegt die Klaviatur. Die orange hinterlegte Note ist dran; spiele die Noten der Reihe nach, jede Taste klingt. Eine falsche Taste leuchtet kurz rot, die Note bleibt markiert, und ab dem zweiten Fehler an derselben Note nennt der Begleiter die Lage. **Tipp** lässt die gesuchte Taste 1,5 Sekunden gelb mit ihrem Namen leuchten; ein Tipp zählt für die Sterne wie ein Fehler, und die Note zählt nicht mehr als beim ersten Versuch richtig. **Neu starten** beginnt die Melodie von vorn, Fehler und Tipps bleiben gezählt. **Melodie anhören** spielt die ganze Melodie vor. Nach der letzten Note erklingt die ganze Melodie, die Noten leuchten dabei nacheinander auf, danach steht der Name des Lieds da. Die Melodien sind Anfänge bekannter Kinderlieder (Hänschen klein, Alle meine Entchen, Mary Had a Little Lamb, Morgen kommt der Weihnachtsmann, Freude, schöner Götterfunken, Bruder Jakob), verschoben in die Notenauswahl; passt keins, spielt das Kind eine zufällige Folge aus kleinen Schritten. Für die Taste gilt der Antwortmodus wie bei „Klaviertasten“. 5 Melodien pro Runde; bis 2 Fehler (falsche Tasten und Tipps zusammen) gibt es 3 Sterne, bis 5 Fehler 2, sonst 1. Das Ergebnis zeigt falsche Tasten und Tipps getrennt. Punkte: 10 pro Melodie plus 10 pro Stern.
 - **Tägliche Notenreise:** Jeden Tag drei Etappen aus „Welche Note ist das?“, „Klaviertasten“, „Note setzen“ und „Spiel eine Melodie“; Auswahl und Reihenfolge wechseln täglich. Die ersten drei Spiele haben je 5 Aufgaben, die Melodie-Etappe hat 2 Melodien, und dort zählt jede Note, die beim ersten Versuch stimmt, als richtig. Jede Etappe wird bis zur letzten Aufgabe gespielt. Wer alle drei Etappen gespielt hat, hat die Reise geschafft und bekommt den Durchschnitt der Etappensterne und einmal pro Tag einen Extrastern; die Startseite zeigt, ob die Reise heute geschafft ist und wie viele Tage in Folge.
 
 ## Fehler üben
@@ -136,6 +162,19 @@ Nach einer Runde mit Fehlern in „Welche Note ist das?“, „Klaviertasten“,
 In allen Spielen bleiben Notensystem und Antworten nach der Antwort an ihrer Stelle; die Rückmeldung des Tiers steht darunter, und Linie oder Zwischenraum der Note sind hinterlegt.
 
 Ältere Spielstände bleiben erhalten: Sterne und Rekorde zählen weiter, Häschen und Kätzchen bleiben, fehlende Tiere ergänzt das Spiel einmalig nach Sternzahl.
+
+## Design and new rules (English summary)
+
+The English version of the app (Note Zoo) works the same way. In short:
+
+- **Design:** All pages follow the layout of the Stitch designs: cream background, white cards, tactile buttons, and orange accents. Anything that would reveal the answer appears only after the child answers.
+- **Top menu:** The companion opens the zoo, followed by the tabs **Zoo**, **Journey**, and **My Animals**, a gold bar toward the next animal, the stars collected, the notes read, and a gear for **Settings**. During a round, the menu first asks “End this round?”; that round’s points don’t count.
+- **Notes read:** The note counter adds up every correctly read note across all games.
+- **Sound on/off:** The speaker on the home page and **Sound on** in Note Flight turn all sounds on or off. The choice is saved.
+- **Note Flight:** Three **hearts**; a mistake or a late answer costs one. Each wave has 10 notes and is about 15% faster. The **combo** rises with every correct note in a row, up to x5, and resets after a mistake. Points per note: wave × number of selected notes × combo × speed, rounded, at least 1. **Speed** cycles through 0.5×, 0.75×, 1×, and 1.25×. **Pause** (button, Space, or Escape) stops the flight; a hidden tab pauses it automatically.
+- **Melody:** **Hint** lights up the right key for 1.5 seconds. A hint counts like a mistake for the stars, and the result shows mistakes and hints separately. **Restart** keeps mistakes and hints.
+- **Results:** A window over the game shows the stars, up to four value cards (for example time, mistakes, combo, or hints), progress toward the next animal, and the buttons **Play again**, **Practice mistakes**, **Zoo**, and **Scores**.
+- **Settings:** **Reset** asks first, then restores clefs, notes, answers, and animal helpers. The bar at the bottom counts the selected notes and starts the main game with **Save & play**.
 
 ## Dateien
 
