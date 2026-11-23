@@ -32,7 +32,8 @@
   var timer = null;
   var raf = null;
   var letzteZeit = null;
-  var pausiert = false;
+  var pausiert = false;       // Flug steht, weil der Tab versteckt oder die Runde angehalten ist
+  var angehalten = false;     // angehalten über pausiere(true), zum Beispiel Fenster „Runde beenden?“
   var wartetAufWeiter = null; // Funktion, die nach „Weiter“ läuft
   var tasten = null;          // Buchstabentasten (Modi.hilfen.tastenEingabe)
 
@@ -73,6 +74,7 @@
     flug = null;
     zustand = null;
     pausiert = false;
+    angehalten = false;
     wartetAufWeiter = null;
     if (tasten) tasten.zuruecksetzen();
   }
@@ -133,7 +135,7 @@
     umgebung.zeigeTier($("flug-tier"), "normal");
     $("flug-text").textContent = t("flug.schnell");
     letzteZeit = null;
-    if (!document.hidden) raf = requestAnimationFrame(schritt);
+    if (!document.hidden && !angehalten) raf = requestAnimationFrame(schritt);
     else pausiert = true;
   }
 
@@ -154,20 +156,31 @@
     raf = requestAnimationFrame(schritt);
   }
 
-  /* Pause bei verstecktem Tab, danach geht der Flug an derselben Stelle weiter. */
-  document.addEventListener("visibilitychange", function () {
-    if (document.hidden) {
-      if (raf) cancelAnimationFrame(raf);
-      raf = null;
-      pausiert = true;
-    } else if (pausiert) {
-      pausiert = false;
-      if (aktiv() && zustand && zustand.offen) {
-        letzteZeit = null;
-        raf = requestAnimationFrame(schritt);
-      }
+  /* Pause bei verstecktem Tab oder über pausiere(true), danach geht der Flug an derselben Stelle weiter. */
+  function halteAn() {
+    if (raf) cancelAnimationFrame(raf);
+    raf = null;
+    pausiert = true;
+  }
+
+  function laufWeiter() {
+    if (!pausiert || document.hidden || angehalten) return;
+    pausiert = false;
+    if (aktiv() && zustand && zustand.offen) {
+      letzteZeit = null;
+      raf = requestAnimationFrame(schritt);
     }
+  }
+
+  document.addEventListener("visibilitychange", function () {
+    if (document.hidden) halteAn(); else laufWeiter();
   });
+
+  /** Hält den Flug an (true) oder lässt ihn weiterlaufen (false), siehe js/modi.js. */
+  function pausiere(an) {
+    angehalten = !!an;
+    if (angehalten) halteAn(); else laufWeiter();
+  }
 
   function beantworte(name) {
     if (!aktiv() || !zustand || !zustand.offen) return; // eine Antwort pro Note
@@ -277,6 +290,7 @@
     symbol: "🚀",
     ansicht: "notenflug",
     starte: starte,
-    stoppe: stoppe
+    stoppe: stoppe,
+    pausiere: pausiere
   });
 })();

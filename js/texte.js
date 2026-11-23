@@ -374,7 +374,27 @@
       "einst.info": "Die Einstellungen gelten für alle Spiele und werden auf diesem Gerät gespeichert.",
       "einst.zuWenigEinfach": "Bei „Einfach“ zählen nur die Buchstaben: {c1} und {c2} sind beide ein C. Kreuze Noten mit mindestens {n} verschiedenen Buchstaben an (Fis oder Es zählen extra), sonst können die Spiele nicht starten.",
       "einst.zuWenigGenau": "Kreuze mindestens {n} verschiedene Noten an, sonst können die Spiele nicht starten.",
-      "einst.gewaehlt": " Gewählt: {liste}."
+      "einst.gewaehlt": " Gewählt: {liste}.",
+      /* Bausteine Version 3: oberes Menü, Rückfrage, Ton, Fußzeile */
+      "menue.aria": "Hauptmenü",
+      "menue.zoo": "Zoo",
+      "menue.reise": "Notenreise",
+      "menue.tiere": "Meine Tiere",
+      "menue.sterneAria": { eins: "1 Stern gesammelt", viele: "{n} Sterne gesammelt" },
+      "menue.notenAria": { eins: "1 Note richtig gelesen", viele: "{n} Noten richtig gelesen" },
+      "frage.ja": "Ja",
+      "frage.nein": "Abbrechen",
+      "frage.rundeTitel": "Runde beenden?",
+      "frage.rundeText": "Die Punkte dieser Runde werden nicht gezählt.",
+      "frage.rundeJa": "Ja, beenden",
+      "frage.rundeNein": "Weiterspielen",
+      "ton.an": "Ton an",
+      "ton.aus": "Ton aus",
+      "ton.ausschalten": "Töne ausschalten",
+      "ton.einschalten": "Töne einschalten",
+      "ton.einschaltenKnopf": "Ton einschalten",
+      "hoeren.tonAus": "🔇 Der Ton ist ausgeschaltet. Für das Hör-Spiel brauchst du ihn.",
+      "fuss.zeile": "Mit Liebe gemacht für kleine Notenleser · Version {version}"
     },
 
     en: {
@@ -709,7 +729,27 @@
       "einst.info": "These settings work for all games and are saved on this device.",
       "einst.zuWenigEinfach": "In “Easy,” only the letters count: {c1} and {c2} are both C. Check notes with at least {n} different letters (F♯ or E♭ count as extra letters), or the games can’t start.",
       "einst.zuWenigGenau": "Check at least {n} different notes, or the games can’t start.",
-      "einst.gewaehlt": " Selected: {liste}."
+      "einst.gewaehlt": " Selected: {liste}.",
+      /* Building blocks version 3: top menu, confirmation, sound, footer */
+      "menue.aria": "Main menu",
+      "menue.zoo": "Zoo",
+      "menue.reise": "Journey",
+      "menue.tiere": "My Animals",
+      "menue.sterneAria": { eins: "1 star collected", viele: "{n} stars collected" },
+      "menue.notenAria": { eins: "1 note read correctly", viele: "{n} notes read correctly" },
+      "frage.ja": "Yes",
+      "frage.nein": "Cancel",
+      "frage.rundeTitel": "End this round?",
+      "frage.rundeText": "The points from this round won’t count.",
+      "frage.rundeJa": "Yes, end it",
+      "frage.rundeNein": "Keep playing",
+      "ton.an": "Sound on",
+      "ton.aus": "Sound off",
+      "ton.ausschalten": "Turn sound off",
+      "ton.einschalten": "Turn sound on",
+      "ton.einschaltenKnopf": "Turn sound on",
+      "hoeren.tonAus": "🔇 The sound is off. You need it for the listening game.",
+      "fuss.zeile": "Made with love for young music readers · Version {version}"
     }
   };
 

@@ -14,6 +14,7 @@
   var T = window.Texte;
   var t = T.t;
   var SPEICHER_SCHLUESSEL = "welche-note-ist-das.spielstand.v1";
+  var VERSION = "3";         // steht in der Fußzeile
 
   var speicherVerfuegbar = true;
   var stand = ladeSpielstand();
@@ -24,6 +25,7 @@
   var offenerRekord = null;  // { modus, nr } für die Namensabfrage
   var rekordModus = null;    // Modus des offenen Rekords (Text der Namensabfrage)
   var uebungsNoten = [];     // Noten für „Fehler üben“ aus der letzten Runde
+  var ansichtJetzt = "";     // Name der sichtbaren Ansicht
 
   function $(id) { return document.getElementById(id); }
 
@@ -132,6 +134,8 @@
     Array.prototype.forEach.call(document.querySelectorAll("section.ansicht"), function (s) {
       s.hidden = s.id !== "ansicht-" + name;
     });
+    ansichtJetzt = name;
+    window.Bausteine.menue.zeige(name);
     window.scrollTo(0, 0);
     var titel = $("titel-" + name) || document.querySelector("#ansicht-" + name + " h1");
     if (titel) titel.focus({ preventScroll: true });
@@ -409,6 +413,7 @@
           stand.tier = tier.id;
           speichereSpielstand();
           zeigeTiere(tier.id);
+          window.Bausteine.menue.aktualisiere();
         });
         li.appendChild(b);
       } else {
@@ -808,6 +813,41 @@
   $("knopf-ueben").addEventListener("click", starteUebung);
   Array.prototype.forEach.call(document.querySelectorAll(".knopf-zurueck"), function (b) {
     b.addEventListener("click", zurStartseite);
+  });
+
+  /* ---------- Oberes Menü, Ton und Fußzeile (js/bausteine.js) ---------- */
+
+  /** Ziel eines Reiters, einer Pille oder des Profilknopfs. Eine laufende Runde wird verworfen. */
+  function navigiere(ziel) {
+    stoppeModus();
+    if (ziel === "reise") {
+      var reise = window.Modi.liste().filter(function (m) { return m.id === "notenreise"; })[0];
+      if (reise && auswahlReicht(auswahl())) { starteModus(reise); return; }
+      ziel = "start";
+    }
+    if (ziel === "tiere") zeigeTiere();
+    else if (ziel === "einstellungen") zeigeEinstellungen();
+    else zurStartseite();
+  }
+
+  window.Bausteine.menue.baue({
+    version: VERSION,
+    stand: function () { return stand; },
+    navigiere: navigiere,
+    // Runde läuft: ein Modus ist noch nicht verbucht, oder „Fehler üben“ ist nicht am Ende.
+    // In der Übersicht der Notenreise erst, wenn eine Etappe geschafft ist.
+    rundeLaeuft: function () {
+      if (ansichtJetzt === "reise") return laufendeNr !== -1 && !!document.querySelector("#reise-etappen .ist-geschafft");
+      return laufendeNr !== -1 || (ansichtJetzt === "ueben" && $("ueben-ende").hidden);
+    },
+    reiseAktiv: function () { return laufendeNr !== -1 && !!aktiverModus && aktiverModus.id === "notenreise"; },
+    pausiere: function (an) { if (laufendeNr !== -1 && aktiverModus && aktiverModus.pausiere) aktiverModus.pausiere(an); }
+  });
+
+  window.Klang.setzeAn(stand.ton);
+  window.Klang.beiWechsel(function (an) {
+    stand.ton = an;
+    speichereSpielstand();
   });
 
   window.Symbole.setzeEin(document); // gezeichnete Symbole in Menü- und Ergebnisknöpfen

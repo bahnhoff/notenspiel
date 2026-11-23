@@ -689,3 +689,23 @@ Der Benutzer will den Aufbau aller Seiten übernehmen und fehlende Funktionen na
 - Notenflug: `neuerFlug(anzahl, tempo)`; das Flug-Objekt hat `tempo`, `combo` (1 bis 5, für die Pille), `serie` und `besteCombo`. `flugAntwort` liefert zusätzlich `punkte` (Punkte dieser Note) und `combo`. Weitere Funktionen: `flugzeit(level, tempo)`, `flugTrefferPunkte`, `flugTempo` (prüft den Wert), `naechstesFlugTempo`, `flugTempoStufe` (liefert `flug.stufe.gemuetlich` und so weiter, Texte sind schon da). Die Combo zählt ab sofort im Notenflug, das Tempo bleibt bis Paket 7 bei 1.
 - Melodie: Wertungsobjekt `neueMelodieRunde()` mit `melodieTaste`, `melodieTipp`, `melodieNeustart`, `melodieNaechste`, `melodieFehlerHier`. `js/modi/melodie.js` nutzt es schon. Abweichung: Richtige Noten beim ersten Versuch zählen erst am Ende einer Melodie, damit „Neu starten“ nichts doppelt zählt; eine Note mit Fehler oder Tipp zählt auch nach einem Neustart nicht als „beim ersten Versuch“.
 - `formatiereDauer(ms)`.
+
+### Paket 2: Bausteine Menü und Ton (`js/bausteine.js`)
+
+Alle Bausteine stehen in `js/bausteine.js` als `window.Bausteine`, die Gebrauchsanweisung steht im Kopfkommentar der Datei. Kurz:
+
+- Oberes Menü `#oberes-menue` und Fußzeile `#fusszeile` stehen fest in `index.html`. `js/app.js` ruft in `zeigeAnsicht` `Bausteine.menue.zeige(name)` auf; das blendet Menü und Fußzeile je Ansicht ein und setzt den aktiven Reiter. Neue Seiten brauchen dafür nichts zu tun. Eigene feste Leisten unter dem Menü (zum Beispiel die Kopfzeile der Einstellungen) nutzen `top: var(--menue-hoehe)`.
+- `Bausteine.fortschritt({ wert, max, text, farbe })` und `setzeFortschritt` für Balken (Notenflug, Meine Tiere, Ergebnis).
+- `Bausteine.pille({ symbol, text, art, aria, knopf })` und `setzePille` für alle Zähler-Pillen.
+- `Bausteine.frage({ titel, text, ja, nein }, beiJa, beiNein)` für Rückfragen (auch „Einstellungen zurücksetzen?“).
+- `Bausteine.tonKnopf({ mitText })` für Lautsprecher-Knöpfe (Startseite ohne Text, Notenflug mit „Ton an“). Der Zustand liegt in `Klang.an()` und wird als `stand.ton` gespeichert.
+- Neue Modus-Funktion `pausiere(an)` (js/modi.js): Der Notenflug hält damit während der Rückfrage an. Paket 7 kann die Pause-Taste darauf aufbauen.
+- Symbole neu in `js/symbole.js`: zahnrad, rakete, pokal, orden, ton-an, ton-aus, stern, note, herz, herz-leer, flamme, pfote. `Tiere.kopf(art)` zeichnet nur den Kopf eines Tiers.
+
+Abweichungen und Ergänzungen:
+
+- Unter 800 px Breite entfallen Reiter und Zoo-Knopf (der Plan nennt nur 360 px), weil die Reiter auf schmalen Tablets nicht in eine Zeile passen.
+- Die Noten-Pille ist kein Knopf, weil der Plan ihr kein Ziel gibt.
+- Die Fußzeile erscheint schon jetzt auf allen Seiten außer dem Notenflug, auch auf der Startseite; Paket 4 muss sie dort nicht mehr einbauen. Die Fußzeile steht auch bei kurzen Seiten am unteren Rand.
+- „Runde beenden?“ hat eine zweite Zeile „Die Punkte dieser Runde werden nicht gezählt.“ (englisch „The points from this round won’t count.“). „Weiterspielen“ ist die Haupttaste mit dem Fokus, Escape zählt als „Weiterspielen“. In der Übersicht der Notenreise fragt das Menü erst, wenn eine Etappe geschafft ist. „Fehler üben“ fragt ebenfalls.
+- Im Hör-Spiel erscheint bei ausgeschaltetem Ton schon jetzt der Hinweis mit dem Knopf „Ton einschalten“, damit das Spiel nicht stumm bleibt.

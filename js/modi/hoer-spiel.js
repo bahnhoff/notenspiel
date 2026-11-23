@@ -88,6 +88,22 @@
   function zeigeTonHinweis(mitTon) {
     var box = $("hoeren-hinweis");
     clearTimeout(hinweisTimer);
+    // Ton in der App ausgeschaltet (Klang.setzeAn): Hinweis mit Knopf „Ton einschalten“
+    if (!Ton.an()) {
+      box.textContent = T.t("hoeren.tonAus") + " ";
+      var k = document.createElement("button");
+      k.type = "button";
+      k.className = "knopf knopf-klein knopf-neben knopf-ton-ein";
+      k.textContent = T.t("ton.einschaltenKnopf");
+      k.addEventListener("click", function () {
+        Ton.setzeAn(true);
+        zeigeTonHinweis(Ton.bereit());
+        spieleAufgabe();
+      });
+      box.appendChild(k);
+      box.hidden = false;
+      return;
+    }
     if (!mitTon) {
       box.textContent = T.t("hoeren.keinTon");
       box.hidden = false;

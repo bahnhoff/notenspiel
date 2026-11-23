@@ -23,6 +23,9 @@
  *     ansicht: "notenflug",   // zeigt <section id="ansicht-notenflug" class="ansicht"> in index.html
  *     starte: function (umgebung) { … },  // neue Runde beginnen
  *     stoppe: function () { … },          // optional: Runde verwerfen (Timer, Animation, Ton)
+ *     pausiere: function (an) { … },      // optional: Runde anhalten (true) und weiterlaufen
+ *                             // lassen (false), solange das Fenster „Runde beenden?“ offen
+ *                             // ist (js/bausteine.js). Nur Spiele mit Zeitdruck (Notenflug).
  *     reise: true,            // optional: taugt als Etappe der Täglichen Notenreise,
  *                             // beachtet dann umgebung.aufgaben
  *     kachelInfo: function (status) { … }, // optional: kurzer Statustext unter dem Namen

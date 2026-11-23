@@ -11,6 +11,9 @@
  * note-setzen, noten-memory, hoer-spiel, notenreise, melodie)
  * die Menüknöpfe tiere, rekorde, einstellungen, ueben und lautsprecher für
  * „Nochmal hören“ im Hör-Spiel (dessen Bezugston-Knopf nutzt klaviertasten).
+ * Bausteine aus Plan Version 3 (js/bausteine.js): zahnrad (Profilknopf),
+ * rakete, pokal, orden, ton-an und ton-aus (Lautsprecher mit und ohne
+ * Wellen), stern, note, herz, herz-leer und flamme (Pillen), pfote (Fußzeile).
  * Alle Symbole liegen in einem Feld von 48 × 48 und sind nur Schmuck
  * (aria-hidden), der Text daneben trägt die Bedeutung.
  */
@@ -173,6 +176,59 @@
     einstellungen: function () {
       return form(zahnrad(24, 24, 15, 20.5, 8), F.sand) + kreis(24, 24, 6.5, F.creme);
     },
+
+    // Bausteine Version 3: Zahnrad für den Profilknopf, helle Fläche auf dunklem Grund
+    zahnrad: function () {
+      return form(zahnrad(24, 24, 14, 19.5, 8), F.creme) + kreis(24, 24, 6, F.orange);
+    },
+
+    // Rakete und Pokal unter eigenem Namen (Kopfkarten, Rekorde)
+    rakete: function () { return ZEICHNUNGEN.notenflug(); },
+    pokal: function () { return ZEICHNUNGEN.rekorde(); },
+
+    // Orden: Band mit runder Medaille und Stern
+    orden: function () {
+      return form("M15 4 L22 4 L27 20 L20 22 Z", F.blau) + form("M33 4 L26 4 L21 20 L28 22 Z", F.rot) +
+        kreis(24, 31, 12.5, F.gelb) + kreis(24, 31, 8.5, F.gold, true) +
+        form("M24 25 L25.8 29 L30 29.4 L26.8 32.2 L27.8 36.4 L24 34.2 L20.2 36.4 L21.2 32.2 L18 29.4 L22.2 29 Z", F.creme);
+    },
+
+    // Ton an: Lautsprecher mit Wellen; Ton aus: Lautsprecher mit Kreuz
+    "ton-an": function () {
+      return form("M6 19 L13 19 L23 10 L23 38 L13 29 L6 29 Z", F.orange) +
+        linie("M29 18 C32 21 32 27 29 30", 2.8) + linie("M34 13 C40 19 40 29 34 35", 2.8);
+    },
+    "ton-aus": function () {
+      return form("M6 19 L13 19 L23 10 L23 38 L13 29 L6 29 Z", F.sand) +
+        linie("M30 18 L42 30 M42 18 L30 30", 3);
+    },
+
+    // Stern für Pillen und Sterne-Zähler
+    stern: function () {
+      return form("M24 4 L29.6 16.6 L43 17.8 L32.8 26.8 L35.8 40 L24 33 L12.2 40 L15.2 26.8 L5 17.8 L18.4 16.6 Z", F.gelb);
+    },
+
+    // Achtelnote für die Noten-Pille
+    note: function () {
+      return linie("M27 34 L27 7 C30 12 37 13 38 20", 3.2) + oval(20.5, 35, 8, 6, F.orange, -20);
+    },
+
+    // Herz (volles Leben) und leeres Herz (graue Kontur)
+    herz: function () {
+      return form("M24 41 C14 33 6 26 6 17 C6 11 10.5 7 16 7 C19.6 7 22.4 9 24 12 C25.6 9 28.4 7 32 7 C37.5 7 42 11 42 17 C42 26 34 33 24 41 Z", F.rot);
+    },
+    "herz-leer": function () {
+      return '<path d="M24 41 C14 33 6 26 6 17 C6 11 10.5 7 16 7 C19.6 7 22.4 9 24 12 C25.6 9 28.4 7 32 7 C37.5 7 42 11 42 17 C42 26 34 33 24 41 Z" fill="none" stroke="#a8998b" stroke-width="3" stroke-linejoin="round"/>';
+    },
+
+    // Flamme für die Combo-Pille
+    flamme: function () {
+      return form("M24 44 C14 44 9 37 9 30 C9 21 16 17 17 8 C22 12 25 17 24 23 C27 21 28.5 18 29 15 C35 20 39 25 39 31 C39 38 33 44 24 44 Z", F.orange) +
+        form("M24 44 C19.5 44 17 40.5 17 37 C17 32 21 30 22 25 C26 28 31 32 31 37 C31 41 28 44 24 44 Z", F.gelb);
+    },
+
+    // Pfote für die Fußzeile
+    pfote: function () { return ZEICHNUNGEN.tiere(); },
 
     // Fehler üben: Zielscheibe mit Pfeil
     ueben: function () {

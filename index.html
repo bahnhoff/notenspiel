@@ -11,6 +11,29 @@
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+  <!-- Oberes Menü (js/bausteine.js): auf allen Ansichten außer Startseite und Ergebnis, bleibt beim Scrollen oben -->
+  <header class="oberes-menue" id="oberes-menue" hidden>
+    <nav class="menue-innen" aria-label="Hauptmenü" data-text-aria-label="menue.aria">
+      <button type="button" class="menue-heim" id="menue-heim" data-ziel="start" aria-label="Zurück zur Startseite" data-text-aria-label="zurueck.aria"></button>
+      <div class="menue-reiter">
+        <button type="button" class="menue-reiter-knopf" data-ziel="start" data-text="menue.zoo">Zoo</button>
+        <button type="button" class="menue-reiter-knopf" data-ziel="reise" data-text="menue.reise">Notenreise</button>
+        <button type="button" class="menue-reiter-knopf" data-ziel="tiere" data-text="menue.tiere">Meine Tiere</button>
+      </div>
+      <!-- Fortschritt zum nächsten Sammeltier -->
+      <div class="fortschritt menue-fortschritt" id="menue-fortschritt" role="progressbar"><span class="fortschritt-fuellung"></span></div>
+      <button type="button" class="pille pille-gold menue-pille" id="menue-sterne" data-ziel="tiere">
+        <span class="pille-symbol" data-symbol="stern" aria-hidden="true"></span><span class="pille-zahl"></span>
+      </button>
+      <span class="pille menue-pille" id="menue-noten" role="img">
+        <span class="pille-symbol" data-symbol="note" aria-hidden="true"></span><span class="pille-zahl"></span>
+      </span>
+      <button type="button" class="menue-profil" id="menue-profil" data-ziel="einstellungen" aria-label="Einstellungen" data-text-aria-label="start.einstellungen">
+        <span class="menue-profil-symbol" data-symbol="zahnrad" aria-hidden="true"></span>
+      </button>
+    </nav>
+  </header>
+
   <main id="app">
 
     <!-- Startseite -->
@@ -508,6 +531,24 @@
 
   </main>
 
+  <!-- Fußzeile (js/bausteine.js): überall außer im Notenflug -->
+  <footer class="fusszeile" id="fusszeile">
+    <div class="fuss-innen">
+      <span class="fuss-name"><span class="fuss-symbol" data-symbol="pfote" aria-hidden="true"></span><span data-text="meta.titel">Notenzoo</span></span>
+      <span class="fuss-zeile" id="fuss-zeile"></span>
+    </div>
+  </footer>
+
+  <!-- Rückfrage (Bausteine.frage), zum Beispiel „Runde beenden?“ -->
+  <dialog class="rueckfrage" id="rueckfrage" aria-labelledby="rueckfrage-titel">
+    <h2 id="rueckfrage-titel"></h2>
+    <p id="rueckfrage-text"></p>
+    <div class="rueckfrage-knoepfe">
+      <button type="button" class="knopf knopf-neben" id="rueckfrage-ja"></button>
+      <button type="button" class="knopf knopf-haupt" id="rueckfrage-nein"></button>
+    </div>
+  </dialog>
+
   <script src="js/texte.js"></script>
   <script src="js/noten-konfiguration.js"></script>
   <script src="js/noten.js"></script>
@@ -517,6 +558,7 @@
   <script src="js/klang.js"></script>
   <script src="js/klaviatur.js"></script>
   <script src="js/symbole.js"></script>
+  <script src="js/bausteine.js"></script>
   <script src="js/modi.js"></script>
   <!-- Spielmodi: je Modus eine Datei, vor js/app.js -->
   <script src="js/modi/klassisch.js"></script>

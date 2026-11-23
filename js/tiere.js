@@ -619,5 +619,10 @@
       "</svg>";
   }
 
-  root.Tiere = { zeichne: zeichne, name: name, hat: function (art) { return !!ARTEN[art]; } };
+  /** Nur der Kopf (Ausschnitt der ganzen Zeichnung), für runde Knöpfe und die Sprechblase „Zeile“. */
+  function kopf(art, stimmung, beschriftung) {
+    return zeichne(art, stimmung, beschriftung).replace('viewBox="0 0 120 120"', 'viewBox="16 8 88 88"').replace('class="tier-svg', 'class="tier-svg tier-kopf');
+  }
+
+  root.Tiere = { zeichne: zeichne, kopf: kopf, name: name, hat: function (art) { return !!ARTEN[art]; } };
 })(this);

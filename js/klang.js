@@ -6,6 +6,11 @@
  * AudioContext startet erst nach einem Tipp: vor `spiele` immer `bereit()`
  * aus einer Nutzeraktion heraus aufrufen. Ohne Web Audio liefert `bereit()`
  * false, und `spiele` tut nichts.
+ *
+ * Ton an oder aus (Plan Version 3): Alle Töne laufen über `spiele`. Bei
+ * `setzeAn(false)` tut `spiele` nichts und liefert false. `an()` fragt den
+ * Zustand ab, `beiWechsel(fn)` meldet jeden Wechsel mit fn(an) (die App
+ * speichert ihn als `stand.ton`, Knöpfe aus js/bausteine.js zeigen ihn).
  */
 (function (root) {
   "use strict";
@@ -14,6 +19,8 @@
     var Kontext = window.AudioContext || window.webkitAudioContext;
     var ctx = null;
     var aktive = [];
+    var tonAn = true;
+    var beobachter = [];
     // Teiltöne: [Vielfaches, Lautstärke]. Höhere klingen schneller ab.
     var TEILTOENE = [[1, 1], [2, 0.5], [3, 0.28], [4, 0.16], [5, 0.1], [6, 0.06], [7, 0.035]];
 
@@ -58,7 +65,7 @@
 
     /** Spielt einen Ton (Tonhöhe als MIDI-Nummer, siehe Noten.halbton). */
     function spiele(halbton) {
-      if (!ctx) return false;
+      if (!ctx || !tonAn) return false;
       stoppeAlle();
       var f = frequenz(halbton);
       var start = ctx.currentTime + 0.03;
@@ -107,8 +114,20 @@
       if (ctx && ctx.state === "running" && ctx.suspend) leise(ctx.suspend());
     }
 
+    /** Schaltet alle Töne an oder aus und meldet den Wechsel. */
+    function setzeAn(an) {
+      an = !!an;
+      if (an === tonAn) return;
+      tonAn = an;
+      if (!an) stoppeAlle();
+      beobachter.forEach(function (fn) { fn(an); });
+    }
+
     return {
       verfuegbar: !!Kontext,
+      an: function () { return tonAn; },
+      setzeAn: setzeAn,
+      beiWechsel: function (fn) { beobachter.push(fn); },
       bereit: bereit,
       spiele: spiele,
       stoppeAlle: stoppeAlle,

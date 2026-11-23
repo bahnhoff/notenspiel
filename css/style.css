@@ -1860,3 +1860,230 @@ h1:focus { outline: none; }
 .melodie-knoepfe { display: flex; flex-wrap: wrap; gap: 10px; }
 .melodie-knoepfe .knopf { flex: 1 1 140px; }
 .melodie-knoepfe .knopf-neben { border-radius: 999px; box-shadow: var(--schatten-taste); }
+
+/* ==========================================================================
+   Gemeinsame Bausteine Version 3 (js/bausteine.js, Plan docs/plan-v3.md)
+   ========================================================================== */
+
+:root {
+  --menue-hoehe: 68px;           /* Höhe des oberen Menüs, für eigene feste Leisten darunter */
+  --gruen-balken: #16a34a;
+  --blau-balken: #0ea5e9;
+  --pille-hoehe: 36px;
+}
+
+/* ---------- Fortschrittsbalken ---------- */
+
+.fortschritt {
+  position: relative;
+  height: 12px;
+  border-radius: 999px;
+  background: #efe6d8;
+  overflow: hidden;
+}
+.fortschritt-fuellung {
+  display: block;
+  height: 100%;
+  width: 0;
+  border-radius: 999px;
+  background: var(--gruen-balken);
+  transition: width 0.3s ease;
+}
+.fortschritt-blau .fortschritt-fuellung { background: linear-gradient(90deg, #38bdf8, var(--blau-balken)); }
+.fortschritt-orange .fortschritt-fuellung { background: var(--akzent); }
+
+/* ---------- Pillen für Zähler ---------- */
+
+.pille {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: var(--pille-hoehe);
+  padding: 0 14px 0 10px;
+  border-radius: 999px;
+  border: 2px solid var(--rand-weich);
+  background: var(--karte);
+  color: var(--text);
+  box-shadow: 0 3px 0 #e2d6c4;
+  font: inherit;
+  font-weight: 800;
+  font-size: 1rem;
+  line-height: 1;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.pille-symbol { display: inline-block; line-height: 0; }
+.pille-symbol .symbol-svg { width: 22px; height: 22px; }
+.pille-gold { background: #fff8e1; border-color: #f8e3a3; box-shadow: 0 3px 0 #f2c94c; color: #7a4f00; }
+.pille-rosa { background: #fdeeee; border-color: #f7d4d4; box-shadow: 0 3px 0 #efc2c2; }
+.pille-gruen { background: var(--gruen-hell); border-color: #b5dfc2; box-shadow: 0 3px 0 #8cc79e; color: var(--gruen); }
+/* Als Knopf: größere Tippfläche (mindestens 44 px) ohne größere Pille */
+button.pille { position: relative; cursor: pointer; touch-action: manipulation; }
+button.pille::before { content: ""; position: absolute; inset: -6px -3px; }
+button.pille:active { transform: translateY(2px); box-shadow: none; }
+button.pille:focus-visible { outline: 4px solid var(--fokus); outline-offset: 3px; }
+
+/* ---------- Oberes Menü ---------- */
+
+.oberes-menue {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  background: rgba(255, 253, 248, 0.94);
+  border-bottom: 1px solid var(--rand-weich);
+  box-shadow: 0 2px 14px rgba(160, 130, 90, 0.1);
+  padding-top: env(safe-area-inset-top);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+}
+.menue-innen {
+  max-width: 1100px;
+  margin: 0 auto;
+  min-height: var(--menue-hoehe);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px max(12px, env(safe-area-inset-right)) 8px max(12px, env(safe-area-inset-left));
+}
+.menue-heim,
+.menue-profil {
+  flex: 0 0 auto;
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  border-radius: 50%;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.menue-heim {
+  border: 2px solid var(--rand-weich);
+  background: var(--karte);
+  box-shadow: var(--schatten-taste);
+  overflow: hidden;
+}
+.menue-heim .tier-svg { width: 100%; height: 100%; display: block; }
+.oberes-menue.im-spiel .menue-heim { display: none; }
+.menue-profil {
+  border: 2px solid var(--akzent-dunkel);
+  background: var(--akzent-dunkel);
+  box-shadow: 0 3px 0 #8a3510;
+  display: grid;
+  place-items: center;
+}
+.menue-profil-symbol .symbol-svg { width: 28px; height: 28px; }
+.menue-heim:focus-visible, .menue-profil:focus-visible, .menue-reiter-knopf:focus-visible { outline: 4px solid var(--fokus); outline-offset: 3px; }
+.menue-heim:active, .menue-profil:active { transform: translateY(2px); box-shadow: none; }
+
+.menue-reiter { display: flex; gap: 4px; flex: 0 0 auto; }
+.menue-reiter-knopf {
+  font: inherit;
+  font-weight: 700;
+  font-size: 1.05rem;
+  min-height: 44px;
+  padding: 8px 16px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-leise);
+  cursor: pointer;
+  white-space: nowrap;
+  touch-action: manipulation;
+}
+.menue-reiter-knopf:hover { background: #fbefe2; }
+.menue-reiter-knopf[aria-current="page"] { background: var(--akzent); color: #fff; box-shadow: 0 3px 0 var(--akzent-dunkel); }
+
+.menue-fortschritt { flex: 1 1 80px; min-width: 60px; max-width: 220px; margin: 0 auto; }
+.menue-pille { flex: 0 0 auto; }
+
+/* ---------- Fußzeile ---------- */
+
+/* Die Fußzeile steht auch bei kurzen Seiten unten */
+body { display: flex; flex-direction: column; }
+body > main { flex: 1 0 auto; width: 100%; }
+
+.fusszeile {
+  margin-top: 28px;
+  background: #fcefe2;
+  border-top: 1px solid var(--rand-weich);
+  color: var(--text-leise);
+}
+.fuss-innen {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 18px max(16px, env(safe-area-inset-right)) max(18px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px 18px;
+}
+.fuss-name { display: inline-flex; align-items: center; gap: 8px; font-weight: 800; font-size: 1.15rem; color: var(--akzent-dunkel); }
+.fuss-symbol .symbol-svg { width: 26px; height: 26px; }
+.fuss-zeile { font-size: 0.95rem; font-weight: 600; }
+
+/* ---------- Rückfrage ---------- */
+
+.rueckfrage {
+  border: 0;
+  border-radius: 28px;
+  padding: 26px 22px 22px;
+  width: min(420px, calc(100vw - 24px));
+  background: var(--karte);
+  color: var(--text);
+  box-shadow: 0 6px 0 rgba(61, 43, 31, 0.12), 0 20px 50px rgba(61, 43, 31, 0.25);
+  text-align: center;
+}
+.rueckfrage::backdrop { background: rgba(42, 29, 20, 0.45); -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px); }
+.rueckfrage h2 { margin: 0 0 8px; font-size: 1.5rem; font-weight: 800; }
+.rueckfrage p { margin: 0 0 18px; color: var(--text-leise); font-weight: 600; }
+.rueckfrage-knoepfe { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+.rueckfrage-knoepfe .knopf { flex: 1 1 150px; font-size: 1.1rem; min-height: 52px; border-radius: 999px; }
+.rueckfrage-knoepfe .knopf-neben { box-shadow: var(--schatten-taste); }
+
+/* ---------- Ton an oder aus ---------- */
+
+.ton-knopf {
+  font: inherit;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 2px solid var(--rand-weich);
+  background: var(--karte);
+  color: var(--gruen);
+  box-shadow: var(--schatten-taste);
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.ton-knopf.ist-aus { color: var(--text-leise); }
+.ton-symbol { line-height: 0; }
+.ton-symbol .symbol-svg { width: 26px; height: 26px; }
+.ton-knopf:focus-visible { outline: 4px solid var(--fokus); outline-offset: 3px; }
+.ton-knopf:active { transform: translateY(2px); box-shadow: none; }
+.knopf-ton-ein { margin-top: 8px; }
+
+/* ---------- Handy und schmale Tablets ---------- */
+
+/* Unter 800 px: keine Reiter und kein Zoo-Knopf (wie im Entwurf), eine Zeile von 56 px */
+@media (max-width: 799px) {
+  :root { --menue-hoehe: 56px; }
+  .menue-reiter, .menue-heim { display: none; }
+  .menue-innen { padding-top: 6px; padding-bottom: 6px; gap: 8px; }
+  .menue-fortschritt { max-width: none; }
+  .menue-profil { width: 44px; height: 44px; }
+}
+
+@media (max-width: 599px) {
+  :root { --pille-hoehe: 32px; }
+  .pille { padding: 0 10px 0 7px; font-size: 0.95rem; gap: 4px; }
+  .pille-symbol .symbol-svg { width: 19px; height: 19px; }
+  .fusszeile { margin-top: 20px; }
+  .fuss-innen { flex-direction: column; justify-content: center; text-align: center; padding-top: 12px; }
+  .fuss-name { font-size: 1rem; }
+  .fuss-zeile { font-size: 0.85rem; }
+}
