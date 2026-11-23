@@ -752,3 +752,9 @@ Abweichungen:
 - Die Rückmeldung nach einem Fehler ist eine Karte unter den Tasten.
 - Auf dem Handy steht der Pause-Knopf in der Kopfkarte statt bei Merkspruch und Tempo. Die Bühne ist etwa 245 px hoch statt 200 px, und das Notensystem ist höchstens 104 px hoch.
 - Die Ergebnisseite zeigt die Rechnung „Noten × Welle × Tempo“; lange Werte brechen um (Klasse `ergebnis-lang`), damit 360 px nicht seitlich scrollen. Das eigene Ergebnisfenster folgt in Paket 13.
+
+### Korrekturen am Notenflug (nach Paket 7)
+
+- Die Hinweiszeile nennt den gewählten Bereich der Antworten, zum Beispiel „Tippe die Note oder drücke C bis G“ und „Tap a note or press keys C–G“ (`tippWerte` in `Modi.hilfen.tastenEingabe`).
+- Auf dem Handy darf die Sprechzeile in der Bühne zweizeilig werden; die Höhe für zwei Zeilen ist fest reserviert, damit Bühne und Tasten nicht springen. Das Notensystem ist dort jetzt etwa 130 px hoch (vorher höchstens 104 px). Mit 7 Buchstaben (4 + 3) endet die letzte Tastenreihe bei 360 × 740 noch bei etwa 708 px.
+- Klavier-Lotse: Die gelb hinterlegte Taste mit dem Schild „c¹“ ist die feste Markierung des mittleren C aus `js/klaviatur.js` (wie in Klaviertasten und Melodie). Sie steht bei jeder Note an derselben Stelle und verrät die Lösung nicht. Die Lösung nach einem Fehler ist davon deutlich verschieden: grün, mit Häkchen, gestrichelter Rahmen und vollem Namen. Keine Änderung.

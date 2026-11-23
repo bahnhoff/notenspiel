@@ -424,6 +424,7 @@
    *                    beim Warten auf die Ziffer der getippte Anfang
    *   tipp, tippTouch  optional: Textschlüssel des Tipps mit Tastatur (Standard
    *                    „tasten.tipp“) und ohne Tastatur (Standard: kein Tipp)
+   *   tippWerte()      optional: Platzhalter für den Tipp, zum Beispiel { von, bis }
    * Liefert { taste(ev), zuruecksetzen() }. Der Modus ruft taste(ev) im
    * keydown-Handler auf, wenn seine Ansicht sichtbar ist, und zuruecksetzen()
    * bei jeder neuen Aufgabe.
@@ -439,7 +440,7 @@
       var tipp = tastaturGeraet() ? (optionen.tipp || "tasten.tipp") : optionen.tippTouch;
       el.classList.toggle("tippt", !!wartend);
       el.classList.toggle("tasten-tipp-an", !!wartend || !!tipp);
-      el.textContent = wartend ? wartend.text + "…" : (tipp ? t(tipp) : "");
+      el.textContent = wartend ? wartend.text + "…" : (tipp ? t(tipp, optionen.tippWerte ? optionen.tippWerte() : undefined) : "");
     }
 
     function zuruecksetzen() {

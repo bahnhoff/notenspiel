@@ -86,7 +86,12 @@
       beiAntwort: beantworte,
       anzeige: $("flug-tasten"),
       tipp: "flug.tastenTipp",
-      tippTouch: "flug.tastenTippTouch"
+      tippTouch: "flug.tastenTippTouch",
+      // Bereich der Antworten, zum Beispiel „C bis G“ (wie auf der Startseite)
+      tippWerte: function () {
+        var a = umgebung.antworten;
+        return { von: a[0].anzeige, bis: a[a.length - 1].anzeige };
+      }
     });
     if (!sprech) {
       sprech = B.sprechZeile({ tier: u.tier, text: "" });
