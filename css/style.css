@@ -987,7 +987,8 @@ h1:focus { outline: none; }
   margin: 18px 0 4px;
 }
 
-.sterne-gesamt .stern { font-size: 1.8rem; }
+.sterne-gesamt .stern-symbol { display: inline-block; vertical-align: -0.3em; }
+.sterne-gesamt .stern-symbol .symbol-svg { width: 1.6em; height: 1.6em; }
 .sterne-gesamt { font-weight: 800; }
 .sterne-gesamt strong { color: var(--gold); font-size: 1.15em; }
 
@@ -2844,3 +2845,14 @@ body.fenster-offen { overflow: hidden; }
   background: linear-gradient(rgba(255, 250, 246, 0), #fffaf6);
   pointer-events: none;
 }
+
+/* ---------- Meine Tiere: Balken und Spalten wie im Entwurf ---------- */
+
+.ansicht-tiere { max-width: 1240px; }
+.tiere-balken { max-width: 280px; margin: 0 auto 20px; background: #f3ece1; border: 1px solid var(--rand-weich); }
+.ansicht-tiere .tier-liste { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+@media (min-width: 600px) { .ansicht-tiere .tier-liste { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; } }
+@media (min-width: 900px) { .ansicht-tiere .tier-liste { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px; } }
+@media (min-width: 1200px) { .ansicht-tiere .tier-liste { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
+/* Handy: Knopf „Auswählen“ über die volle Kartenbreite, mindestens 48 px hoch */
+.ansicht-tiere .tier-karte .knopf { min-height: 48px; }

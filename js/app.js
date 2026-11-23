@@ -541,12 +541,15 @@
   /* ---------- Meine Tiere ---------- */
 
   function zeigeTiere(fokusTier) {
-    $("tiere-sterne").innerHTML = '<span class="stern stern-voll" aria-hidden="true">★</span> <span></span> <strong>' + stand.sterne + "</strong>";
-    $("tiere-sterne").querySelector("span:not(.stern)").textContent = t("tiere.gesammelt");
+    $("tiere-sterne").innerHTML = '<span class="stern-symbol" aria-hidden="true">' + window.Symbole.zeichne("stern") + '</span> <span></span> <strong>' + stand.sterne + "</strong>";
+    $("tiere-sterne").querySelector("span:not(.stern-symbol)").textContent = t("tiere.gesammelt");
     var naechstes = L.naechstesTier(stand);
     $("tiere-naechstes").textContent = (naechstes
       ? t("tiere.noch", { sterne: sterneText(naechstes.fehlend) })
       : t("tiere.alle")) + t("tiere.entdeckt", { n: stand.entdeckt.length, gesamt: L.TIERE.length });
+    // Balken: gesammelte Sterne seit dem letzten Tier; alle entdeckt = voll
+    window.Bausteine.setzeFortschritt($("tiere-balken"), naechstes ? naechstes.gesammelt : 1, naechstes ? naechstes.schritt : 1,
+      naechstes ? t("tiere.noch", { sterne: sterneText(naechstes.fehlend) }) : t("tiere.alle"));
 
     var liste = $("tier-liste");
     liste.innerHTML = "";

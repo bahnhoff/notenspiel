@@ -821,3 +821,8 @@ Abweichungen:
 - Fehler üben hatte Kopfkarte, farbige Tasten mit Silbe und die Klaviatur als Karte schon. Neu: Das Ende ist das Ergebnisfenster mit „Geübte Noten“ und „Aufgaben“, ohne Sterne, Rekord und Fortschrittskarte (`umgebung.ende` statt `nochmal` und `startseite`, `#ueben-ende` entfällt). „Nochmal spielen“ startet das Spiel der Runde, „Rekorde“ zeigt dessen Abschnitt.
 - Notenreise: Kopfkarte mit Zoo-Pille, Titel mit Kompass und Unterzeile „4 Tage in Folge“ (ohne Serie „3 Etappen · je 5 Aufgaben“). Ergänzt: rechts eine grüne Pille mit den geschafften Etappen („1/3“, Screenreader „1 von 3 Etappen geschafft“). Die Zeile unter der Kopfkarte nennt nur noch den Extrastern, weil die Serie oben steht.
 - Das Ergebnis der Reise heißt „Reise geschafft!“; der Spruch des Begleiters wiederholt das nicht mehr.
+
+### Paket 15: Meine Tiere
+
+- Goldener Balken zum nächsten Tier unter dem Satz „Noch 2 Sterne …“ (höchstens 280 px breit, wie im Entwurf), Screenreader-Text wie der Satz; sind alle Tiere entdeckt, ist er voll.
+- Spalten: 2 (Handy), 3 ab 600 px, 4 ab 900 px, 5 ab 1200 px; die Seite ist dafür bis 1240 px breit. Der Stern vor „Gesammelte Sterne“ ist das gezeichnete Symbol.
