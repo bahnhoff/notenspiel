@@ -728,12 +728,17 @@
         if (modus.kachelInfo) text.appendChild(element("span", "modus-info karte-status"));
         b.appendChild(modusSymbol(modus));
         b.appendChild(text);
+        b.appendChild(element("span", "karte-pfeil", "›")).setAttribute("aria-hidden", "true");
         karten.appendChild(b);
       } else {
-        // Kachel mit großem Symbol und kurzem Namen
+        // Kachel: Symbol im getönten Kästchen links, Name und kurze Unterzeile rechts
         b = element("button", "knopf knopf-neben knopf-modus");
         b.appendChild(modusSymbol(modus));
-        b.appendChild(element("span", "modus-name", modus.name));
+        var kachelText = element("span", "modus-text");
+        kachelText.appendChild(element("span", "modus-name", modus.name));
+        var unter = t("kachel." + modus.id);
+        if (unter !== "kachel." + modus.id) kachelText.appendChild(element("span", "modus-unterzeile", unter));
+        b.appendChild(kachelText);
         if (modus.kachelInfo) {
           b.classList.add("knopf-modus-info");
           b.appendChild(element("span", "modus-info"));
@@ -747,6 +752,8 @@
     karten.hidden = karten.children.length === 0;
     box.hidden = box.children.length === 0;
     $("titel-modi").hidden = box.hidden;
+    $("start-modi-anzahl").textContent = t("start.anzahlSpiele", { n: box.children.length });
+    $("start-modi-anzahl").hidden = box.hidden;
   }
 
   /** Kurze Zusatztexte auf Kacheln und Karten, zum Beispiel „Heute geschafft ✓“. */

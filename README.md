@@ -78,7 +78,9 @@ Auf Englisch gelten eigene Merktiere, passend zu den englischen Namen (`merktier
 
 ## Startseite
 
-Ganz oben steht der Hauptknopf **Noten üben** für „Welche Note ist das?“ mit einer Zeile wie „10 Aufgaben · C bis G“; der Bereich kommt aus der Notenauswahl. Direkt darunter steht die **Tägliche Notenreise** als eigene Karte mit „3 Spiele à 5 Aufgaben“ und dem Stand (heute geschafft, Tage in Folge). Die übrigen Spiele folgen als Kacheln unter „Mehr Spiele“.
+Ganz oben steht der Hauptknopf **Noten üben** für „Welche Note ist das?“ mit einer Zeile wie „10 Aufgaben · C bis G“; der Bereich kommt aus der Notenauswahl. Direkt darunter steht die **Tägliche Notenreise** als eigene Karte mit „3 Spiele à 5 Aufgaben“ und dem Stand (heute geschafft, Tage in Folge). Die übrigen Spiele folgen als Kacheln unter „Mehr Spiele“: Symbol im getönten Kästchen, Name und eine kurze Unterzeile (Texte `kachel.<Kennung>` in `js/texte.js`; auf schmalen Handys ausgeblendet). Alle Elemente stehen in einer gemeinsamen Spalte von höchstens 440 Pixel Breite. Die Gestaltung folgt dem Stitch-Entwurf „Main Screen (Faithful Redesign)“.
+
+Schrift ist Nunito Sans (SIL Open Font License), lokal als `fonts/nunito-sans-latin.woff2`, damit die Seite keine fremden Server anfragt.
 
 Spielkacheln, Notenreise und die Knöpfe **Meine Tiere**, **Rekorde**, **Einstellungen**, **Rekord speichern** und **Fehler üben** zeigen gezeichnete Symbole statt Emojis, im Stil der Tiere: warme Farben und dunkelbraune, runde Umrisse. So sehen sie auf jedem Gerät gleich aus. Die Zeichnungen stehen in `js/symbole.js`, je eine pro Kennung des Spiels oder Knopfs.
 

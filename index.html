@@ -31,7 +31,10 @@
       <!-- Modi mit startKarte: true (Tägliche Notenreise) als eigene Karte direkt unter dem Hauptknopf -->
       <div class="start-karten" id="start-karten" hidden></div>
       <!-- Weitere Spielmodi aus js/modi/ erscheinen hier automatisch als Kacheln. -->
-      <h2 class="start-modi-titel" id="titel-modi" data-text="start.mehrSpiele">Mehr Spiele</h2>
+      <div class="start-modi-kopf">
+        <h2 class="start-modi-titel" id="titel-modi" data-text="start.mehrSpiele">Mehr Spiele</h2>
+        <span class="start-modi-anzahl" id="start-modi-anzahl" hidden></span>
+      </div>
       <div class="start-modi" id="start-modi" role="group" aria-labelledby="titel-modi" hidden></div>
       <div class="start-menue">
         <button type="button" class="knopf knopf-neben" id="knopf-tiere">
