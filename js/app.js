@@ -435,7 +435,10 @@
     window.Modi.liste().forEach(function (modus) {
       var abschnitt = element("section", "rekord-abschnitt");
       var titelId = "rekorde-" + modus.id;
-      var h2 = element("h2", "rekord-modus", modus.name);
+      // Überschrift mit dem gezeichneten Symbol des Spiels im getönten Kästchen (wie auf der Startseite)
+      var h2 = element("h2", "rekord-modus");
+      h2.appendChild(modusSymbol(modus));
+      h2.appendChild(element("span", "rekord-modus-name", modus.name));
       h2.id = titelId;
       abschnitt.setAttribute("aria-labelledby", titelId);
       abschnitt.appendChild(h2);

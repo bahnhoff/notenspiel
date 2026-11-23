@@ -1044,9 +1044,27 @@ h1:focus { outline: none; }
 .rekord-abschnitt + .rekord-abschnitt { margin-top: 26px; }
 
 .rekord-modus {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   margin: 18px 0 0;
   font-size: 1.3rem;
+  font-weight: 800;
 }
+
+.rekord-modus .modus-symbol {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 12px;
+  background: #fff1e8;
+  border: 2px solid #fbdcc9;
+  font-size: 1.5rem;
+}
+.rekord-abschnitt:nth-child(even) .rekord-modus .modus-symbol { background: #fff6d6; border-color: #f8e3a3; }
+.rekord-modus .modus-symbol .symbol-svg { width: 1.8rem; height: 1.8rem; }
 
 .rekord-liste {
   list-style: none;
@@ -1064,14 +1082,14 @@ h1:focus { outline: none; }
   align-items: center;
   gap: 2px 10px;
   background: var(--karte);
-  border: 2px solid var(--rand);
-  border-radius: var(--radius);
+  border: 2px solid var(--rand-weich);
+  border-radius: 20px;
   padding: 12px 16px;
-  box-shadow: var(--schatten);
+  box-shadow: var(--schatten-taste);
   font-size: 1.15rem;
 }
 
-.rekord-platz { grid-area: platz; font-weight: 800; font-size: 1.5rem; color: var(--akzent-dunkel); }
+.rekord-platz { grid-area: platz; font-weight: 800; font-size: 1.7rem; color: var(--akzent); }
 .rekord-punkte { grid-area: punkte; font-weight: 700; }
 .rekord-sterne { grid-area: sterne; white-space: nowrap; }
 .rekord-datum { grid-area: datum; color: var(--text-leise); font-size: 0.95rem; text-align: right; white-space: nowrap; }
@@ -1094,6 +1112,17 @@ h1:focus { outline: none; }
   color: var(--text-leise);
   font-size: 1.1rem;
   margin: 10px 0 0;
+}
+
+/* Bei den Rekorden: leerer Abschnitt als weiche Karte */
+.rekord-abschnitt .leer-hinweis {
+  padding: 14px 16px;
+  background: var(--karte);
+  border: 2px solid var(--rand-weich);
+  border-radius: 20px;
+  box-shadow: var(--schatten-weich);
+  font-size: 1rem;
+  font-weight: 600;
 }
 
 /* ---------- Notenflug ---------- */
