@@ -1615,6 +1615,37 @@ h1:focus { outline: none; }
 .taste.ist-loesung { outline: 3px dashed var(--gruen); outline-offset: -9px; }
 .taste.ist-falsch { background: var(--rot-hell); color: var(--rot); border: 4px dashed var(--rot); }
 .klaviatur.gesperrt .taste { cursor: default; }
+/* Namensschild der Taste nach der Antwort (grün, deutlich anders als die orange Markierung des mittleren C) */
+.taste.ist-ziel { background: var(--gruen-hell); color: var(--gruen); box-shadow: inset 0 0 0 3px var(--gruen); }
+.taste.ist-richtig .taste-name, .taste.ist-loesung .taste-name, .taste.ist-ziel .taste-name {
+  color: #fff; background: var(--gruen); border-radius: 999px; padding: 1px 0.4em; font-size: 0.95em;
+}
+
+/* Klaviertasten wie im Entwurf: eine Spalte, Begleiter mit Aufgabe oben rechts, Rückmeldung unter der Klaviatur */
+.klavier-inhalt { display: flex; flex-direction: column; max-width: 900px; width: 100%; margin: 0 auto; }
+.klavier-frage { display: flex; align-items: center; gap: 10px; margin: 2px 0 10px; }
+.klavier-frage .tier-klein { width: 56px; flex-basis: 56px; }
+.klavier-frage-blase { margin: 0; font-size: 1.05rem; }
+.rueckmeldung-karte {
+  margin-top: 14px;
+  background: var(--karte);
+  border: 2px solid var(--rand-weich);
+  border-radius: 24px;
+  padding: 8px 12px;
+  box-shadow: var(--schatten-weich);
+}
+.rueckmeldung-karte .sprechblase { border: 0; box-shadow: none; padding: 4px; }
+.rueckmeldung-karte .sprechblase::before, .rueckmeldung-karte .sprechblase::after { display: none; }
+.rueckmeldung-karte .sprechblase p { min-height: 0; }
+.rueckmeldung-karte .knopf-weiter { margin-top: 10px; width: 100%; }
+@media (min-width: 700px) {
+  /* Die Aufgabe ragt nur in den oberen Rand der Bühne, nie über das Notensystem */
+  .klavier-frage { position: relative; z-index: 2; justify-content: flex-end; margin: 0 -8px -34px 0; }
+  .klavier-frage .tier-klein { width: 78px; flex-basis: 78px; }
+  .klavier-frage-blase { flex: 0 1 300px; padding: 14px 18px; font-size: 1.15rem; }
+  .klavier-buehne { padding-top: 44px; }
+  .klavier-rueckmeldung { margin: 18px 12px 0; }
+}
 
 /* ---------- Note setzen ---------- */
 

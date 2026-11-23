@@ -245,24 +245,24 @@
         </div>
       </header>
 
-      <div class="runde-inhalt">
-        <div class="runde-noten">
-          <div class="notensystem" id="klavier-notensystem"></div>
-          <div class="klaviatur" id="klaviatur" role="group" aria-label="Klaviatur" data-text-aria-label="klavier.aria"></div>
+      <!-- Wie im Entwurf eine Spalte: Begleiter mit der kurzen Aufgabe oben rechts, Bühne, Klaviatur, Rückmeldung darunter -->
+      <div class="klavier-inhalt">
+        <div class="klavier-frage">
+          <div class="tier-klein" id="klavier-tier"></div>
+          <p class="sprechblase klavier-frage-blase" id="klavier-frage-text"></p>
         </div>
-        <div class="runde-antworten">
-          <div class="tier-zeile">
-            <div class="tier-klein" id="klavier-tier"></div>
-            <div class="sprechblase">
-              <div aria-live="polite">
-                <div class="merkhilfe" id="klavier-merkhilfe" hidden>
-                  <div class="merkhilfe-bild" id="klavier-merkhilfe-bild"></div>
-                  <p class="merkhilfe-text" id="klavier-merkhilfe-text"></p>
-                </div>
-                <p id="klavier-text"></p>
+        <div class="notensystem klavier-buehne" id="klavier-notensystem"></div>
+        <div class="klaviatur" id="klaviatur" role="group" aria-label="Klaviatur" data-text-aria-label="klavier.aria"></div>
+        <div class="rueckmeldung-karte klavier-rueckmeldung" id="klavier-rueckmeldung" hidden>
+          <div class="sprechblase">
+            <div aria-live="polite">
+              <div class="merkhilfe" id="klavier-merkhilfe" hidden>
+                <div class="merkhilfe-bild" id="klavier-merkhilfe-bild"></div>
+                <p class="merkhilfe-text" id="klavier-merkhilfe-text"></p>
               </div>
-              <button type="button" class="knopf knopf-haupt knopf-weiter" id="klavier-weiter" hidden data-text="runde.weiter">Weiter</button>
+              <p id="klavier-text"></p>
             </div>
+            <button type="button" class="knopf knopf-haupt knopf-weiter" id="klavier-weiter" hidden data-text="runde.weiter">Weiter</button>
           </div>
         </div>
       </div>

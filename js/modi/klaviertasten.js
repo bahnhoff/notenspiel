@@ -9,6 +9,10 @@
  * Jede Taste spielt beim Drücken ihren Ton (js/klang.js). Die Klaviatur selbst
  * baut js/klaviatur.js (auch für „Fehler üben“).
  * Im einfachen Antwortmodus zählt jede Taste mit dem richtigen Buchstaben.
+ * Aufbau wie im Entwurf: Begleiter mit der kurzen Aufgabe oben rechts über der
+ * Bühne, darunter die Klaviatur mit zwei Zusatztasten unter der tiefsten Note.
+ * Die Zieltaste leuchtet erst nach der Antwort mit Namensschild auf; Merkhilfe,
+ * Rückmeldung und „Weiter“ stehen als Karte unter der Klaviatur.
  * 10 Aufgaben, Wertung wie im klassischen Spiel (js/spiel-logik.js).
  * Nutzt die Ansicht #ansicht-klavier aus index.html.
  */
@@ -37,11 +41,11 @@
     umgebung = u;
     runde = L.neueRunde(u.noten, { vorrang: u.schwierig, aufgaben: u.aufgaben });
     letzteTaste = -1;
-    klaviatur = window.Klaviatur.baue($("klaviatur"), u.namen, beantworte);
+    klaviatur = window.Klaviatur.baue($("klaviatur"), u.namen, beantworte, { unten: 2 });
     u.zeigeTier($("klavier-tier"), "normal");
+    $("klavier-frage-text").textContent = T.t(klaviatur.mitSchwarz ? "klavier.start" : "klavier.startWeiss");
     u.zeigeAnsicht();
     zeigeAufgabe();
-    $("klavier-text").textContent = T.t(klaviatur.mitSchwarz ? "klavier.start" : "klavier.startWeiss");
   }
 
   function stoppe() {
@@ -64,6 +68,7 @@
     system.classList.remove("ist-falsch", "ist-richtig");
     $("klavier-weiter").hidden = true;
     $("klavier-merkhilfe").hidden = true;
+    $("klavier-rueckmeldung").hidden = true;
     klaviatur.zuruecksetzen();
     var tasten = klaviatur.tasten;
     var fokus = document.activeElement;
@@ -89,6 +94,7 @@
     system.classList.add(a.richtig ? "ist-richtig" : "ist-falsch");
     H.zeigeMerkhilfe(umgebung, a.note, "klavier-merkhilfe");
     $("klavier-text").textContent = (a.richtig ? "✓ " : "✗ ") + a.nachricht;
+    $("klavier-rueckmeldung").hidden = false;
     umgebung.zeigeTier($("klavier-tier"), a.richtig ? "froh" : "oje");
 
     if (a.richtig) {
@@ -109,7 +115,6 @@
       H.klassischesEnde(umgebung, r);
       return;
     }
-    $("klavier-text").textContent = T.t("runde.undDiese");
     umgebung.zeigeTier($("klavier-tier"), "normal");
     zeigeAufgabe();
   }
@@ -122,6 +127,13 @@
     var taste = window.Noten.tasteZuBuchstabe(ev.key);
     if (!taste) return;
     var treffer = klaviatur.weisseMit(taste);
+    // Gibt es den Buchstaben mehrmals (Zusatztasten), zählen nur Tasten aus der Notenauswahl.
+    if (treffer.length > 1) {
+      var gewaehlt = {};
+      umgebung.namen.forEach(function (n) { gewaehlt[n.name] = true; });
+      var drin = treffer.filter(function (nr) { return gewaehlt[klaviatur.tasten[nr].name]; });
+      if (drin.length === 1 || (drin.length > 1 && umgebung.antwortmodus === "einfach")) treffer = drin;
+    }
     // Im einfachen Modus zählt jede Taste mit dem Buchstaben, dann reicht die erste.
     if (treffer.length === 1 || (treffer.length > 1 && umgebung.antwortmodus === "einfach")) {
       ev.preventDefault();

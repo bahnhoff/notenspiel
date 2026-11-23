@@ -1,7 +1,7 @@
 /*
  * Gemeinsame Klaviatur für „Klaviertasten“, „Spiel eine Melodie“ und „Fehler üben“.
  *
- *   var k = Klaviatur.baue(box, namen, beiTipp);
+ *   var k = Klaviatur.baue(box, namen, beiTipp, { unten: 2 });
  *
  * Baut in `box` (Element mit der Klasse `klaviatur`) die Tasten von der
  * tiefsten bis zur höchsten Note aus `namen` (umgebung.namen), ohne Lücken,
@@ -9,7 +9,9 @@
  * auch die schwarzen, und spielen beim Drücken ihren Ton (js/klang.js).
  * Für eine schwarze Taste zählt die Tonhöhe: fis¹ und ges¹ sind dieselbe
  * Taste. Das mittlere C ist markiert. `beiTipp(nr)` bekommt die Nummer der
- * Taste in `k.tasten`.
+ * Taste in `k.tasten`. Mit `optionen.unten` kommen so viele weiße Tasten unter
+ * der tiefsten Note dazu (Klaviertasten: 2, wie im Entwurf), nachdem die
+ * Mindestzahl von 7 weißen Tasten oben aufgefüllt ist.
  *
  * Rückgabe:
  *   tasten            alle Tasten { art, el, toene, halbton, buchstabe, name, anzeige }
@@ -72,7 +74,7 @@
 
   var MINDEST_WEISSE = 7;
 
-  function baue(box, namen, beiTipp) {
+  function baue(box, namen, beiTipp, optionen) {
     var N = root.Noten;
     var L = root.SpielLogik;
     var tasten = [], weisse = [];
@@ -87,6 +89,7 @@
       // Mindestens 7 weiße Tasten (eine ganze Oktave), auch bei kleiner Notenauswahl.
       // Fehlende Tasten kommen oben dazu: aus c¹ bis g¹ wird c¹ bis h¹.
       while (hoch - tief + 1 < MINDEST_WEISSE) hoch++;
+      tief = Math.max(0, tief - ((optionen && optionen.unten) || 0));
       for (var s = tief; s <= hoch; s++) {
         var ton = N.ton(s, 0);
         var weiss = { art: "weiss", toene: [ton], halbton: ton.halbton, buchstabe: ton.buchstabe, name: ton.name, anzeige: ton.anzeige, schwarz: null };
@@ -127,7 +130,7 @@
       zuruecksetzen: function () {
         box.classList.remove("gesperrt");
         tasten.forEach(function (t) {
-          t.el.classList.remove("ist-richtig", "ist-falsch", "ist-loesung");
+          t.el.classList.remove("ist-richtig", "ist-falsch", "ist-loesung", "ist-ziel");
           t.el.setAttribute("aria-disabled", "false");
           t.el.querySelector(".taste-marke").textContent = "";
           t.el.querySelector(".taste-name").textContent = "";
@@ -154,7 +157,7 @@
             beschrifte(t, "ist-richtig", "✓", ton.anzeige);
           } else if (t.halbton === a.note.halbton) {
             // Genau die gezeigte Note: bei falscher Antwort als Lösung, sonst nur beschriftet.
-            beschrifte(t, a.richtig ? "" : "ist-loesung", a.richtig ? "" : "✓", a.note.anzeige);
+            beschrifte(t, a.richtig ? "ist-ziel" : "ist-loesung", a.richtig ? "" : "✓", a.note.anzeige);
           } else if (i === nr) {
             beschrifte(t, "ist-falsch", "✗", ton.anzeige);
           }

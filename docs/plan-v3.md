@@ -758,3 +758,10 @@ Abweichungen:
 - Die Hinweiszeile nennt den gewählten Bereich der Antworten, zum Beispiel „Tippe die Note oder drücke C bis G“ und „Tap a note or press keys C–G“ (`tippWerte` in `Modi.hilfen.tastenEingabe`).
 - Auf dem Handy darf die Sprechzeile in der Bühne zweizeilig werden; die Höhe für zwei Zeilen ist fest reserviert, damit Bühne und Tasten nicht springen. Das Notensystem ist dort jetzt etwa 130 px hoch (vorher höchstens 104 px). Mit 7 Buchstaben (4 + 3) endet die letzte Tastenreihe bei 360 × 740 noch bei etwa 708 px.
 - Klavier-Lotse: Die gelb hinterlegte Taste mit dem Schild „c¹“ ist die feste Markierung des mittleren C aus `js/klaviatur.js` (wie in Klaviertasten und Melodie). Sie steht bei jeder Note an derselben Stelle und verrät die Lösung nicht. Die Lösung nach einem Fehler ist davon deutlich verschieden: grün, mit Häkchen, gestrichelter Rahmen und vollem Namen. Keine Änderung.
+
+### Paket 8: Klaviertasten
+
+- Eine Spalte wie im Entwurf (höchstens 900 px breit): Begleiter mit der kurzen Aufgabe, Bühne, Klaviatur, darunter die Rückmeldung als Karte (Merkhilfe, Text, „Weiter“, Klasse `rueckmeldung-karte`), die nur nach einer Antwort erscheint. Ab 700 px steht der Begleiter oben rechts und ragt nur in den oberen Rand der Bühne, damit er nie eine hohe Note verdeckt; auf dem Handy steht er als Zeile über der Bühne. Der Begleiter zeigt nach der Antwort sein Gesicht (froh oder oje), der Text der Aufgabe bleibt.
+- Die Überschrift war schon die Frage („Welche Taste ist das?“, „Which key is it?“).
+- Zusatztasten: `Klaviatur.baue(box, namen, beiTipp, { unten: 2 })` legt zwei weiße Tasten unter die tiefste Note, nachdem die Mindestzahl von 7 oben aufgefüllt ist (c¹ bis g¹ ergibt a bis h¹, 9 weiße Tasten). Der Entwurf zeigt drei Tasten darunter (g bis h¹); der Plan nennt zwei, umgesetzt sind zwei. Gibt es einen Buchstaben auf der Tastatur dadurch zweimal, zählt die Taste aus der Notenauswahl.
+- Nach der Antwort trägt die gesuchte Taste ein grünes Namensschild, auch bei richtiger Antwort in einer anderen Oktave (Klasse `ist-ziel`). Das gilt in allen Klaviaturen; die orange Markierung des mittleren C bleibt davon verschieden.
