@@ -709,3 +709,15 @@ Abweichungen und Ergänzungen:
 - Die Fußzeile erscheint schon jetzt auf allen Seiten außer dem Notenflug, auch auf der Startseite; Paket 4 muss sie dort nicht mehr einbauen. Die Fußzeile steht auch bei kurzen Seiten am unteren Rand.
 - „Runde beenden?“ hat eine zweite Zeile „Die Punkte dieser Runde werden nicht gezählt.“ (englisch „The points from this round won’t count.“). „Weiterspielen“ ist die Haupttaste mit dem Fokus, Escape zählt als „Weiterspielen“. In der Übersicht der Notenreise fragt das Menü erst, wenn eine Etappe geschafft ist. „Fehler üben“ fragt ebenfalls.
 - Im Hör-Spiel erscheint bei ausgeschaltetem Ton schon jetzt der Hinweis mit dem Knopf „Ton einschalten“, damit das Spiel nicht stumm bleibt.
+
+### Paket 3: Bausteine Spielseiten
+
+- Kopfkarte: Alle acht Spielansichten nutzen das Muster `<header class="runde-kopf kopfkarte">` mit Zurück-Pille (`.knopf-zurueck`, Text „Zoo“), `.runde-titel` (darin `.runde-titel-zeile` mit `h1` und `.runde-symbol[data-symbol=…]`, darunter die Aufgabennummer) und rechts den Pillen (`.pille.pille-gold.sterne-anzeige`, `.pille.punkte-anzeige`). Das genaue HTML steht im Kopfkommentar von `js/bausteine.js`. Neue Spielseiten kopieren es; `.runde-titel-unten` stellt den Titel auf dem Handy unter die Pillen.
+- Sprechblase: Größe „Karte“ ist die bestehende `.tier-zeile` mit großem Begleiter. Größe „Zeile“ ist `Bausteine.sprechZeile({ tier, text })` mit `setzeSprechZeile(z, tier, text)`, Ausgabe „Füchschen sagt: …“ (Text `begleiter.sagt`); ohne Tier gilt der Fuchs.
+- Buchstabentasten: `Modi.antwortKnoepfe` setzt `data-stamm` (c bis h) für die Farbe und zeigt bei reinen Stammtönen die Silbe darunter (Text `antwort.silben`, englisch mit „Sol“). Tasten mit Oktave oder Vorzeichen bleiben ohne Silbe.
+
+Abweichungen:
+
+- Ab 700 px steht der Titel auf allen Spielseiten links neben der Zurück-Pille (wie im Notenflug-Entwurf), nicht mittig.
+- Die Punkte-Pille hat kein Symbol; die Sterne-Pille behält die drei ★-Zeichen.
+- Die Stammfarben sind für ausreichenden Kontrast dunkler als im Entwurf. G hat einen hellgoldenen Hintergrund, weil die gelbe Schrift auf Weiß zu schwach ist.

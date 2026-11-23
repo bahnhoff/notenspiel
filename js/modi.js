@@ -193,6 +193,10 @@
    * untereinander. Vorzeichen-Noten einer Oktave stehen in einer eigenen Reihe
    * darüber (fis¹ über f¹), bei Platzkonflikt (dis¹ und des¹) Kreuz und B
    * getrennt. `beiKlick(name)` wird beim Antippen aufgerufen.
+   * Jede Taste trägt `data-stamm` (c bis h) für die feste Farbe des Stammtons
+   * (CSS-Variablen --farbe-c … --farbe-h). Im einfachen Modus steht unter
+   * Stammtönen die Silbe (Do, Re, Mi …, Texte "antwort.silben"); Vorzeichen-
+   * Tasten und der genaue Modus zeigen keine Silbe.
    */
   function antwortKnoepfe(box, antworten, beiKlick) {
     box.innerHTML = "";
@@ -229,8 +233,18 @@
         b.dataset.name = a.name;
         b.dataset.anzeige = a.anzeige || a.name;
         if (!einfach) b.style.gridColumn = String(root.Noten.BUCHSTABEN.indexOf(a.buchstabe) + 1);
+        // Farbe des Stammtons (CSS-Variable je data-stamm) und im einfachen Modus die Silbe darunter
+        b.dataset.stamm = a.buchstabe;
         b.innerHTML = '<span class="antwort-name"></span><span class="antwort-marke" aria-hidden="true"></span>';
         b.querySelector(".antwort-name").textContent = b.dataset.anzeige;
+        var silbe = a.oktave === null && !a.vorzeichen ? root.Texte.liste("antwort.silben")[root.Noten.BUCHSTABEN.indexOf(a.buchstabe)] : "";
+        if (silbe) {
+          var sp = document.createElement("span");
+          sp.className = "antwort-silbe";
+          sp.setAttribute("aria-hidden", "true");
+          sp.textContent = silbe;
+          b.appendChild(sp);
+        }
         b.setAttribute("aria-label", b.dataset.anzeige);
         b.addEventListener("click", function () { beiKlick(a.name); });
         reihe.appendChild(b);

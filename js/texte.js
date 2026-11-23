@@ -62,6 +62,7 @@
       "zurueck.aria": "Zurück zur Startseite",
       "zurueck.startseite": "Startseite",
       "zurueck.text": "Zurück",
+      "zurueck.zoo": "Zoo",
       "runde.aufgabe": "Aufgabe {nr} von {anzahl}",
       "runde.weiter": "Weiter",
       "runde.antwortenAria": "Antworten",
@@ -394,7 +395,9 @@
       "ton.einschalten": "Töne einschalten",
       "ton.einschaltenKnopf": "Ton einschalten",
       "hoeren.tonAus": "🔇 Der Ton ist ausgeschaltet. Für das Hör-Spiel brauchst du ihn.",
-      "fuss.zeile": "Mit Liebe gemacht für kleine Notenleser · Version {version}"
+      "fuss.zeile": "Mit Liebe gemacht für kleine Notenleser · Version {version}",
+      "antwort.silben": ["Do", "Re", "Mi", "Fa", "So", "La", "Ti"],
+      "begleiter.sagt": "{name} sagt:"
     },
 
     en: {
@@ -434,6 +437,7 @@
       "zurueck.aria": "Back to the start page",
       "zurueck.startseite": "Home",
       "zurueck.text": "Back",
+      "zurueck.zoo": "Zoo",
       "runde.aufgabe": "Question {nr} of {anzahl}",
       "runde.weiter": "Next",
       "runde.antwortenAria": "Answers",
@@ -749,7 +753,9 @@
       "ton.einschalten": "Turn sound on",
       "ton.einschaltenKnopf": "Turn sound on",
       "hoeren.tonAus": "🔇 The sound is off. You need it for the listening game.",
-      "fuss.zeile": "Made with love for young music readers · Version {version}"
+      "fuss.zeile": "Made with love for young music readers · Version {version}",
+      "antwort.silben": ["Do", "Re", "Mi", "Fa", "Sol", "La", "Ti"],
+      "begleiter.sagt": "{name} says:"
     }
   };
 

@@ -32,6 +32,27 @@
  *   alle Ton-Knöpfe folgen dem Zustand von selbst. mitText zeigt „Ton an“ oder
  *   „Ton aus“ neben dem Symbol (Notenflug), sonst nur das Symbol (Startseite).
  *
+ * Sprechblase des Begleiters, zwei Größen
+ *   „Karte“: die vorhandene Struktur .tier-zeile > .tier-klein + .sprechblase
+ *   in index.html (ganzes Tier, Merkhilfe, Hinweis, „Weiter“), unverändert.
+ *   „Zeile“: var z = Bausteine.sprechZeile({ tier: "fuchs", text: "…" });
+ *   Bausteine.setzeSprechZeile(z, tier, text)
+ *   Runder Tierkopf (32 px) und ein einzeiliger Text mit dem Namen davor:
+ *   „Füchschen sagt: …“ (Texte "begleiter.sagt"). Zu lange Texte enden mit
+ *   Auslassungspunkten; der volle Text steht im title. Für die Bühne im
+ *   Notenflug und die Steuerzeile im Hör-Spiel.
+ *
+ * Kopfkarte der Spiele (nur HTML und CSS, kein JavaScript)
+ *   <header class="runde-kopf kopfkarte"> mit .knopf-zurueck („← Zoo“),
+ *   .runde-titel (.aufgabe-nr und .runde-titel-zeile mit h1 und
+ *   .runde-symbol[data-symbol]) und .runde-status mit Pillen (Klasse `pille`).
+ *   Mit .runde-titel-unten steht die Unterzeile unter der Überschrift
+ *   (Notenflug, Melodie). Handy: zwei Zeilen, Zurück und Pillen oben.
+ *
+ * Buchstabentasten mit Farbe und Silbe: Modi.hilfen.antwortKnoepfe in
+ * js/modi.js setzt data-stamm und die Silbe, die Farben stehen in
+ * css/style.css (--farbe-c … --farbe-h).
+ *
  * Oberes Menü und Fußzeile
  *   Bausteine.menue.baue({ stand, navigiere, rundeLaeuft, pausiere, reiseAktiv })
  *   Bausteine.menue.zeige(ansicht)    nach jedem Ansichtswechsel (js/app.js)
@@ -172,6 +193,33 @@
 
   root.Klang.beiWechsel(function () { tonKnoepfe.forEach(zeigeTon); });
 
+  /* ---------- Sprechblase „Zeile“ ---------- */
+
+  function sprechZeile(o) {
+    o = o || {};
+    var z = element("div", "sprech-zeile");
+    z.appendChild(element("span", "sprech-zeile-kopf")).setAttribute("aria-hidden", "true");
+    var p = z.appendChild(element("p", "sprech-zeile-text"));
+    p.appendChild(element("strong", "sprech-zeile-name"));
+    p.appendChild(element("span", "sprech-zeile-satz"));
+    setzeSprechZeile(z, o.tier || "fuchs", o.text || "");
+    return z;
+  }
+
+  function setzeSprechZeile(z, tier, text) {
+    tier = tier || "fuchs";
+    var info = root.SpielLogik.tierVon(tier);
+    var name = info ? info.name : "";
+    if (z.dataset.tier !== tier) {
+      z.querySelector(".sprech-zeile-kopf").innerHTML = root.Tiere.kopf(tier, "normal", "");
+      z.dataset.tier = tier;
+    }
+    var sagt = t("begleiter.sagt", { name: name });
+    z.querySelector(".sprech-zeile-name").textContent = sagt + " ";
+    z.querySelector(".sprech-zeile-satz").textContent = text;
+    z.querySelector(".sprech-zeile-text").title = sagt + " " + text;
+  }
+
   /* ---------- Oberes Menü und Fußzeile ---------- */
 
   var menueOptionen = null;
@@ -246,6 +294,8 @@
     setzePille: setzePille,
     frage: frage,
     tonKnopf: tonKnopf,
+    sprechZeile: sprechZeile,
+    setzeSprechZeile: setzeSprechZeile,
     menue: { baue: baue, zeige: zeige, aktualisiere: aktualisiere }
   };
 })(this);

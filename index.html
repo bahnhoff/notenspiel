@@ -75,17 +75,20 @@
 
     <!-- Spielrunde -->
     <section id="ansicht-runde" class="ansicht ansicht-runde" aria-labelledby="titel-runde" hidden>
-      <header class="runde-kopf">
+      <header class="runde-kopf kopfkarte">
         <button type="button" class="knopf knopf-klein knopf-zurueck" aria-label="Zurück zur Startseite" data-text-aria-label="zurueck.aria">
-          <span aria-hidden="true">←</span> <span class="knopf-text" data-text="zurueck.startseite">Startseite</span>
+          <span aria-hidden="true">←</span> <span class="knopf-text" data-text="zurueck.zoo">Zoo</span>
         </button>
         <div class="runde-titel">
           <p class="aufgabe-nr" id="aufgabe-nr"></p>
-          <h1 id="titel-runde" class="frage" tabindex="-1" data-text="modus.klassisch">Welche Note ist das?</h1>
+          <div class="runde-titel-zeile">
+            <h1 id="titel-runde" class="frage" tabindex="-1" data-text="modus.klassisch">Welche Note ist das?</h1>
+            <span class="runde-symbol" data-symbol="klassisch" aria-hidden="true"></span>
+          </div>
         </div>
         <div class="runde-status">
-          <span class="sterne-anzeige" id="sterne-anzeige" role="img"></span>
-          <span class="punkte-anzeige" id="punkte-anzeige"></span>
+          <span class="pille pille-gold sterne-anzeige" id="sterne-anzeige" role="img"></span>
+          <span class="pille punkte-anzeige" id="punkte-anzeige"></span>
         </div>
       </header>
 
@@ -117,17 +120,20 @@
 
     <!-- Notenflug -->
     <section id="ansicht-notenflug" class="ansicht ansicht-runde ansicht-notenflug" aria-labelledby="titel-notenflug" hidden>
-      <header class="runde-kopf">
+      <header class="runde-kopf kopfkarte">
         <button type="button" class="knopf knopf-klein knopf-zurueck" aria-label="Zurück zur Startseite" data-text-aria-label="zurueck.aria">
-          <span aria-hidden="true">←</span> <span class="knopf-text" data-text="zurueck.startseite">Startseite</span>
+          <span aria-hidden="true">←</span> <span class="knopf-text" data-text="zurueck.zoo">Zoo</span>
         </button>
-        <div class="runde-titel">
+        <div class="runde-titel runde-titel-unten">
           <p class="aufgabe-nr" id="flug-level"></p>
-          <h1 id="titel-notenflug" class="frage" tabindex="-1" data-text="modus.notenflug">Notenflug</h1>
+          <div class="runde-titel-zeile">
+            <h1 id="titel-notenflug" class="frage" tabindex="-1" data-text="modus.notenflug">Notenflug</h1>
+            <span class="runde-symbol" data-symbol="notenflug" aria-hidden="true"></span>
+          </div>
         </div>
         <div class="runde-status">
-          <span class="sterne-anzeige" id="flug-sterne" role="img"></span>
-          <span class="punkte-anzeige" id="flug-punkte"></span>
+          <span class="pille pille-gold sterne-anzeige" id="flug-sterne" role="img"></span>
+          <span class="pille punkte-anzeige" id="flug-punkte"></span>
         </div>
       </header>
 
@@ -159,17 +165,20 @@
 
     <!-- Klaviertasten -->
     <section id="ansicht-klavier" class="ansicht ansicht-runde ansicht-klavier" aria-labelledby="titel-klavier" hidden>
-      <header class="runde-kopf">
+      <header class="runde-kopf kopfkarte">
         <button type="button" class="knopf knopf-klein knopf-zurueck" aria-label="Zurück zur Startseite" data-text-aria-label="zurueck.aria">
-          <span aria-hidden="true">←</span> <span class="knopf-text" data-text="zurueck.startseite">Startseite</span>
+          <span aria-hidden="true">←</span> <span class="knopf-text" data-text="zurueck.zoo">Zoo</span>
         </button>
         <div class="runde-titel">
           <p class="aufgabe-nr" id="klavier-aufgabe"></p>
-          <h1 id="titel-klavier" class="frage" tabindex="-1" data-text="klavier.frage">Welche Taste ist das?</h1>
+          <div class="runde-titel-zeile">
+            <h1 id="titel-klavier" class="frage" tabindex="-1" data-text="klavier.frage">Welche Taste ist das?</h1>
+            <span class="runde-symbol" data-symbol="klaviertasten" aria-hidden="true"></span>
+          </div>
         </div>
         <div class="runde-status">
-          <span class="sterne-anzeige" id="klavier-sterne" role="img"></span>
-          <span class="punkte-anzeige" id="klavier-punkte"></span>
+          <span class="pille pille-gold sterne-anzeige" id="klavier-sterne" role="img"></span>
+          <span class="pille punkte-anzeige" id="klavier-punkte"></span>
         </div>
       </header>
 
@@ -198,17 +207,20 @@
 
     <!-- Note setzen -->
     <section id="ansicht-setzen" class="ansicht ansicht-runde ansicht-setzen" aria-labelledby="titel-setzen" hidden>
-      <header class="runde-kopf">
+      <header class="runde-kopf kopfkarte">
         <button type="button" class="knopf knopf-klein knopf-zurueck" aria-label="Zurück zur Startseite" data-text-aria-label="zurueck.aria">
-          <span aria-hidden="true">←</span> <span class="knopf-text" data-text="zurueck.startseite">Startseite</span>
+          <span aria-hidden="true">←</span> <span class="knopf-text" data-text="zurueck.zoo">Zoo</span>
         </button>
         <div class="runde-titel">
           <p class="aufgabe-nr" id="setzen-aufgabe"></p>
-          <h1 id="titel-setzen" class="frage" tabindex="-1"><span data-text="setzen.frage">Setze die Note</span> <span class="setzen-name" id="setzen-name"></span></h1>
+          <div class="runde-titel-zeile">
+            <h1 id="titel-setzen" class="frage" tabindex="-1"><span data-text="setzen.frage">Setze die Note</span> <span class="setzen-name" id="setzen-name"></span></h1>
+            <span class="runde-symbol" data-symbol="note-setzen" aria-hidden="true"></span>
+          </div>
         </div>
         <div class="runde-status">
-          <span class="sterne-anzeige" id="setzen-sterne" role="img"></span>
-          <span class="punkte-anzeige" id="setzen-punkte"></span>
+          <span class="pille pille-gold sterne-anzeige" id="setzen-sterne" role="img"></span>
+          <span class="pille punkte-anzeige" id="setzen-punkte"></span>
         </div>
       </header>
 
@@ -247,16 +259,19 @@
 
     <!-- Noten-Memory -->
     <section id="ansicht-memory" class="ansicht ansicht-memory" aria-labelledby="titel-memory" hidden>
-      <header class="runde-kopf">
+      <header class="runde-kopf kopfkarte">
         <button type="button" class="knopf knopf-klein knopf-zurueck" aria-label="Zurück zur Startseite" data-text-aria-label="zurueck.aria">
-          <span aria-hidden="true">←</span> <span class="knopf-text" data-text="zurueck.startseite">Startseite</span>
+          <span aria-hidden="true">←</span> <span class="knopf-text" data-text="zurueck.zoo">Zoo</span>
         </button>
         <div class="runde-titel">
-          <h1 id="titel-memory" class="frage" tabindex="-1" data-text="modus.noten-memory">Noten-Memory</h1>
+          <div class="runde-titel-zeile">
+            <h1 id="titel-memory" class="frage" tabindex="-1" data-text="modus.noten-memory">Noten-Memory</h1>
+            <span class="runde-symbol" data-symbol="noten-memory" aria-hidden="true"></span>
+          </div>
         </div>
         <div class="runde-status" id="memory-status">
-          <span class="punkte-anzeige" id="memory-zuege"></span>
-          <span class="punkte-anzeige" id="memory-paare"></span>
+          <span class="pille punkte-anzeige" id="memory-zuege"></span>
+          <span class="pille punkte-anzeige" id="memory-paare"></span>
         </div>
       </header>
       <!-- Wahl vor dem Spiel: Normal (6 Paare) oder Schwer (10 Paare), Antippen startet -->
@@ -295,17 +310,20 @@
 
     <!-- Hör-Spiel -->
     <section id="ansicht-hoeren" class="ansicht ansicht-runde ansicht-hoeren" aria-labelledby="titel-hoeren" hidden>
-      <header class="runde-kopf">
+      <header class="runde-kopf kopfkarte">
         <button type="button" class="knopf knopf-klein knopf-zurueck" aria-label="Zurück zur Startseite" data-text-aria-label="zurueck.aria">
-          <span aria-hidden="true">←</span> <span class="knopf-text" data-text="zurueck.startseite">Startseite</span>
+          <span aria-hidden="true">←</span> <span class="knopf-text" data-text="zurueck.zoo">Zoo</span>
         </button>
         <div class="runde-titel">
           <p class="aufgabe-nr" id="hoeren-aufgabe"></p>
-          <h1 id="titel-hoeren" class="frage" tabindex="-1" data-text="hoeren.frage">Welche Note hörst du?</h1>
+          <div class="runde-titel-zeile">
+            <h1 id="titel-hoeren" class="frage" tabindex="-1" data-text="hoeren.frage">Welche Note hörst du?</h1>
+            <span class="runde-symbol" data-symbol="hoer-spiel" aria-hidden="true"></span>
+          </div>
         </div>
         <div class="runde-status">
-          <span class="sterne-anzeige" id="hoeren-sterne" role="img"></span>
-          <span class="punkte-anzeige" id="hoeren-punkte"></span>
+          <span class="pille pille-gold sterne-anzeige" id="hoeren-sterne" role="img"></span>
+          <span class="pille punkte-anzeige" id="hoeren-punkte"></span>
         </div>
       </header>
 
@@ -342,17 +360,20 @@
 
     <!-- Spiel eine Melodie: Noten der Reihe nach auf der Klaviatur spielen (js/modi/melodie.js) -->
     <section id="ansicht-melodie" class="ansicht ansicht-runde ansicht-klavier ansicht-melodie" aria-labelledby="titel-melodie" hidden>
-      <header class="runde-kopf">
+      <header class="runde-kopf kopfkarte">
         <button type="button" class="knopf knopf-klein knopf-zurueck" aria-label="Zurück zur Startseite" data-text-aria-label="zurueck.aria">
-          <span aria-hidden="true">←</span> <span class="knopf-text" data-text="zurueck.startseite">Startseite</span>
+          <span aria-hidden="true">←</span> <span class="knopf-text" data-text="zurueck.zoo">Zoo</span>
         </button>
-        <div class="runde-titel">
+        <div class="runde-titel runde-titel-unten">
           <p class="aufgabe-nr" id="melodie-aufgabe"></p>
-          <h1 id="titel-melodie" class="frage" tabindex="-1" data-text="melodie.frage">Spiel die Melodie!</h1>
+          <div class="runde-titel-zeile">
+            <h1 id="titel-melodie" class="frage" tabindex="-1" data-text="melodie.frage">Spiel die Melodie!</h1>
+            <span class="runde-symbol" data-symbol="melodie" aria-hidden="true"></span>
+          </div>
         </div>
         <div class="runde-status">
-          <span class="sterne-anzeige" id="melodie-sterne" role="img"></span>
-          <span class="punkte-anzeige" id="melodie-punkte"></span>
+          <span class="pille pille-gold sterne-anzeige" id="melodie-sterne" role="img"></span>
+          <span class="pille punkte-anzeige" id="melodie-punkte"></span>
         </div>
       </header>
 
@@ -380,16 +401,19 @@
 
     <!-- Fehler üben: nach einer Runde mit Fehlern, ohne Punkte und Sterne (js/fehler-ueben.js) -->
     <section id="ansicht-ueben" class="ansicht ansicht-runde ansicht-ueben" aria-labelledby="titel-ueben" hidden>
-      <header class="runde-kopf">
+      <header class="runde-kopf kopfkarte">
         <button type="button" class="knopf knopf-klein knopf-zurueck" aria-label="Zurück zur Startseite" data-text-aria-label="zurueck.aria">
-          <span aria-hidden="true">←</span> <span class="knopf-text" data-text="zurueck.startseite">Startseite</span>
+          <span aria-hidden="true">←</span> <span class="knopf-text" data-text="zurueck.zoo">Zoo</span>
         </button>
         <div class="runde-titel" id="ueben-titel">
           <p class="aufgabe-nr" id="ueben-aufgabe"></p>
-          <h1 id="titel-ueben" class="frage" tabindex="-1"></h1>
+          <div class="runde-titel-zeile">
+            <h1 id="titel-ueben" class="frage" tabindex="-1"></h1>
+            <span class="runde-symbol" data-symbol="ueben" aria-hidden="true"></span>
+          </div>
         </div>
         <div class="runde-status">
-          <span class="punkte-anzeige ueben-marke" data-text="ueben.titel">Fehler üben</span>
+          <span class="pille punkte-anzeige ueben-marke" data-text="ueben.titel">Fehler üben</span>
         </div>
       </header>
 

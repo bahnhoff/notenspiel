@@ -2087,3 +2087,108 @@ body > main { flex: 1 0 auto; width: 100%; }
   .fuss-name { font-size: 1rem; }
   .fuss-zeile { font-size: 0.85rem; }
 }
+
+/* ---------- Kopfkarte der Spiele ---------- */
+
+/* Weiße Karte: Zurück-Pille „← Zoo“, Titel mit Spielsymbol und Unterzeile, Pillen rechts.
+   Handy: zwei Zeilen (Zurück und Pillen oben, Titel mittig darunter). */
+.runde-kopf.kopfkarte {
+  background: var(--karte);
+  border: 2px solid var(--rand-weich);
+  border-radius: 24px;
+  box-shadow: var(--schatten-weich);
+  padding: 8px 10px 10px;
+  margin-bottom: 14px;
+}
+.kopfkarte .knopf-zurueck {
+  background: #f6efe6;
+  border-color: #eadfce;
+  border-radius: 999px;
+  box-shadow: 0 3px 0 #e2d6c4;
+}
+.runde-titel { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.runde-titel-unten .aufgabe-nr { order: 2; text-transform: none; letter-spacing: 0; font-weight: 700; font-size: 0.95rem; }
+.runde-titel-zeile { display: flex; align-items: center; justify-content: center; gap: 8px; min-width: 0; max-width: 100%; }
+.kopfkarte .frage { font-size: clamp(1.35rem, 5.5vw, 1.8rem); min-width: 0; }
+.runde-symbol { flex: 0 0 auto; line-height: 0; }
+.runde-symbol .symbol-svg { width: 1.9rem; height: 1.9rem; }
+.kopfkarte .runde-status { gap: 8px; }
+/* Sterne der Runde als goldene Pille mit Sternzeichen */
+.kopfkarte .sterne-anzeige.pille { font-size: 1.15rem; letter-spacing: 1px; padding: 0 12px; }
+.kopfkarte .sterne-anzeige .stern-leer { color: #c9b8a2; }
+
+@media (min-width: 700px) {
+  .runde-kopf.kopfkarte,
+  .ansicht-memory .runde-kopf.kopfkarte {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-areas: "zurueck titel status";
+    gap: 16px;
+    padding: 10px 14px;
+    margin-bottom: 18px;
+  }
+  .kopfkarte .runde-titel { align-items: flex-start; text-align: left; }
+  .kopfkarte .runde-titel-zeile { justify-content: flex-start; }
+  .kopfkarte .aufgabe-nr { text-align: left; }
+}
+
+/* ---------- Buchstabentasten mit Farbe und Silbe ---------- */
+
+/* Feste Farbe je Stammton. Sie trägt keine Bedeutung allein, der Buchstabe bleibt die Information. */
+:root {
+  --farbe-c: #b8430f;
+  --farbe-d: #e0601f;
+  --farbe-e: #8a6400;
+  --farbe-f: #15803d;
+  --farbe-g: #c2560f;
+  --farbe-a: #0277b5;
+  --farbe-h: #166534;
+}
+.knopf-antwort { flex-direction: column; gap: 0; line-height: 1.05; }
+.knopf-antwort[data-stamm="c"] { color: var(--farbe-c); }
+.knopf-antwort[data-stamm="d"] { color: var(--farbe-d); }
+.knopf-antwort[data-stamm="e"] { color: var(--farbe-e); }
+.knopf-antwort[data-stamm="f"] { color: var(--farbe-f); }
+.knopf-antwort[data-stamm="g"] { color: var(--farbe-g); background: #fff6d8; border-color: #f6dc93; }
+.knopf-antwort[data-stamm="a"] { color: var(--farbe-a); }
+.knopf-antwort[data-stamm="h"] { color: var(--farbe-h); }
+.antwort-silbe { font-size: 0.85rem; font-weight: 700; color: var(--text-leise); letter-spacing: 0.02em; }
+/* Rückmeldung geht vor: grün oder rot wie bisher */
+.knopf-antwort.ist-richtig, .knopf-antwort.ist-loesung { color: var(--gruen); background: var(--gruen-hell); border-color: var(--gruen); }
+.knopf-antwort.ist-falsch { color: var(--rot); background: var(--rot-hell); border-color: var(--rot); }
+.knopf-antwort.ist-richtig .antwort-silbe, .knopf-antwort.ist-loesung .antwort-silbe { color: var(--gruen); }
+.knopf-antwort.ist-falsch .antwort-silbe { color: var(--rot); }
+
+/* ---------- Sprechblase „Zeile“ ---------- */
+
+.sprech-zeile {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 100%;
+  min-width: 0;
+  padding: 5px 14px 5px 5px;
+  border-radius: 999px;
+  background: var(--karte);
+  border: 2px solid var(--rand-weich);
+  box-shadow: 0 2px 8px rgba(160, 130, 90, 0.14);
+}
+.sprech-zeile-kopf {
+  flex: 0 0 32px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: #fff1e8;
+}
+.sprech-zeile-kopf .tier-svg { width: 100%; height: 100%; display: block; }
+.sprech-zeile-text { margin: 0; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 1rem; font-weight: 600; }
+.sprech-zeile-name { font-weight: 700; color: var(--text-leise); }
+
+@media (max-width: 599px) {
+  .kopfkarte .runde-status { gap: 6px; }
+  .kopfkarte .sterne-anzeige.pille { font-size: 1rem; padding: 0 9px; }
+  .runde-symbol .symbol-svg { width: 1.6rem; height: 1.6rem; }
+  .knopf-antwort { min-height: 60px; }
+  .antwort-silbe { font-size: 0.75rem; }
+  .sprech-zeile-text { font-size: 0.92rem; }
+}
