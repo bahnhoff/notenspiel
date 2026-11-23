@@ -121,6 +121,8 @@
     var box = $("memory-karten");
     box.innerHTML = "";
     box.classList.toggle("memory-schwer", spiel.stufe === "schwer");
+    // Kartenzahl für das Raster: Bei wenigen Tönen gibt es weniger Paare, die Reihen sollen trotzdem aufgehen.
+    box.setAttribute("data-karten", String(spiel.karten.length));
     spiel.karten.forEach(function (k, i) {
       var b = document.createElement("button");
       b.type = "button";

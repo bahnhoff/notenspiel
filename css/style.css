@@ -445,6 +445,8 @@ h1:focus { outline: none; }
 
 .stern-voll { color: var(--gold); text-shadow: 0 1px 0 #c27803; }
 .stern-leer { color: #8a7a6c; }
+/* Seltene Tiere: goldener Funkelstern als Textzeichen statt Emoji */
+.tier-selten::before { content: "✦"; margin-right: 0.3em; color: var(--gold); }
 
 .punkte-anzeige {
   background: var(--karte);
@@ -1420,6 +1422,9 @@ h1:focus { outline: none; }
 .memory-karte.ist-kein-paar .karte-marke { color: var(--rot); }
 
 /* Schwer: 20 Karten, auf dem Handy 4 Spalten × 5 Reihen (passt ab 340 px Breite) */
+/* Wenige Paare (kleiner Tonumfang): 8 Karten als 2 Reihen zu 4 statt 3, 3, 2 */
+.memory-karten[data-karten="8"] .memory-karte { flex-basis: calc((100% - 24px) / 4); }
+
 .memory-schwer { gap: 6px; }
 .memory-schwer .memory-karte {
   flex-basis: calc((100% - 18px) / 4);
@@ -1474,6 +1479,9 @@ h1:focus { outline: none; }
 @media (min-width: 700px) {
   .memory-karte { flex-basis: calc((100% - 24px) / 4); height: clamp(110px, 20vh, 170px); }
   .memory-schwer .memory-karte { flex-basis: calc((100% - 24px) / 5); height: clamp(84px, 15vh, 140px); }
+  /* 6 Karten als 2 × 3, 10 als 2 Reihen zu 5 statt 4, 4, 2 */
+  .memory-karten[data-karten="6"] .memory-karte { flex-basis: calc((100% - 16px) / 3); }
+  .memory-karten[data-karten="10"] .memory-karte { flex-basis: calc((100% - 32px) / 5); }
   .klaviatur { --taste-min: 150px; --taste-max: 220px; }
 }
 

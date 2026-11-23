@@ -400,7 +400,7 @@
         var gewaehlt = stand.tier === tier.id;
         li.innerHTML = '<div class="tier-mittel">' + window.Tiere.zeichne(tier.id, gewaehlt ? "froh" : "normal", tier.name) + "</div>";
         li.appendChild(element("p", "tier-name", tier.name));
-        if (tier.selten) li.appendChild(element("p", "tier-info", t("tiere.selten")));
+        if (tier.selten) li.appendChild(element("p", "tier-info tier-selten", t("tiere.selten")));
         var b = element("button", "knopf " + (gewaehlt ? "knopf-gewaehlt" : "knopf-neben"), t(gewaehlt ? "tiere.begleiter" : "tiere.auswaehlen"));
         b.type = "button";
         b.setAttribute("aria-pressed", gewaehlt ? "true" : "false");
@@ -414,7 +414,7 @@
       } else {
         li.innerHTML = '<div class="tier-mittel">' + window.Tiere.zeichne(tier.id, "normal", t("tiere.unentdeckt"), true) + "</div>";
         li.appendChild(element("p", "tier-name", "???"));
-        if (tier.selten) li.appendChild(element("p", "tier-info", t("tiere.seltenAb", { n: L.SELTEN_AB_STERNEN })));
+        if (tier.selten) li.appendChild(element("p", "tier-info tier-selten", t("tiere.seltenAb", { n: L.SELTEN_AB_STERNEN })));
       }
       liste.appendChild(li);
     });
@@ -456,7 +456,9 @@
           // Variante als kleines Schild hinter den Punkten, zum Beispiel „Schwer“ im Noten-Memory
           if (r.variante) punkte.appendChild(element("span", "rekord-variante", t("variante." + r.variante)));
           var st = element("span", "rekord-sterne");
-          st.innerHTML = '<span class="stern stern-voll" aria-hidden="true">★</span> ';
+          st.innerHTML = r.sterne > 0
+            ? '<span class="stern stern-voll" aria-hidden="true">★</span> '
+            : '<span class="stern stern-leer" aria-hidden="true">☆</span> ';
           st.appendChild(document.createTextNode(sterneText(r.sterne)));
           li.appendChild(st);
           // Alte Rekorde haben kein Namensfeld und zeigen keinen Namen.
