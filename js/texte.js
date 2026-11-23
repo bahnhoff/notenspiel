@@ -460,6 +460,15 @@
 
       /* Rekorde */
       "rekorde.leer": "Noch keine Rekorde. Spiel eine Runde, dann steht dein Ergebnis hier.",
+      "rekorde.ruhmeshalle": "Ruhmeshalle",
+      "rekorde.bestenliste": "Bestenliste",
+      "rekorde.bannerText": "Übe jeden Tag, sammle goldene Sterne und komm ganz nach oben!",
+      "rekorde.zuletzt": "Zuletzt gespielt",
+      "rekorde.spielen": "{spiel} spielen",
+      "rekorde.spielenNotenflug": "Notenflug starten",
+      "rekorde.spielenMelodie": "Melodie spielen",
+      "rekorde.spielenNotenreise": "Notenreise starten",
+      "rekorde.spieleHaupt": "Spiele „{spiel}“",
       "rekorde.datum": "de-DE",
 
       /* Einstellungen */
@@ -928,6 +937,15 @@
       "tiere.unentdeckt": "Not found yet",
 
       "rekorde.leer": "No high scores yet. Play a round, and your score will show up here.",
+      "rekorde.ruhmeshalle": "Hall of fame",
+      "rekorde.bestenliste": "Leaderboard",
+      "rekorde.bannerText": "Practice every day, earn golden stars, and reach the top!",
+      "rekorde.zuletzt": "Last played",
+      "rekorde.spielen": "Play {spiel}",
+      "rekorde.spielenNotenflug": "Start Note Flight",
+      "rekorde.spielenMelodie": "Play a melody",
+      "rekorde.spielenNotenreise": "Start the journey",
+      "rekorde.spieleHaupt": "Play “{spiel}”",
       "rekorde.datum": "en-US",
 
       "einst.oktaven": ["", "", "Octave 2", "Octave 3", "Octave 4 · middle C", "Octave 5", "Octave 6"],

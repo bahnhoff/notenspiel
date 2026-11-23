@@ -590,11 +590,20 @@
 
   /* ---------- Rekorde ---------- */
 
+  // Eigene Knopftexte, wo „{Spiel} spielen“ holpert („Spiel eine Melodie spielen“)
+  var LEER_KNOPF = { notenflug: "rekorde.spielenNotenflug", melodie: "rekorde.spielenMelodie", notenreise: "rekorde.spielenNotenreise" };
+
   function zeigeRekorde() {
     var inhalt = $("rekorde-inhalt");
     inhalt.innerHTML = "";
     // Nur angemeldete Modi: Rekorde entfernter Modi bleiben im Spielstand, erscheinen hier aber nicht.
-    window.Modi.liste().forEach(function (modus) {
+    // Das zuletzt gespielte Spiel steht oben mit dem Etikett „Zuletzt gespielt“, die übrigen in der
+    // Reihenfolge der Startseite. Ab dem dritten Abschnitt zweispaltig (ab 900 px, css/style.css).
+    var modi = window.Modi.liste().slice();
+    var letzter = modi.filter(function (m) { return m.id === stand.letzterModus; })[0];
+    if (letzter) modi = [letzter].concat(modi.filter(function (m) { return m !== letzter; }));
+    var raster = null;
+    modi.forEach(function (modus, nr) {
       var abschnitt = element("section", "rekord-abschnitt");
       var titelId = "rekorde-" + modus.id;
       // Überschrift mit dem gezeichneten Symbol des Spiels im getönten Kästchen (wie auf der Startseite)
@@ -603,10 +612,23 @@
       h2.appendChild(element("span", "rekord-modus-name", modus.name));
       h2.id = titelId;
       abschnitt.setAttribute("aria-labelledby", titelId);
+      if (modus === letzter) h2.appendChild(element("span", "rekord-zuletzt", t("rekorde.zuletzt")));
       abschnitt.appendChild(h2);
       var rekorde = L.sortiereRekorde(stand.rekorde[modus.id] || []).slice(0, L.REGELN.maxRekorde);
       if (rekorde.length === 0) {
-        abschnitt.appendChild(element("p", "leer-hinweis", t("rekorde.leer")));
+        // Leere Karte mit Text und Knopf, der das Spiel direkt startet
+        var leer = element("div", "leer-hinweis rekord-leer");
+        var text = leer.appendChild(element("p", "", t("rekorde.leer")));
+        var los = element("button", "knopf knopf-neben knopf-klein rekord-leer-knopf",
+          LEER_KNOPF[modus.id] ? t(LEER_KNOPF[modus.id]) : t("rekorde.spielen", { spiel: modus.name }));
+        los.type = "button";
+        los.addEventListener("click", function () {
+          var a = auswahl();
+          if (!auswahlReicht(a)) { text.textContent = zuWenigText(a); return; }
+          starteModus(modus);
+        });
+        leer.appendChild(los);
+        abschnitt.appendChild(leer);
       } else {
         var ol = element("ol", "rekord-liste");
         rekorde.forEach(function (r, i) {
@@ -632,8 +654,11 @@
         });
         abschnitt.appendChild(ol);
       }
-      inhalt.appendChild(abschnitt);
+      if (nr < 2) { inhalt.appendChild(abschnitt); return; }
+      if (!raster) raster = inhalt.appendChild(element("div", "rekorde-raster"));
+      raster.appendChild(abschnitt);
     });
+    $("rekorde-spielen-text").textContent = t("rekorde.spieleHaupt", { spiel: hauptspiel.name });
     zeigeAnsicht("rekorde");
   }
 
@@ -967,6 +992,11 @@
   $("knopf-rekorde").addEventListener("click", zeigeRekorde);
   $("knopf-einstellungen").addEventListener("click", zeigeEinstellungen);
   $("knopf-ergebnis-start").addEventListener("click", zurStartseite);
+  // Große Taste unter den Rekorden; reichen die Noten nicht, führt sie zu den Einstellungen
+  $("rekorde-spielen").addEventListener("click", function () {
+    if (!auswahlReicht(auswahl())) { zeigeEinstellungen(); return; }
+    starteModus(hauptspiel);
+  });
   // „Rekorde“ im Ergebnisfenster: Rekordseite mit dem Abschnitt des gespielten Spiels im Blick
   $("knopf-ergebnis-rekorde").addEventListener("click", function () {
     var id = ergebnisModusId;

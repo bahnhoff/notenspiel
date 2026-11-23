@@ -826,3 +826,10 @@ Abweichungen:
 
 - Goldener Balken zum nächsten Tier unter dem Satz „Noch 2 Sterne …“ (höchstens 280 px breit, wie im Entwurf), Screenreader-Text wie der Satz; sind alle Tiere entdeckt, ist er voll.
 - Spalten: 2 (Handy), 3 ab 600 px, 4 ab 900 px, 5 ab 1200 px; die Seite ist dafür bis 1240 px breit. Der Stern vor „Gesammelte Sterne“ ist das gezeichnete Symbol.
+
+### Paket 16: Rekorde
+
+- Pille „Ruhmeshalle“ mit Pokal (Schmuck, auf dem Handy nur der Pokal), Banner „Bestenliste“ mit Orden und Schmucksternen (Handy ohne Sterne), Etikett „Zuletzt gespielt“ am Abschnitt aus `stand.letzterModus`, der oben steht. Platz 1 hat eine goldene Nummer.
+- Leere Karten haben einen Knopf, der das Spiel startet. Eigene Texte, wo „{Spiel} spielen“ holpert: „Notenflug starten“, „Melodie spielen“, „Notenreise starten“ (englisch „Start Note Flight“, „Play a melody“, „Start the journey“). Reichen die Noten nicht, ersetzt der Hinweis zu den Einstellungen den Text der Karte.
+- Ab 900 px stehen die Abschnitte ab dem dritten in zwei Spalten; die leeren Karten stellen dort Text und Knopf untereinander.
+- Große Taste „Spiele „Welche Note ist das?““ unten; reichen die Noten nicht, öffnet sie die Einstellungen.

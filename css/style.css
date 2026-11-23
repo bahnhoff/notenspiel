@@ -2856,3 +2856,83 @@ body.fenster-offen { overflow: hidden; }
 @media (min-width: 1200px) { .ansicht-tiere .tier-liste { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
 /* Handy: Knopf „Auswählen“ über die volle Kartenbreite, mindestens 48 px hoch */
 .ansicht-tiere .tier-karte .knopf { min-height: 48px; }
+
+/* ---------- Rekorde wie im Entwurf: Pille „Ruhmeshalle“, Banner, Etikett, leere Karten, Raster ---------- */
+
+.ansicht-rekorde .seiten-kopf::after { content: none; }
+.rekorde-ruhm {
+  justify-self: end;
+  display: inline-flex; align-items: center; gap: 6px;
+  min-height: 40px;
+  padding: 4px 14px 4px 10px;
+  border-radius: 999px;
+  background: #fffbea;
+  border: 2px solid #f8d77a;
+  box-shadow: 0 3px 0 #f3dc9a;
+  color: #8a5a00;
+  font-weight: 800;
+  white-space: nowrap;
+}
+.rekorde-ruhm-symbol .symbol-svg { width: 24px; height: 24px; }
+
+.rekorde-banner {
+  display: flex; align-items: center; gap: 14px;
+  margin: 18px 0 6px;
+  padding: 14px 18px;
+  border-radius: 24px;
+  background: linear-gradient(90deg, #fff4d6, #fffbea);
+  border: 2px solid #f8e3a3;
+  box-shadow: 0 4px 0 #f3dc9a;
+}
+.rekorde-banner-orden {
+  flex: 0 0 52px; width: 52px; height: 52px;
+  border-radius: 50%; background: #fff; border: 2px solid #f8e3a3;
+  display: flex; align-items: center; justify-content: center;
+}
+.rekorde-banner-orden .symbol-svg { width: 34px; height: 34px; }
+.rekorde-banner-text { flex: 1 1 auto; min-width: 0; }
+.rekorde-banner-text h2 { margin: 0; font-size: 1.2rem; color: #8a5a00; }
+.rekorde-banner-text p { margin: 2px 0 0; color: var(--text-leise); font-size: 0.95rem; }
+.rekorde-banner-sterne { display: flex; align-items: center; gap: 6px; }
+.rekorde-banner-sterne .symbol-svg { width: 28px; height: 28px; }
+.rekorde-banner-sterne span:nth-child(2) .symbol-svg { width: 36px; height: 36px; }
+
+.rekord-zuletzt {
+  margin-left: auto;
+  padding: 3px 12px;
+  border-radius: 999px;
+  background: var(--rot-hell);
+  color: var(--akzent-dunkel);
+  font-size: 0.85rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+.rekord:first-child .rekord-platz { color: var(--gold); text-shadow: 0 1px 0 #c27803; }
+
+.rekord-leer { display: flex; align-items: center; justify-content: space-between; gap: 12px; text-align: left; }
+.rekord-leer p { margin: 0; min-width: 0; }
+.rekord-leer-knopf { flex: 0 0 auto; min-height: 48px; box-shadow: var(--schatten-taste); }
+
+.knopf-rekorde-spielen { display: flex; align-items: center; justify-content: center; gap: 6px; margin: 28px auto 0; min-height: 60px; font-size: 1.25rem; padding-left: 28px; padding-right: 28px; }
+.knopf-rekorde-spielen .knopf-symbol .symbol-svg { width: 1.2em; height: 1.2em; margin: 0; filter: brightness(0) invert(1); }
+
+@media (min-width: 900px) {
+  .rekorde-raster { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 20px; margin-top: 26px; }
+  .rekorde-raster .rekord-abschnitt + .rekord-abschnitt { margin-top: 0; }
+  .rekorde-raster .rekord-abschnitt:nth-child(n+3) { margin-top: 26px; }
+  .rekorde-raster .rekord-modus { font-size: 1.15rem; }
+  .rekorde-raster .rekord-leer { flex-direction: column; align-items: stretch; text-align: center; }
+}
+@media (max-width: 899px) {
+  .rekorde-raster > .rekord-abschnitt { margin-top: 26px; }
+}
+
+/* Handy: Ruhmeshalle nur als Pokal, Banner ohne Schmucksterne, leere Karten untereinander, große Taste volle Breite */
+@media (max-width: 599px) {
+  .rekorde-ruhm { padding: 4px 8px; min-width: 44px; justify-content: center; }
+  .rekorde-ruhm-text { display: none; }
+  .rekorde-banner { padding: 12px 14px; gap: 10px; }
+  .rekorde-banner-sterne { display: none; }
+  .rekord-leer { flex-direction: column; align-items: stretch; text-align: center; }
+  .knopf-rekorde-spielen { width: 100%; }
+}
