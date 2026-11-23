@@ -571,8 +571,25 @@
           <span aria-hidden="true">←</span> <span data-text="zurueck.text">Zurück</span>
         </button>
         <h1 id="titel-einstellungen" class="titel" tabindex="-1" data-text="start.einstellungen">Einstellungen</h1>
+        <button type="button" id="einstellungen-zuruecksetzen" class="knopf knopf-klein einstellungen-zuruecksetzen" aria-label="Einstellungen auf Standard zurücksetzen" data-text-aria-label="einst.zuruecksetzenAria">
+          <svg class="zuruecksetzen-symbol" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 12a8 8 0 1 0 2.4-5.7M4 4v4.5h4.5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span class="zuruecksetzen-text" data-text="einst.zuruecksetzen">Zurücksetzen</span>
+        </button>
       </header>
       <form class="einstellungen" id="einstellungen-formular"></form>
+      <!-- Feste Leiste unten: Zähler, Stand der Auswahl und Taste zum Spielen -->
+      <div class="einstellungen-leiste" id="einstellungen-leiste">
+        <div class="einstellungen-leiste-innen">
+          <span class="einstellungen-zaehler" id="einstellungen-zaehler" aria-hidden="true">0</span>
+          <p class="einstellungen-leiste-text" role="status">
+            <strong id="einstellungen-anzahl"></strong>
+            <span id="einstellungen-bereit"></span>
+          </p>
+          <button type="button" id="einstellungen-spielen" class="knopf knopf-haupt einstellungen-spielen">
+            <span class="einstellungen-spielen-lang" data-text="einst.spielen">Speichern und spielen</span><span class="einstellungen-spielen-kurz" data-text="einst.spielenKurz">Spielen</span> <span aria-hidden="true">→</span>
+          </button>
+        </div>
+      </div>
     </section>
 
     <!-- Rekorde -->

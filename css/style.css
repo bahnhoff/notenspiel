@@ -888,19 +888,11 @@ h1:focus { outline: none; }
 }
 .noten-oktave-titel::after { content: ""; flex: 1 1 auto; height: 2px; border-radius: 1px; background: var(--rand-weich); }
 
-/* Schmale Handys: 4 Spalten (c bis f, darunter g bis h), ab 440 px eine Oktave pro Reihe */
+/* Eine Oktave pro Reihe in 7 Spalten, auf dem Handy mit schmaleren Knöpfen (siehe unten) */
 .noten-gitter {
   display: grid;
-  grid-template-columns: repeat(4, minmax(48px, 1fr));
+  grid-template-columns: repeat(7, minmax(0, 1fr));
   gap: 6px;
-}
-
-@media (max-width: 439px) {
-  .noten-gitter .noten-wahl { grid-column: auto !important; }
-}
-
-@media (min-width: 440px) {
-  .noten-gitter { grid-template-columns: repeat(7, minmax(48px, 1fr)); }
 }
 
 .noten-wahl {
@@ -950,9 +942,6 @@ h1:focus { outline: none; }
 .noten-vorzeichen-titel { display: flex; align-items: center; gap: 2px; font-size: 0.95rem; font-weight: 700; color: var(--text-leise); }
 .noten-vorzeichen-titel .vorzeichen-symbol { width: 16px; height: 26px; color: var(--text); }
 .noten-gitter-vorzeichen .noten-wahl { font-size: 1.15rem; min-height: 48px; padding-top: 10px; }
-@media (min-width: 440px) {
-  .noten-gitter-vorzeichen { grid-template-columns: repeat(7, minmax(40px, 1fr)); }
-}
 
 .start-auswahl-hinweis { color: var(--rot); font-weight: 700; }
 
@@ -2935,4 +2924,109 @@ body.fenster-offen { overflow: hidden; }
   .rekorde-banner-sterne { display: none; }
   .rekord-leer { flex-direction: column; align-items: stretch; text-align: center; }
   .knopf-rekorde-spielen { width: 100%; }
+}
+
+/* ---------- Einstellungen wie im Entwurf: Kopf mit „Zurücksetzen“, Hinweiskarte, Schlüsselsymbole, feste Leiste ---------- */
+
+.ansicht-einstellungen .seiten-kopf {
+  position: sticky;
+  top: var(--menue-hoehe);
+  z-index: 5;
+  padding: 8px 0;
+  /* Band über die ganze Breite mit Linie unten wie im Entwurf */
+  background: #fffbf3;
+  box-shadow: 0 0 0 100vmax #fffbf3, 0 2px 0 100vmax var(--rand-weich);
+  clip-path: inset(0 -100vmax -2px);
+}
+.ansicht-einstellungen .seiten-kopf::after { content: none; }
+.einstellungen-zuruecksetzen {
+  justify-self: end;
+  display: inline-flex; align-items: center; gap: 6px;
+  min-height: 44px;
+  background: var(--karte);
+  color: var(--text-leise);
+}
+.zuruecksetzen-symbol { width: 18px; height: 18px; flex: 0 0 auto; }
+
+.einstellungen-karte {
+  display: flex; align-items: center; gap: 14px;
+  padding: 12px 16px;
+  background: #fffbea;
+  border: 2px solid #f8e3a0;
+  border-radius: 20px;
+}
+.einstellungen-karte-tier {
+  flex: 0 0 auto;
+  width: 52px; height: 52px;
+  display: grid; place-items: center;
+  border-radius: 16px;
+  background: #ffe9d6;
+}
+.einstellungen-karte-tier svg { width: 44px; height: 44px; }
+.einstellungen-karte-text p { margin: 0; color: var(--text-leise); }
+.einstellungen-karte-text .einstellungen-karte-titel { color: var(--text); font-weight: 800; font-size: 1.1rem; }
+.einstellungen-karte .einstellungen-info { text-align: left; font-size: 0.9rem; margin-top: 2px; }
+
+.wahl-schluessel .wahl-text { flex: 1 1 auto; }
+.wahl-schluessel-symbol { flex: 0 0 auto; display: inline-flex; color: var(--text); }
+.wahl-schluessel-symbol .schluessel-symbol { height: 40px; width: auto; }
+.wahl-schluessel-symbol.ist-bass .schluessel-symbol { height: 26px; }
+
+/* Platz unter der Seite, damit die feste Leiste weder Noten noch Fußzeile verdeckt */
+body:has(#ansicht-einstellungen:not([hidden])) { padding-bottom: calc(96px + env(safe-area-inset-bottom)); }
+.einstellungen-leiste {
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
+  z-index: 20;
+  background: var(--karte);
+  border-top: 2px solid var(--rand-weich);
+  box-shadow: 0 -6px 18px rgba(80, 50, 20, 0.08);
+  padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
+}
+.einstellungen-leiste-innen {
+  max-width: 760px;
+  margin: 0 auto;
+  display: flex; align-items: center; gap: 12px;
+}
+.einstellungen-zaehler {
+  flex: 0 0 auto;
+  min-width: 40px; height: 40px;
+  padding: 0 6px;
+  box-sizing: border-box;
+  display: grid; place-items: center;
+  border-radius: 999px;
+  background: #ffe9d6;
+  color: var(--akzent-dunkel);
+  border: 2px solid #f6c7a4;
+  font-weight: 800;
+}
+.einstellungen-zaehler.ist-zu-wenig { background: var(--akzent); border-color: var(--akzent-dunkel); color: #fff; }
+.einstellungen-leiste-text { flex: 1 1 auto; min-width: 0; margin: 0; display: flex; flex-direction: column; line-height: 1.25; }
+#einstellungen-bereit { font-size: 0.9rem; font-weight: 700; color: var(--gruen-dunkel, #2b8a3e); }
+#einstellungen-bereit.ist-zu-wenig { color: var(--akzent-dunkel); }
+.einstellungen-spielen { flex: 0 0 auto; min-height: 48px; white-space: nowrap; }
+.einstellungen-spielen:disabled { background: #d9cfc2; border-color: #c2b6a7; box-shadow: 0 4px 0 #c2b6a7; color: #fff; cursor: not-allowed; }
+
+@media (max-width: 519px) {
+  .zuruecksetzen-text { display: none; }
+  .einstellungen-zuruecksetzen { width: 44px; padding: 0; justify-content: center; }
+  .einstellungen-karte { padding: 10px 12px; gap: 10px; align-items: flex-start; }
+  .einstellungen-karte-tier { width: 44px; height: 44px; }
+  .einstellungen-karte-tier svg { width: 38px; height: 38px; }
+  .einstellungen-leiste { padding: 8px 12px calc(8px + env(safe-area-inset-bottom)); }
+  .einstellungen-leiste-innen { gap: 8px; min-height: 56px; }
+  .einstellungen-leiste-text { font-size: 0.9rem; }
+  #einstellungen-bereit { font-size: 0.8rem; }
+  .einstellungen-spielen { padding: 10px 14px; font-size: 1rem; }
+  .einstellungen-spielen-lang { display: none; }
+}
+@media (min-width: 520px) { .einstellungen-spielen-kurz { display: none; } }
+
+/* Handy: Oktavblöcke in 7 Spalten, Knöpfe etwa 40 px breit und 48 px hoch, Vorzeichen 40 px hoch, „mit ♯“ über der Reihe */
+@media (max-width: 439px) {
+  .noten-gitter { gap: 4px; }
+  .noten-wahl { min-width: 0; min-height: 48px; padding: 0; font-size: 1.1rem; border-radius: 12px; }
+  .noten-wahl-haken { left: 3px; font-size: 0.8rem; }
+  .noten-vorzeichen { grid-template-columns: minmax(0, 1fr); gap: 2px; margin-left: 0; padding: 4px 4px 6px 4px; border-left-width: 3px; }
+  .noten-gitter-vorzeichen .noten-wahl { min-height: 40px; padding-top: 4px; font-size: 0.9rem; }
 }

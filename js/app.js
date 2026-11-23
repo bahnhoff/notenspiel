@@ -813,13 +813,24 @@
     var e = stand.einstellungen;
     f.innerHTML = "";
 
+    // Hinweiskarte mit dem Begleiter: worum es auf der Seite geht und dass alles sofort gespeichert wird
+    var karte = element("div", "einstellungen-karte");
+    var tier = karte.appendChild(element("span", "einstellungen-karte-tier"));
+    tier.setAttribute("aria-hidden", "true");
+    zeigeTier(tier, "froh");
+    var kt = karte.appendChild(element("div", "einstellungen-karte-text"));
+    kt.appendChild(element("p", "einstellungen-karte-titel", t("einst.karteTitel")));
+    kt.appendChild(element("p", "", t("einst.karteText")));
+    kt.appendChild(element("p", "einstellungen-info", t("einst.info")));
+    f.appendChild(karte);
+
     antwortGruppe(f, e);
 
     var fs = element("fieldset", "einstellung");
     fs.appendChild(element("legend", "", t("einst.schluessel")));
     ["violin", "bass"].forEach(function (sl) {
       var an = e.schluessel.indexOf(sl) !== -1;
-      fs.appendChild(kaestchen(N.SCHLUESSEL[sl].name, "schluessel-" + sl, an, false, function (neu) {
+      var zeile = fs.appendChild(kaestchen(N.SCHLUESSEL[sl].name, "schluessel-" + sl, an, false, function (neu) {
         if (!neu && e.schluessel.length === 1) {
           // Mindestens ein Schlüssel bleibt angekreuzt.
           baueEinstellungen();
@@ -833,15 +844,10 @@
           x.schluessel = ["violin", "bass"].filter(function (s) { return s === sl ? neu : x.schluessel.indexOf(s) !== -1; });
         }, "schluessel-" + sl);
       }));
+      zeile.classList.add("wahl-schluessel");
+      zeile.insertAdjacentHTML("beforeend", '<span class="wahl-schluessel-symbol ist-' + sl + '">' + window.Notensystem.schluesselSymbol(sl) + "</span>");
     });
     f.appendChild(fs);
-
-    var hinweis = element("p", "einstellungen-hinweis");
-    hinweis.id = "einstellungen-hinweis";
-    hinweis.setAttribute("role", "status");
-    f.appendChild(hinweis);
-
-    e.schluessel.forEach(function (sl) { notenGruppe(f, sl, e); });
 
     var mt = element("fieldset", "einstellung");
     mt.appendChild(element("legend", "", t("einst.merktiere")));
@@ -851,7 +857,13 @@
       aendereEinstellung(function (x) { x.merktiere = neu; }, "merktiere");
     }));
     f.appendChild(mt);
-    f.appendChild(element("p", "einstellungen-info", t("einst.info")));
+
+    var hinweis = element("p", "einstellungen-hinweis");
+    hinweis.id = "einstellungen-hinweis";
+    hinweis.setAttribute("role", "status");
+    f.appendChild(hinweis);
+
+    e.schluessel.forEach(function (sl) { notenGruppe(f, sl, e); });
     zeigeEinstellungsHinweis();
   }
 
@@ -870,7 +882,37 @@
     }
     el.textContent = text;
     el.hidden = !text;
+    zeigeEinstellungsLeiste(a);
   }
+
+  /**
+   * Feste Leiste unten: Zahl der gewählten Noten, bei „Einfach“ auch die
+   * Buchstaben, wenn es weniger sind. Reicht die Auswahl nicht, wird der
+   * Zähler orange und die Taste zum Spielen ausgegraut.
+   */
+  function zeigeEinstellungsLeiste(a) {
+    var reicht = auswahlReicht(a);
+    var n = a.noten.length;
+    $("einstellungen-zaehler").textContent = String(n);
+    $("einstellungen-zaehler").classList.toggle("ist-zu-wenig", !reicht);
+    $("einstellungen-anzahl").textContent = t("einst.anzahl", { n: n }) +
+      (a.antwortmodus === "einfach" && a.antworten.length < n ? t("einst.anzahlBuchstaben", { n: a.antworten.length }) : "");
+    $("einstellungen-bereit").textContent = reicht ? t("einst.bereit") : t("einst.mindestens", { n: N.MINDEST_NOTEN });
+    $("einstellungen-bereit").classList.toggle("ist-zu-wenig", !reicht);
+    $("einstellungen-spielen").disabled = !reicht;
+  }
+
+  /** „Zurücksetzen“: nach der Rückfrage Schlüssel, Noten, Antwortmodus und Merktiere auf Standard. */
+  $("einstellungen-zuruecksetzen").addEventListener("click", function () {
+    var knopf = $("einstellungen-zuruecksetzen");
+    window.Bausteine.frage({ titel: t("einst.zuruecksetzenFrage"), ja: t("einst.zuruecksetzen"), nein: t("einst.abbrechen") }, function () {
+      einstellungsHinweis = "";
+      stand.einstellungen = N.einstellungen(K, L.bereinigeEinstellungen({}));
+      speichereSpielstand();
+      baueEinstellungen();
+      knopf.focus({ preventScroll: true });
+    }, function () { knopf.focus({ preventScroll: true }); });
+  });
 
   function zeigeEinstellungen() {
     einstellungsHinweis = "";
@@ -992,6 +1034,10 @@
   $("knopf-rekorde").addEventListener("click", zeigeRekorde);
   $("knopf-einstellungen").addEventListener("click", zeigeEinstellungen);
   $("knopf-ergebnis-start").addEventListener("click", zurStartseite);
+  // „Speichern und spielen“: gespeichert ist schon, die Taste startet das Hauptspiel
+  $("einstellungen-spielen").addEventListener("click", function () {
+    if (auswahlReicht(auswahl())) starteModus(hauptspiel);
+  });
   // Große Taste unter den Rekorden; reichen die Noten nicht, führt sie zu den Einstellungen
   $("rekorde-spielen").addEventListener("click", function () {
     if (!auswahlReicht(auswahl())) { zeigeEinstellungen(); return; }

@@ -833,3 +833,11 @@ Abweichungen:
 - Leere Karten haben einen Knopf, der das Spiel startet. Eigene Texte, wo „{Spiel} spielen“ holpert: „Notenflug starten“, „Melodie spielen“, „Notenreise starten“ (englisch „Start Note Flight“, „Play a melody“, „Start the journey“). Reichen die Noten nicht, ersetzt der Hinweis zu den Einstellungen den Text der Karte.
 - Ab 900 px stehen die Abschnitte ab dem dritten in zwei Spalten; die leeren Karten stellen dort Text und Knopf untereinander.
 - Große Taste „Spiele „Welche Note ist das?““ unten; reichen die Noten nicht, öffnet sie die Einstellungen.
+
+### Paket 17: Einstellungen
+
+- Kopfzeile bleibt unter dem oberen Menü stehen, als helles Band über die ganze Breite. „Zurücksetzen“ mit Kreispfeil fragt vorher über `Bausteine.frage` und setzt nur Schlüssel, Noten, Antwortmodus und Merktiere zurück (`bereinigeEinstellungen({})`); der Fokus kehrt auf den Knopf zurück.
+- Hinweiskarte mit dem gewählten Begleiter; `einst.info` steht dort als dritte Zeile, unten auf der Seite entfällt der Satz. Die Beispielzeilen auf „Einfach“, „Genau“ und den Schnellwahl-Knöpfen gab es schon.
+- Reihenfolge: Hinweiskarte, Antworten, Schlüssel, Merktiere, Hinweis zu wenigen Noten, Noten je Schlüssel.
+- Feste Leiste: Im Modus „Einfach“ zählt „Wähle mindestens 3 Noten.“ wie bisher die Buchstaben, deshalb kann „3 Noten gewählt, 2 Buchstaben“ zu wenig sein. Auf dem Handy heißt die Taste nur „Spielen“ („Play“), damit Zähler und Text daneben Platz haben.
+- Handy: Die Oktavblöcke stehen jetzt auch unter 440 px in 7 Spalten (vorher 4 und 3); „mit ♯“ und „mit ♭“ stehen über ihrer Reihe. Die Schnellwahl bleibt als fließende Reihe (2 und 3 Knöpfe) statt im Raster mit 2 Spalten.
