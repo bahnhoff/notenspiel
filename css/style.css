@@ -750,10 +750,10 @@ h1:focus { outline: none; }
 .einstellung {
   margin: 0;
   background: var(--karte);
-  border: 2px solid var(--rand);
-  border-radius: var(--radius);
-  padding: 10px 14px 14px;
-  box-shadow: var(--schatten);
+  border: 2px solid var(--rand-weich);
+  border-radius: 24px;
+  padding: 10px 14px 16px;
+  box-shadow: var(--schatten-weich);
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -772,7 +772,7 @@ h1:focus { outline: none; }
   min-height: 52px;
   padding: 8px 12px;
   border: 2px solid var(--rand);
-  border-radius: 14px;
+  border-radius: 16px;
   cursor: pointer;
   font-size: 1.1rem;
 }
@@ -789,6 +789,7 @@ h1:focus { outline: none; }
   border-color: var(--akzent);
   background: #fff1e6;
   font-weight: 700;
+  box-shadow: 0 3px 0 var(--akzent);
 }
 
 .wahl:has(input:focus-visible) { outline: 4px solid var(--fokus); outline-offset: 2px; }
@@ -842,6 +843,8 @@ h1:focus { outline: none; }
 }
 
 .antwort-modus {
+  border-radius: 18px;
+  box-shadow: var(--schatten-taste);
   min-height: 64px;
   padding: 6px 8px;
   display: flex;
@@ -858,6 +861,7 @@ h1:focus { outline: none; }
   background: var(--gruen-hell);
   border-color: var(--gruen);
   color: var(--gruen);
+  box-shadow: 0 4px 0 var(--gruen);
 }
 
 .antwort-modus.ist-an .antwort-modus-info { color: var(--gruen); }
@@ -872,6 +876,8 @@ h1:focus { outline: none; }
 }
 
 .knopf-schnellwahl {
+  border-radius: 14px;
+  box-shadow: var(--schatten-taste);
   flex: 1 1 auto;
   min-height: 48px;
   padding: 4px 10px;
@@ -887,12 +893,17 @@ h1:focus { outline: none; }
 
 .noten-oktave { display: flex; flex-direction: column; gap: 4px; }
 
+/* Oktavtitel mit feiner Linie bis zum Rand */
 .noten-oktave-titel {
-  margin: 4px 0 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 6px 0 2px;
   font-size: 0.95rem;
-  font-weight: 700;
+  font-weight: 800;
   color: var(--text-leise);
 }
+.noten-oktave-titel::after { content: ""; flex: 1 1 auto; height: 2px; border-radius: 1px; background: var(--rand-weich); }
 
 /* Schmale Handys: 4 Spalten (c bis f, darunter g bis h), ab 440 px eine Oktave pro Reihe */
 .noten-gitter {
@@ -914,20 +925,21 @@ h1:focus { outline: none; }
   min-height: 52px;
   min-width: 48px;
   border: 2px solid var(--rand);
-  border-radius: 12px;
+  border-radius: 14px;
   background: var(--karte);
   color: var(--text);
   font: inherit;
   font-size: 1.45rem;
-  font-weight: 700;
+  font-weight: 800;
   cursor: pointer;
-  box-shadow: var(--schatten);
+  box-shadow: var(--schatten-taste);
   touch-action: manipulation;
 }
 
 .noten-wahl.ist-an {
   border-color: var(--akzent);
   background: #fff1e6;
+  box-shadow: 0 3px 0 var(--akzent);
 }
 
 .noten-wahl-haken {
@@ -949,7 +961,7 @@ h1:focus { outline: none; }
   margin-left: 4px;
   padding: 6px 6px 6px 8px;
   border-left: 4px solid #c9b6f2;
-  border-radius: 0 12px 12px 0;
+  border-radius: 4px 14px 14px 4px;
   background: #f7f2ff;
 }
 .noten-vorzeichen-titel { display: flex; align-items: center; gap: 2px; font-size: 0.95rem; font-weight: 700; color: var(--text-leise); }
