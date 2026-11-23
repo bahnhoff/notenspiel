@@ -1838,24 +1838,43 @@ h1:focus { outline: none; }
 
 /* ---------- Hör-Spiel ---------- */
 
+/* Wie im Entwurf eine Spalte: Steuerzeile, drei Karten, Spielzeug-Klavier */
+.hoeren-inhalt { display: flex; flex-direction: column; gap: 14px; max-width: 860px; width: 100%; margin: 0 auto; }
+.ansicht-hoeren .runde-kopf.kopfkarte { position: relative; max-width: 860px; width: 100%; margin-left: auto; margin-right: auto; box-sizing: border-box; }
+
 .hoeren-steuerung {
   display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 10px;
-  margin-bottom: 10px;
+  grid-template-columns: minmax(0, 1.25fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
 }
 
-/* „Nochmal hören“ als Pille, Bezugston als runde Karte daneben (Stitch) */
-.knopf-hoeren { font-size: 1.3rem; min-height: 60px; border-radius: 999px; }
-.knopf-bezug { font-size: 1.1rem; min-height: 60px; border-radius: 20px; box-shadow: var(--schatten-taste); }
+/* „Nochmal hören“ als Pille, Bezugston als Kästchen daneben (Entwurf) */
+.knopf-hoeren { font-size: 1.3rem; min-height: 64px; border-radius: 999px; }
+.knopf-hoeren.spielt .hoeren-wellen { animation: wellen 0.6s ease-in-out 2; }
+@keyframes wellen {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.18); }
+}
+.knopf-bezug {
+  display: inline-flex; align-items: center; gap: 8px;
+  min-height: 64px; padding: 6px 14px; border-radius: 20px; box-shadow: var(--schatten-taste);
+}
+.knopf-bezug .knopf-symbol .symbol-svg { width: 30px; height: 30px; }
+.bezug-text { display: flex; flex-direction: column; align-items: flex-start; line-height: 1.1; }
+.bezug-titel { font-size: 0.72rem; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-leise); }
+.bezug-name { font-size: 1.25rem; font-weight: 800; }
 
-@media (max-width: 400px) {
-  .knopf-hoeren { font-size: 1.15rem; padding: 8px 10px; }
-  .knopf-bezug { padding: 8px 10px; }
+/* Sprechzeile des Begleiters: bis zu drei Zeilen, die Höhe ist reserviert */
+.hoeren-sprech { display: flex; min-width: 0; }
+.hoeren-sprech .sprech-zeile { flex: 1 1 auto; min-height: 64px; border-radius: 22px; }
+.hoeren-sprech .sprech-zeile-text {
+  white-space: normal; line-height: 1.2; font-size: 0.92rem;
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; line-clamp: 3;
 }
 
 .hoeren-hinweis {
-  margin: 0 0 10px;
+  margin: 0;
   padding: 8px 12px;
   border: 2px dashed var(--akzent);
   border-radius: 12px;
@@ -1863,11 +1882,36 @@ h1:focus { outline: none; }
   font-weight: 600;
 }
 
+/* Banner nach der Antwort: liegt über der Kopfkarte, nichts darunter verrutscht */
+.hoeren-banner {
+  position: absolute;
+  top: -2px; left: -2px; right: -2px;
+  min-height: calc(100% + 4px);
+  z-index: 6;
+  box-sizing: border-box;
+  display: flex; align-items: center; gap: 12px;
+  padding: 8px 12px 8px 14px;
+  border-radius: 24px;
+  border: 3px solid var(--gruen);
+  background: var(--gruen-hell);
+  box-shadow: var(--schatten-weich);
+}
+.hoeren-banner[hidden] { display: none; }
+.hoeren-banner { scroll-margin-top: calc(var(--menue-hoehe) + 10px); }
+.hoeren-banner.ist-falsch { border-color: var(--rot); border-style: dashed; background: var(--rot-hell); }
+.hoeren-banner-bild { width: 48px; flex: 0 0 48px; }
+.hoeren-banner-bild[hidden] { display: none; }
+.hoeren-banner-text { flex: 1 1 auto; min-width: 0; }
+.hoeren-banner-titel { margin: 0; font-size: 1.2rem; font-weight: 800; color: var(--gruen); }
+.hoeren-banner.ist-falsch .hoeren-banner-titel { color: var(--rot); }
+.hoeren-banner-unter { margin: 2px 0 0; font-size: 0.95rem; font-weight: 600; line-height: 1.3; }
+.hoeren-naechste { flex: 0 0 auto; min-height: 48px; border-radius: 999px; font-size: 1.05rem; padding: 8px 18px; white-space: nowrap; }
+
+/* Drei Antwortkarten: Ziffer oben links, Tipp-Symbol oben rechts, System, Schlüssel darunter */
 .hoeren-optionen {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 8px;
-  counter-reset: hoer-option;
+  gap: 14px;
 }
 
 .hoer-option {
@@ -1876,54 +1920,79 @@ h1:focus { outline: none; }
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 2px;
+  gap: 4px;
   min-height: 96px;
-  padding: 4px;
+  padding: 38px 10px 12px;
   color: #111;
-}
-
-.hoer-option {
   border-color: var(--rand-weich);
-  border-radius: 22px;
+  border-radius: 24px;
   box-shadow: var(--schatten-taste);
-  counter-increment: hoer-option;
 }
 .hoer-option:active { transform: translateY(3px); box-shadow: var(--schatten-taste-gedrueckt); }
+.hoer-ziffer {
+  position: absolute; top: 8px; left: 10px;
+  display: grid; place-items: center;
+  width: 1.8rem; height: 1.8rem; border-radius: 50%;
+  background: #f4ece0; color: var(--text-leise);
+  font-size: 0.95rem; font-weight: 800;
+}
+.hoer-tippen { position: absolute; top: 8px; right: 10px; width: 26px; height: 26px; line-height: 0; opacity: 0.8; }
+.hoer-tippen .symbol-svg { width: 100%; height: 100%; }
+.hoeren-optionen.gesperrt .hoer-tippen { visibility: hidden; }
+.hoer-system { display: block; width: 100%; line-height: 0; }
+.hoer-option .notensystem-svg { width: 100%; max-height: min(30vh, 190px); }
+.hoer-name { font-size: 1rem; font-weight: 700; line-height: 1.2; color: var(--text-leise); min-height: 1.2em; }
+.hoer-marke { position: absolute; top: 6px; right: 12px; font-size: 1.3rem; font-weight: 800; }
 
-/* Mit Tastatur: Ziffer 1, 2, 3 im runden Schild oben links, passend zu den Zifferntasten */
 @media (hover: hover) and (pointer: fine) {
-  .hoer-option::before {
-    content: counter(hoer-option);
-    position: absolute;
-    top: 6px;
-    left: 6px;
-    display: grid;
-    place-items: center;
-    width: 1.6rem;
-    height: 1.6rem;
-    border-radius: 50%;
-    background: #f4ece0;
-    color: var(--text-leise);
-    font-size: 0.9rem;
-    font-weight: 800;
-  }
   .hoeren-optionen:not(.gesperrt) .hoer-option:hover { background: #fffbeb; border-color: #f8d77a; }
 }
-
-.hoer-option .notensystem-svg { width: 100%; max-height: 30vh; }
-.hoer-name { font-size: 1.3rem; line-height: 1; min-height: 1em; }
-/* Der Name erscheint erst nach der Antwort; sein Platz bleibt frei, damit nichts springt. */
-.hoer-marke { position: absolute; top: 2px; right: 6px; font-size: 1.2rem; font-weight: 800; }
 
 .hoer-option.ist-richtig,
 .hoer-option.ist-loesung { background: var(--gruen-hell); border: 4px solid var(--gruen); color: var(--gruen); }
 .hoer-option.ist-loesung { outline: 3px dashed var(--gruen); outline-offset: 2px; }
 .hoer-option.ist-falsch { background: var(--rot-hell); border: 4px dashed var(--rot); color: var(--rot); }
+.hoer-option.ist-richtig .hoer-name, .hoer-option.ist-loesung .hoer-name { color: var(--gruen); }
+.hoer-option.ist-falsch .hoer-name { color: var(--rot); }
 /* Dickerer Rand nach der Antwort, weniger Innenabstand: Das System in der Karte bleibt an seiner Stelle. */
-.hoer-option.ist-richtig, .hoer-option.ist-loesung, .hoer-option.ist-falsch { padding: 2px; }
+.hoer-option.ist-richtig, .hoer-option.ist-loesung, .hoer-option.ist-falsch { padding: 36px 8px 10px; }
+.hoer-option.ist-richtig .hoer-ziffer, .hoer-option.ist-loesung .hoer-ziffer, .hoer-option.ist-falsch .hoer-ziffer { top: 6px; left: 8px; }
 .hoeren-optionen.gesperrt .hoer-option { cursor: default; }
 .hoeren-optionen.gesperrt .hoer-option:not(.ist-richtig):not(.ist-falsch):not(.ist-loesung) { opacity: 0.55; }
 .hoeren-optionen.gesperrt .hoer-option:active { transform: none; box-shadow: var(--schatten-taste); }
+
+/* Spielzeug-Klavier: klingt nur */
+.hoeren-klavier .flug-karte-kopf { justify-content: space-between; }
+.hoeren-klavier-tipp { margin: 0; color: var(--text-leise); font-size: 0.95rem; font-weight: 600; }
+.hoeren-klaviatur.klaviatur { --taste-min: 72px; --taste-max: 112px; margin: 12px 0 0; box-shadow: none; width: auto; }
+.hoeren-klaviatur .taste { font-size: clamp(0.65rem, calc(100cqw / var(--tasten) * 0.3), 1rem); }
+
+/* Handy: Steuerzeile zweireihig, Karten untereinander mit System links und Schlüssel rechts */
+@media (max-width: 599px) {
+  .hoeren-inhalt { gap: 10px; }
+  .hoeren-steuerung { grid-template-columns: auto minmax(0, 1fr); gap: 8px; }
+  .knopf-hoeren { grid-column: 1 / -1; font-size: 1.15rem; min-height: 56px; }
+  .knopf-bezug { min-height: 56px; padding: 6px 10px; }
+  .hoeren-sprech .sprech-zeile { min-height: 56px; padding-right: 10px; }
+  .hoeren-sprech .sprech-zeile-text { font-size: 0.82rem; }
+  .hoeren-optionen { grid-template-columns: minmax(0, 1fr); gap: 8px; }
+  .hoer-option { flex-direction: row; justify-content: flex-start; gap: 10px; min-height: 96px; padding: 6px 40px 6px 44px; }
+  .hoer-ziffer { top: 50%; margin-top: -0.9rem; }
+  .hoer-tippen { top: 50%; margin-top: -13px; }
+  .hoer-marke { top: 50%; margin-top: -0.75em; }
+  .hoer-system { flex: 0 0 52%; }
+  .hoer-option .notensystem-svg { max-height: 84px; }
+  .hoer-name { flex: 1 1 auto; text-align: left; font-size: 0.95rem; }
+  .hoer-option.ist-richtig, .hoer-option.ist-loesung, .hoer-option.ist-falsch { padding: 4px 38px 4px 42px; }
+  .hoer-option.ist-richtig .hoer-ziffer, .hoer-option.ist-loesung .hoer-ziffer, .hoer-option.ist-falsch .hoer-ziffer { top: 50%; left: 8px; }
+  .hoeren-banner { flex-wrap: wrap; gap: 6px 10px; padding: 8px 10px; }
+  .hoeren-banner-bild, .hoeren-banner-bild:not([hidden]) { display: none; }
+  .hoeren-banner-text { flex: 1 1 0; }
+  .hoeren-banner-titel { font-size: 1rem; line-height: 1.2; }
+  .hoeren-banner-unter { font-size: 0.8rem; line-height: 1.25; }
+  .hoeren-naechste { flex: 1 1 100%; min-height: 44px; padding: 6px 14px; }
+  .hoeren-klavier-tipp { flex-basis: 100%; font-size: 0.85rem; }
+}
 
 /* ---------- Fehler üben ---------- */
 

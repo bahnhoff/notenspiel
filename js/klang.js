@@ -7,7 +7,8 @@
  * aus einer Nutzeraktion heraus aufrufen. Ohne Web Audio liefert `bereit()`
  * false, und `spiele` tut nichts.
  *
- * Ton an oder aus (Plan Version 3): Alle Töne laufen über `spiele`. Bei
+ * Ton an oder aus (Plan Version 3): Alle Töne laufen über `spiele` oder
+ * `akkord(halbtoene)`. Bei
  * `setzeAn(false)` tut `spiele` nichts und liefert false. `an()` fragt den
  * Zustand ab, `beiWechsel(fn)` meldet jeden Wechsel mit fn(an) (die App
  * speichert ihn als `stand.ton`, Knöpfe aus js/bausteine.js zeigen ihn).
@@ -67,12 +68,25 @@
     function spiele(halbton) {
       if (!ctx || !tonAn) return false;
       stoppeAlle();
+      anschlag(halbton, 0, 0.5);
+      return true;
+    }
+
+    /** Kurzer Akkord als Lob: die Töne leicht nacheinander angeschlagen (Hör-Spiel). */
+    function akkord(halbtoene) {
+      if (!ctx || !tonAn) return false;
+      stoppeAlle();
+      halbtoene.forEach(function (h, i) { anschlag(h, i * 0.07, 0.28); });
+      return true;
+    }
+
+    function anschlag(halbton, verzoegerung, lautstaerke) {
       var f = frequenz(halbton);
-      var start = ctx.currentTime + 0.03;
+      var start = ctx.currentTime + 0.03 + verzoegerung;
       // Tiefe Töne klingen länger nach als hohe.
       var dauer = Math.max(1.2, Math.min(2.8, 3.2 - f / 400));
       var ausgang = ctx.createGain();
-      ausgang.gain.value = 0.5;
+      ausgang.gain.value = lautstaerke;
       var filter = ctx.createBiquadFilter();
       filter.type = "lowpass";
       filter.frequency.setValueAtTime(Math.min(9000, f * 9), start);
@@ -105,7 +119,6 @@
           aktive = aktive.filter(function (q) { return q !== quelle; });
         };
       });
-      return true;
     }
 
     /** Stoppt alle Töne und legt den AudioContext schlafen. */
@@ -130,6 +143,7 @@
       beiWechsel: function (fn) { beobachter.push(fn); },
       bereit: bereit,
       spiele: spiele,
+      akkord: akkord,
       stoppeAlle: stoppeAlle,
       pausiere: pausiere,
       laeuft: function () { return !!ctx && ctx.state === "running"; }

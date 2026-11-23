@@ -9,6 +9,11 @@
  * AudioContext startet erst nach einem Tipp (Kachel, „Noch eine Runde“,
  * „Nochmal hören“). Ohne Web Audio bleibt das Spiel bedienbar und zeigt
  * einen Hinweis.
+ * Aufbau wie im Entwurf (Plan Version 3): Steuerzeile mit „Nochmal hören“,
+ * Bezugston-Kästchen und Sprechzeile des Begleiters, drei Antwortkarten mit
+ * Ziffer und Schlüssel (der Name erst nach der Antwort), Spielzeug-Klavier
+ * zum Vergleichen (klingt nur, zählt nichts). Nach jeder Antwort liegt ein
+ * Banner mit „Nächste Note →“ über der Kopfkarte.
  * Nutzt die Ansicht #ansicht-hoeren aus index.html.
  */
 (function () {
@@ -17,7 +22,9 @@
   var L = window.SpielLogik;
   var T = window.Texte;
   var H = window.Modi.hilfen;
-  var PAUSE_NACH_RICHTIG = 1300; // Millisekunden
+  var B = window.Bausteine;
+  var N = window.Noten;
+  var PAUSE_NACH_RICHTIG = 1800; // Millisekunden (Zeit, das Banner zu lesen)
   var PAUSE_BEZUGSTON = 1600;    // vom Bezugston c¹ bis zum ersten Aufgabenton
   var MITTLERES_C = 60;          // Tonhöhe von c¹ (MIDI-Nummer, siehe Noten.halbton)
   var OPTIONEN = 3;
@@ -39,6 +46,17 @@
   var knoepfe = [];
   var offen = false;     // erst nach dem ersten Aufgabenton antworten
   var letzterKnopf = -1;
+  var sprech = null;     // Sprechzeile des Begleiters (js/bausteine.js)
+  var klaviatur = null;  // Spielzeug-Klavier
+
+  function sage(text) {
+    if (!sprech) {
+      sprech = B.sprechZeile({ tier: umgebung.tier, text: text });
+      $("hoeren-sprech").appendChild(sprech);
+    } else {
+      B.setzeSprechZeile(sprech, umgebung.tier, text);
+    }
+  }
 
   function $(id) { return document.getElementById(id); }
 
@@ -55,24 +73,24 @@
     var mittleresC = window.Noten.anzeigeName(28, 0);
     $("hoeren-bezug-name").textContent = mittleresC;
     $("hoeren-bezug").setAttribute("aria-label", T.t("hoeren.bezugAria", { name: mittleresC }));
-    u.zeigeTier($("hoeren-tier"), "normal");
+    baueKlavier(u);
     u.zeigeAnsicht();
     zeigeAufgabe();
     // starte() läuft im Tipp auf die Kachel: Jetzt darf der Ton beginnen.
     var mitTon = Ton.bereit();
     zeigeTonHinweis(mitTon);
     if (mitTon && Ton.spiele(MITTLERES_C)) {
-      $("hoeren-text").textContent = T.t("hoeren.einleitung", { name: mittleresC });
+      sage(T.t("hoeren.einleitung", { name: mittleresC }));
       offen = false;
       timer = setTimeout(function () {
         if (!aktiv()) return;
         offen = true;
         spieleAufgabe();
-        $("hoeren-text").textContent = T.t("hoeren.gehoert");
+        sage(T.t("hoeren.gehoert"));
       }, PAUSE_BEZUGSTON);
     } else {
       offen = true;
-      $("hoeren-text").textContent = T.t("hoeren.passt");
+      sage(T.t("hoeren.passt"));
     }
   }
 
@@ -121,7 +139,12 @@
 
   function spieleAufgabe() {
     if (!aktiv() || !runde.aktuell) return;
-    Ton.spiele(runde.aktuell.note.halbton);
+    if (!Ton.spiele(runde.aktuell.note.halbton)) return;
+    // Kleine Wellen-Animation am Lautsprecher von „Nochmal hören“
+    var k = $("hoeren-nochmal");
+    k.classList.remove("spielt");
+    void k.offsetWidth;
+    k.classList.add("spielt");
   }
 
   /*
@@ -147,31 +170,66 @@
     H.zeigeSterne($("hoeren-sterne"), $("hoeren-punkte"), runde.sterne, L.REGELN.startSterne, runde.punkte);
   }
 
+  /** Beschriftung unter einer Karte: vor der Antwort nur der Schlüssel, danach mit Namen. */
+  function kartenText(n, mitName) {
+    var schluessel = T.t("hoeren.karte." + n.schluessel);
+    return mitName ? T.t("hoeren.karteName", { schluessel: schluessel, name: n.anzeige }) : schluessel;
+  }
+
+  /** Spielzeug-Klavier über den gewählten Bereich: klingt nur, antwortet nicht. */
+  function baueKlavier(u) {
+    klaviatur = window.Klaviatur.baue($("hoeren-klaviatur"), u.namen, function () { /* nur Ton */ });
+    klaviatur.tasten.forEach(function (tt) {
+      if (tt.art === "weiss") tt.el.querySelector(".taste-name").textContent = tt.anzeige;
+    });
+  }
+
   function zeigeAufgabe() {
     zeigeStatus();
     optionen = waehleOptionen(runde.aktuell.note);
     var box = $("hoeren-optionen");
     box.innerHTML = "";
     box.classList.remove("gesperrt");
+    var tippen = window.Symbole.zeichne("tippen");
     knoepfe = optionen.map(function (n, i) {
       var b = document.createElement("button");
       b.type = "button";
       b.className = "knopf hoer-option";
-      b.setAttribute("aria-label", T.t("hoeren.note", { nr: i + 1 }));
-      b.innerHTML = '<span class="hoer-marke" aria-hidden="true"></span>' +
-        window.Notensystem.zeichne(n, { bereich: umgebung.bereich, breite: FORM.breite, noteX: FORM.noteX }) +
-        '<span class="hoer-name" aria-hidden="true"></span>';
+      b.setAttribute("aria-label", T.t("hoeren.note", { nr: i + 1 }) + ", " + kartenText(n, false));
+      b.innerHTML = '<span class="hoer-ziffer" aria-hidden="true">' + (i + 1) + "</span>" +
+        '<span class="hoer-tippen" aria-hidden="true">' + tippen + "</span>" +
+        '<span class="hoer-marke" aria-hidden="true"></span>' +
+        '<span class="hoer-system">' + window.Notensystem.zeichne(n, { bereich: umgebung.bereich, breite: FORM.breite, noteX: FORM.noteX }) + "</span>" +
+        '<span class="hoer-name" aria-hidden="true">' + kartenText(n, false) + "</span>";
       b.addEventListener("click", function () { beantworte(i); });
       box.appendChild(b);
       return b;
     });
-    $("hoeren-weiter").hidden = true;
-    $("hoeren-merkhilfe").hidden = true;
+    $("hoeren-banner").hidden = true;
     var fokus = document.activeElement;
     if (letzterKnopf >= 0 && knoepfe[letzterKnopf] &&
         (fokus === document.body || fokus === $("hoeren-weiter") || !document.contains(fokus))) {
       knoepfe[letzterKnopf].focus({ preventScroll: true });
     }
+  }
+
+  /** Banner über der Kopfkarte: Titel, Untertitel und das Merktier. */
+  function zeigeBanner(a, gewaehlt) {
+    var banner = $("hoeren-banner");
+    banner.classList.toggle("ist-richtig", a.richtig);
+    banner.classList.toggle("ist-falsch", !a.richtig);
+    $("hoeren-banner-titel").textContent = a.richtig
+      ? T.t("hoeren.bannerRichtig", { name: a.note.anzeige })
+      : T.t("hoeren.bannerFalsch");
+    $("hoeren-banner-unter").textContent = a.richtig
+      ? a.note.hinweis
+      : T.t(a.note.halbton < gewaehlt.halbton ? "hoeren.tiefer" : "hoeren.hoeher", { name: a.note.anzeige, gewaehlt: gewaehlt.anzeige });
+    var hilfe = umgebung.merkhilfe(a.note);
+    $("hoeren-merkhilfe-bild").innerHTML = hilfe ? window.Tiere.zeichne(hilfe.tier, "froh", hilfe.name) : "";
+    $("hoeren-merkhilfe-bild").hidden = !hilfe;
+    banner.hidden = false;
+    // Die Merkhilfe bleibt beim Begleiter in der Sprechzeile.
+    sage((a.richtig ? "✓ " : "✗ ") + (hilfe ? hilfe.text : (a.richtig ? T.t("hoeren.richtig", { name: a.note.anzeige }) : T.t("hoeren.falsch", { name: a.note.anzeige }).replace(/^✗ /, ""))));
   }
 
   function beantworte(i) {
@@ -184,6 +242,8 @@
     knoepfe.forEach(function (b, k) {
       var n = optionen[k];
       b.setAttribute("aria-disabled", "true");
+      // Nach der Antwort tragen alle Karten den Namen.
+      b.querySelector(".hoer-name").textContent = kartenText(n, true);
       var marke = "", status = "";
       if (n.name === a.note.name) { marke = "✓"; status = a.richtig ? "ist-richtig" : "ist-loesung"; }
       else if (k === i) { marke = "✗"; status = "ist-falsch"; }
@@ -191,28 +251,28 @@
         b.classList.add(status);
         // Bei der gesuchten Note Linie oder Zwischenraum hinterlegen
         if (marke === "✓") {
-          b.querySelector("svg").outerHTML = window.Notensystem.zeichne(n,
+          b.querySelector(".hoer-system").innerHTML = window.Notensystem.zeichne(n,
             { bereich: umgebung.bereich, breite: FORM.breite, noteX: FORM.noteX, markiere: true });
         }
         b.querySelector(".hoer-marke").textContent = marke;
-        b.querySelector(".hoer-name").textContent = n.anzeige;
         b.setAttribute("aria-label", T.t(marke === "✓" ? "runde.richtig" : "runde.falsch",
           { name: T.t("hoeren.noteName", { nr: k + 1, name: n.anzeige }) }));
       }
     });
     zeigeStatus();
-    H.zeigeMerkhilfe(umgebung, a.note, "hoeren-merkhilfe");
-    $("hoeren-text").textContent = a.richtig
-      ? "✓ " + (a.serie > 0 && a.serie % 3 === 0 ? a.nachricht : T.t("hoeren.richtig", { name: a.note.anzeige }))
-      : T.t("hoeren.falsch", { name: a.note.anzeige });
-    umgebung.zeigeTier($("hoeren-tier"), a.richtig ? "froh" : "oje");
+    zeigeBanner(a, gewaehlt);
+    H.zeigeWeiter($("hoeren-weiter"));
+    // Das ganze Banner zeigen, auch wenn die Seite gerade beim Spielzeug-Klavier steht
+    $("hoeren-banner").scrollIntoView({ block: "nearest" });
 
     if (a.richtig) {
+      // Kurzer Dur-Akkord als Lob, dann geht es von selbst weiter.
+      var h = a.note.halbton;
+      Ton.akkord([h, h + 4, h + 7]);
       timer = setTimeout(naechsteAufgabe, PAUSE_NACH_RICHTIG);
     } else {
       // Den richtigen Ton noch einmal vorspielen, damit Ton und Note zusammenpassen.
       spieleAufgabe();
-      H.zeigeWeiter($("hoeren-weiter"));
     }
   }
 
@@ -228,9 +288,9 @@
       H.klassischesEnde(umgebung, r);
       return;
     }
-    umgebung.zeigeTier($("hoeren-tier"), "normal");
-    $("hoeren-text").textContent = T.t("hoeren.weiter");
+    sage(T.t("hoeren.weiter"));
     zeigeAufgabe();
+    // „Nächste Note →“ ist ein Tipp: Der Ton darf gleich beginnen.
     timer = setTimeout(spieleAufgabe, 250);
   }
 
@@ -243,7 +303,7 @@
     if (!offen) {
       // noch in der Einleitung: gleich den Aufgabenton spielen
       offen = true;
-      $("hoeren-text").textContent = T.t("hoeren.gehoert");
+      sage(T.t("hoeren.gehoert"));
     }
     spieleAufgabe();
     if (runde.gesperrt && runde.letzteAntwort && runde.letzteAntwort.richtig) {

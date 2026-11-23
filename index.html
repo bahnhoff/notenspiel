@@ -388,36 +388,38 @@
           <span class="pille pille-gold sterne-anzeige" id="hoeren-sterne" role="img"></span>
           <span class="pille punkte-anzeige" id="hoeren-punkte"></span>
         </div>
+        <!-- Rückmeldung nach der Antwort: liegt über der Kopfkarte, damit unten nichts verrutscht -->
+        <div class="hoeren-banner" id="hoeren-banner" hidden>
+          <div class="merkhilfe-bild hoeren-banner-bild" id="hoeren-merkhilfe-bild"></div>
+          <div class="hoeren-banner-text">
+            <p class="hoeren-banner-titel" id="hoeren-banner-titel"></p>
+            <p class="hoeren-banner-unter" id="hoeren-banner-unter"></p>
+          </div>
+          <button type="button" class="knopf knopf-haupt hoeren-naechste" id="hoeren-weiter" data-text="hoeren.naechste">Nächste Note →</button>
+        </div>
       </header>
 
-      <div class="runde-inhalt">
-        <div class="runde-noten">
-          <div class="hoeren-steuerung">
-            <button type="button" class="knopf knopf-haupt knopf-hoeren" id="hoeren-nochmal">
-              <span class="knopf-symbol" data-symbol="lautsprecher" aria-hidden="true">🔊</span> <span data-text="hoeren.nochmal">Nochmal hören</span>
-            </button>
-            <button type="button" class="knopf knopf-neben knopf-bezug" id="hoeren-bezug">
-              <span class="knopf-symbol" data-symbol="klaviertasten" aria-hidden="true">🎹</span> <span id="hoeren-bezug-name"></span>
-            </button>
-          </div>
-          <p class="hoeren-hinweis" id="hoeren-hinweis" role="status" hidden></p>
-          <div class="hoeren-optionen" id="hoeren-optionen" role="group" aria-label="Drei Noten zur Auswahl" data-text-aria-label="hoeren.optionenAria"></div>
+      <!-- Wie im Entwurf eine Spalte: Steuerzeile, drei Antwortkarten, Spielzeug-Klavier -->
+      <div class="hoeren-inhalt">
+        <div class="hoeren-steuerung">
+          <button type="button" class="knopf knopf-haupt knopf-hoeren" id="hoeren-nochmal">
+            <span class="knopf-symbol hoeren-wellen" data-symbol="lautsprecher" aria-hidden="true">🔊</span> <span data-text="hoeren.nochmal">Nochmal hören</span>
+          </button>
+          <button type="button" class="knopf knopf-neben knopf-bezug" id="hoeren-bezug">
+            <span class="knopf-symbol" data-symbol="klaviertasten" aria-hidden="true">🎹</span>
+            <span class="bezug-text"><span class="bezug-titel" data-text="hoeren.bezug">Bezugston</span> <span class="bezug-name" id="hoeren-bezug-name"></span></span>
+          </button>
+          <div class="hoeren-sprech" id="hoeren-sprech" aria-live="polite"></div>
         </div>
-        <div class="runde-antworten">
-          <div class="tier-zeile">
-            <div class="tier-klein" id="hoeren-tier"></div>
-            <div class="sprechblase">
-              <div aria-live="polite">
-                <div class="merkhilfe" id="hoeren-merkhilfe" hidden>
-                  <div class="merkhilfe-bild" id="hoeren-merkhilfe-bild"></div>
-                  <p class="merkhilfe-text" id="hoeren-merkhilfe-text"></p>
-                </div>
-                <p id="hoeren-text"></p>
-              </div>
-              <button type="button" class="knopf knopf-haupt knopf-weiter" id="hoeren-weiter" hidden data-text="runde.weiter">Weiter</button>
-            </div>
+        <p class="hoeren-hinweis" id="hoeren-hinweis" role="status" hidden></p>
+        <div class="hoeren-optionen" id="hoeren-optionen" role="group" aria-label="Drei Noten zur Auswahl" data-text-aria-label="hoeren.optionenAria"></div>
+        <section class="flug-karte hoeren-klavier" aria-labelledby="hoeren-klavier-titel">
+          <div class="flug-karte-kopf">
+            <h2 class="flug-karte-titel" id="hoeren-klavier-titel"><span class="flug-karte-symbol" data-symbol="note" aria-hidden="true"></span> <span data-text="hoeren.klavier">Spielzeug-Klavier</span></h2>
+            <p class="hoeren-klavier-tipp" data-text="hoeren.klavierTipp">Tippe Tasten zum Anhören!</p>
           </div>
-        </div>
+          <div class="klaviatur hoeren-klaviatur" id="hoeren-klaviatur" role="group" aria-label="Spielzeug-Klavier" data-text-aria-label="hoeren.klavier"></div>
+        </section>
       </div>
     </section>
 

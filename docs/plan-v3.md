@@ -765,3 +765,13 @@ Abweichungen:
 - Die Überschrift war schon die Frage („Welche Taste ist das?“, „Which key is it?“).
 - Zusatztasten: `Klaviatur.baue(box, namen, beiTipp, { unten: 2 })` legt zwei weiße Tasten unter die tiefste Note, nachdem die Mindestzahl von 7 oben aufgefüllt ist (c¹ bis g¹ ergibt a bis h¹, 9 weiße Tasten). Der Entwurf zeigt drei Tasten darunter (g bis h¹); der Plan nennt zwei, umgesetzt sind zwei. Gibt es einen Buchstaben auf der Tastatur dadurch zweimal, zählt die Taste aus der Notenauswahl.
 - Nach der Antwort trägt die gesuchte Taste ein grünes Namensschild, auch bei richtiger Antwort in einer anderen Oktave (Klasse `ist-ziel`). Das gilt in allen Klaviaturen; die orange Markierung des mittleren C bleibt davon verschieden.
+
+### Paket 9: Hör-Spiel
+
+- Eine Spalte wie im Entwurf (höchstens 860 px): Kopfkarte, Steuerzeile (Nochmal hören, Bezugston-Kästchen, Sprechzeile), drei Karten, Spielzeug-Klavier. Die Sprechzeile darf hier bis zu drei Zeilen haben, ihre Höhe ist reserviert.
+- Das Banner liegt in der Kopfkarte (absolut darüber) und zeigt Titel, Untertitel, das Merktier (nur ab 600 px) und „Nächste Note →“ (`#hoeren-weiter`). Die Merkhilfe als Text steht in der Sprechzeile („Füchschen sagt: ✓ g¹ wie Giraffe“). Nach einer richtigen Antwort geht es wie bisher von selbst weiter, jetzt nach 1,8 statt 1,3 Sekunden, damit das Banner lesbar ist; der Knopf geht sofort weiter. Nach einem Fehler wartet das Spiel auf den Knopf.
+- Lob-Akkord: neue Funktion `Klang.akkord(halbtoene)` (Dur-Dreiklang auf der richtigen Note).
+- Die Ziffern 1, 2, 3 stehen jetzt immer auf den Karten, nicht nur bei Geräten mit Maus. Neues Symbol `tippen` in `js/symbole.js` oben rechts; nach der Antwort steht dort ✓ oder ✗.
+- Nach der Antwort tragen alle drei Karten den Namen, nicht nur die gewählte und die richtige.
+- Das Spielzeug-Klavier ist mit den vollen Namen beschriftet (c¹, d¹ …), wie im Entwurf mit „C4 D4 …“.
+- „Nochmal hören“ zeigt beim Abspielen eine kleine Puls-Animation am Lautsprecher.
