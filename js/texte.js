@@ -180,6 +180,10 @@
       "flug.toll": "Toll geflogen!",
       "flug.erreicht": "Erreichtes Level",
       "flug.geschaffte": "Geschaffte Level",
+      "flug.stufe.gemuetlich": "Gemütlich",
+      "flug.stufe.flott": "Flott",
+      "flug.stufe.schnell": "Schnell",
+      "flug.stufe.rasant": "Rasant",
 
       /* Klaviertasten */
       "klavier.frage": "Welche Taste ist das?",
@@ -521,6 +525,10 @@
       "flug.toll": "Great flying!",
       "flug.erreicht": "Level reached",
       "flug.geschaffte": "Levels finished",
+      "flug.stufe.gemuetlich": "Cruise",
+      "flug.stufe.flott": "Zippy",
+      "flug.stufe.schnell": "Fast",
+      "flug.stufe.rasant": "Turbo",
 
       "klavier.frage": "Which key is it?",
       "klavier.aria": "Piano keyboard",

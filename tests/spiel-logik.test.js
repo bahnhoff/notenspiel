@@ -206,10 +206,11 @@ test("Notenflug: jedes Level 15 % schneller, Punkte = Level × gewählte Noten, 
   for (let i = 0; i < 10; i++) L.flugAntwort(flug, true);
   assert.equal(flug.level, 2);
   L.flugAntwort(flug, true);
-  assert.equal(flug.punkte, 10 * 3 + 6);
+  // Combo x1 bis x5: 3 × (1 + 2 + 3 + 4 + 5 × 6), dann Level 2 mit x5
+  assert.equal(flug.punkte, 3 * 40 + 6 * 5);
   L.flugAntwort(flug, false);
   L.flugAntwort(flug, false);
-  assert.deepEqual(L.flugAntwort(flug, false), { levelGeschafft: false, beendet: true });
+  assert.equal(L.flugAntwort(flug, false).beendet, true);
   assert.equal(L.flugAntwort(flug, true), null);
   assert.equal(L.flugSterne(flug), 1);
 });
@@ -289,4 +290,51 @@ test("Spiel eine Melodie: 5 Melodien aus 4 bis 7 Noten der Auswahl, Lieder behal
   }
   assert.ok(L.neueMelodien(NOTEN, zufall).filter((m) => m.lied).length >= 4);
   assert.deepEqual([0, 2, 3, 5, 6].map(L.melodieSterne), [3, 3, 2, 2, 1]);
+});
+
+test("Notenflug: Combo bis x5 vervielfacht die Punkte, Fehler setzt sie auf x1 zurück", () => {
+  const flug = L.neuerFlug(3);
+  assert.deepEqual([1, 2, 3].map(() => L.flugAntwort(flug, true).punkte), [3, 6, 9]);
+  const fehler = L.flugAntwort(flug, false);
+  assert.deepEqual([fehler.punkte, fehler.combo, flug.combo], [0, 1, 1]);
+  assert.equal(L.flugAntwort(flug, true).punkte, 3);
+  assert.equal(flug.besteCombo, 3);
+});
+
+test("Notenflug: Tempo ändert Flugzeit und Punkte, gerundet und mindestens 1", () => {
+  assert.equal(L.flugzeit(1, 0.5), 16000);
+  assert.equal(L.flugzeit(1, 7), 8000); // ungültiges Tempo zählt wie 1
+  const langsam = L.neuerFlug(3, 0.75);
+  assert.equal(L.flugAntwort(langsam, true).punkte, 2); // 3 × 1 × 0,75 = 2,25
+  assert.equal(L.flugAntwort(L.neuerFlug(1, 0.5), true).punkte, 1); // 0,5 → mindestens 1
+  assert.equal(L.flugAntwort(L.neuerFlug(3, 1.25), true).punkte, 4); // 3,75
+  assert.deepEqual([0.5, 0.75, 1, 1.25].map(L.naechstesFlugTempo), [0.75, 1, 1.25, 0.5]);
+  assert.deepEqual([1, 2, 3, 6, 7, 12].map(L.flugTempoStufe),
+    ["flug.stufe.gemuetlich", "flug.stufe.gemuetlich", "flug.stufe.flott", "flug.stufe.schnell", "flug.stufe.rasant", "flug.stufe.rasant"]);
+});
+
+test("Melodie: Tipp zählt wie ein Fehler, Neustart behält die Fehler", () => {
+  const r = L.neueMelodieRunde();
+  L.melodieTaste(r, true, 3);
+  assert.equal(L.melodieTipp(r).ersterTipp, true);
+  L.melodieNeustart(r);
+  assert.deepEqual([r.pos, r.fehler, r.tipps], [0, 1, 1]);
+  [true, true].forEach((x) => L.melodieTaste(r, x, 3));
+  assert.deepEqual(L.melodieTaste(r, true, 3), { richtig: true, fertig: true });
+  // Die zweite Note bekam einen Tipp und zählt nicht als „beim ersten Versuch“.
+  assert.deepEqual([r.notenRichtig, r.notenGesamt, L.melodieSterne(r.fehler)], [2, 3, 3]);
+});
+
+test("Spielstand: gelesene Noten und zuletzt gespielter Modus; alte Stände bekommen Standardwerte", () => {
+  const v = L.verbucheErgebnis(L.leererSpielstand(), "notenflug", { gesamt: 40, neueSterne: 1, richtige: 12 }, 1);
+  const w = L.verbucheErgebnis(v.stand, "noten-memory", { gesamt: 90, neueSterne: 3, richtige: 6 }, 2);
+  assert.deepEqual([w.stand.notenGesamt, w.stand.letzterModus], [18, "noten-memory"]);
+  const alt = L.bereinigeSpielstand({ sterne: 7, flugTempo: 3, ton: "ja" });
+  assert.deepEqual([alt.ton, alt.flugTempo, alt.flugKlaviatur, alt.notenGesamt, alt.letzterModus], [true, 1, null, 0, ""]);
+  const gespeichert = L.bereinigeSpielstand(JSON.parse(JSON.stringify(Object.assign(w.stand, { ton: false, flugTempo: 0.75, flugKlaviatur: false }))));
+  assert.deepEqual([gespeichert.ton, gespeichert.flugTempo, gespeichert.flugKlaviatur, gespeichert.notenGesamt], [false, 0.75, false, 18]);
+});
+
+test("formatiereDauer: Minuten und Sekunden", () => {
+  assert.deepEqual([0, 48900, 72000, 600000, -5, NaN].map(L.formatiereDauer), ["0:00", "0:48", "1:12", "10:00", "0:00", "0:00"]);
 });

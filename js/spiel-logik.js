@@ -355,21 +355,48 @@
     startFlugzeit: 8000,   // Millisekunden im ersten Level
     tempoFaktor: 1.15,     // jedes Level etwa 15 % schneller
     leben: 3,
-    maxSterne: 3
+    maxSterne: 3,
+    maxCombo: 5,                   // Combo x1 bis x5
+    tempi: [0.5, 0.75, 1, 1.25]    // wählbare Tempofaktoren (Knopf „Tempo“)
   };
 
-  /** Flugzeit einer Note in Millisekunden für ein Level (ab 1). */
-  function flugzeit(level) {
-    return NOTENFLUG.startFlugzeit / Math.pow(NOTENFLUG.tempoFaktor, Math.max(1, level) - 1);
+  /** Gültiger Tempofaktor: einer der Werte aus NOTENFLUG.tempi, sonst 1. */
+  function flugTempo(tempo) {
+    return NOTENFLUG.tempi.indexOf(tempo) !== -1 ? tempo : 1;
+  }
+
+  /** Nächster Tempofaktor beim Tippen auf „Tempo“: 0,5 → 0,75 → 1 → 1,25 → 0,5. */
+  function naechstesFlugTempo(tempo) {
+    var i = NOTENFLUG.tempi.indexOf(flugTempo(tempo));
+    return NOTENFLUG.tempi[(i + 1) % NOTENFLUG.tempi.length];
+  }
+
+  /**
+   * Flugzeit einer Note in Millisekunden für ein Level (ab 1), geteilt durch
+   * den Tempofaktor (0,5 = doppelt so viel Zeit).
+   */
+  function flugzeit(level, tempo) {
+    return NOTENFLUG.startFlugzeit / Math.pow(NOTENFLUG.tempoFaktor, Math.max(1, level) - 1) / flugTempo(tempo === undefined ? 1 : tempo);
+  }
+
+  /** Textschlüssel der Tempostufe einer Welle: Welle 1–2 gemütlich, 3–4 flott, 5–6 schnell, ab 7 rasant. */
+  function flugTempoStufe(level) {
+    var stufen = ["gemuetlich", "flott", "schnell", "rasant"];
+    return "flug.stufe." + stufen[Math.min(3, Math.floor((Math.max(1, level) - 1) / 2))];
   }
 
   /**
    * Neuer Notenflug. `notenAnzahl` = Zahl der gewählten Noten, sie bestimmt
-   * mit dem Level die Punkte (siehe flugPunkteProNote).
+   * mit dem Level die Punkte (siehe flugPunkteProNote). `tempo` ist der
+   * Tempofaktor (Standard 1); eine Änderung während des Flugs setzt
+   * `flug.tempo` und gilt ab der nächsten Note.
+   * `combo` ist die Combo-Stufe für die Anzeige (1 bis 5), `serie` die Zahl
+   * der richtigen Antworten in Folge, `besteCombo` die höchste Stufe im Flug.
    */
-  function neuerFlug(notenAnzahl) {
+  function neuerFlug(notenAnzahl, tempo) {
     return { level: 1, imLevel: 0, punkte: 0, richtige: 0, fehler: 0, levelGeschafft: 0, beendet: false,
-      notenAnzahl: notenAnzahl >= 1 ? Math.floor(notenAnzahl) : 1 };
+      notenAnzahl: notenAnzahl >= 1 ? Math.floor(notenAnzahl) : 1,
+      tempo: flugTempo(tempo === undefined ? 1 : tempo), combo: 1, serie: 0, besteCombo: 1 };
   }
 
   /**
@@ -381,29 +408,49 @@
   }
 
   /**
+   * Punkte für eine richtige Note: Grundpunkte × Combo-Stufe × Tempofaktor,
+   * gerundet, mindestens 1.
+   */
+  function flugTrefferPunkte(flug, combo) {
+    return Math.max(1, Math.round(flugPunkteProNote(flug) * combo * flugTempo(flug.tempo)));
+  }
+
+  /**
    * Verbucht eine Note im Notenflug: richtig, falsch oder zu spät (richtig = false).
-   * Liefert { levelGeschafft, beendet } oder null, wenn das Spiel schon vorbei ist.
+   * Richtig: Combo steigt um 1 (höchstens 5), die Punkte zählen mit der Stufe
+   * nach dieser Antwort. Falsch oder zu spät: Combo zurück auf x1.
+   * Liefert { levelGeschafft, beendet, punkte, combo } oder null, wenn das
+   * Spiel schon vorbei ist. `punkte` = Punkte dieser Note.
    */
   function flugAntwort(flug, richtig) {
     if (flug.beendet) return null;
+    var punkte = 0;
     if (richtig) {
-      flug.punkte += flugPunkteProNote(flug);
+      flug.serie = (flug.serie || 0) + 1;
+      flug.combo = Math.min(NOTENFLUG.maxCombo, flug.serie);
+      flug.besteCombo = Math.max(flug.besteCombo || 1, flug.combo);
+      punkte = flugTrefferPunkte(flug, flug.combo);
+      flug.punkte += punkte;
       flug.richtige += 1;
     } else {
+      flug.serie = 0;
+      flug.combo = 1;
       flug.fehler += 1;
     }
     flug.imLevel += 1;
+    var e = { levelGeschafft: false, beendet: false, punkte: punkte, combo: flug.combo };
     if (flug.fehler >= NOTENFLUG.leben) {
       flug.beendet = true;
-      return { levelGeschafft: false, beendet: true };
+      e.beendet = true;
+      return e;
     }
     if (flug.imLevel >= NOTENFLUG.notenProLevel) {
       flug.levelGeschafft += 1;
       flug.level += 1;
       flug.imLevel = 0;
-      return { levelGeschafft: true, beendet: false };
+      e.levelGeschafft = true;
     }
-    return { levelGeschafft: false, beendet: false };
+    return e;
   }
 
   /** Neue Sterne: 1 pro abgeschlossenem Level, höchstens 3. */
@@ -565,6 +612,78 @@
     return melodien * MELODIE.punkteProMelodie + sterne * MELODIE.punkteProStern;
   }
 
+  /*
+   * Zustand einer Melodie-Runde für die Wertung:
+   *   pos          aktuelle Note der Melodie
+   *   fehler       falsche Tasten und Tipps der ganzen Runde (für melodieSterne)
+   *   tipps        benutzte Tipps der Runde
+   *   fehlerAn     { Notenindex → Zahl der Fehler und Tipps } in der aktuellen Melodie
+   *   notenRichtig Noten, die beim ersten Versuch stimmten (ohne Fehler, ohne Tipp)
+   *   notenGesamt  gespielte Noten der Runde
+   * Ablauf: melodieTaste je getippter Taste, melodieTipp für den Knopf „Tipp“,
+   * melodieNeustart für „Neu starten“, melodieNaechste vor jeder neuen Melodie.
+   */
+  function neueMelodieRunde() {
+    return { pos: 0, fehler: 0, tipps: 0, fehlerAn: {}, notenRichtig: 0, notenGesamt: 0 };
+  }
+
+  /** Fehler und Tipps an der aktuellen Note (für den Hinweis zur Lage ab dem zweiten). */
+  function melodieFehlerHier(r) {
+    return r.fehlerAn[r.pos] || 0;
+  }
+
+  /**
+   * Verbucht eine getippte Taste. `laenge` = Zahl der Noten der Melodie.
+   * Liefert { richtig, fertig }; fertig = letzte Note gespielt. Erst dann
+   * zählen die Noten der Melodie für notenRichtig und notenGesamt, damit ein
+   * Neustart nichts doppelt zählt.
+   */
+  function melodieTaste(r, richtig, laenge) {
+    if (!richtig) {
+      r.fehler += 1;
+      r.fehlerAn[r.pos] = melodieFehlerHier(r) + 1;
+      return { richtig: false, fertig: false };
+    }
+    r.pos += 1;
+    var fertig = r.pos >= laenge;
+    if (fertig) {
+      for (var i = 0; i < laenge; i++) if (!r.fehlerAn[i]) r.notenRichtig += 1;
+      r.notenGesamt += laenge;
+    }
+    return { richtig: true, fertig: fertig };
+  }
+
+  /**
+   * Tipp für die aktuelle Note: zählt für die Sterne wie ein Fehler, und die
+   * Note zählt nicht mehr als „beim ersten Versuch richtig“.
+   * Liefert { ersterTipp } (true beim ersten Tipp der Runde).
+   */
+  function melodieTipp(r) {
+    r.fehler += 1;
+    r.tipps += 1;
+    r.fehlerAn[r.pos] = melodieFehlerHier(r) + 1;
+    return { ersterTipp: r.tipps === 1 };
+  }
+
+  /** „Neu starten“: zurück zur ersten Note; Fehler und Tipps bleiben gezählt. */
+  function melodieNeustart(r) {
+    r.pos = 0;
+  }
+
+  /** Vor der nächsten Melodie: erste Note, Fehler je Note neu. */
+  function melodieNaechste(r) {
+    r.pos = 0;
+    r.fehlerAn = {};
+  }
+
+  /* ---------- Zeit ---------- */
+
+  /** Spieldauer als „0:48“ oder „12:05“ (Minuten:Sekunden, abgerundet). */
+  function formatiereDauer(ms) {
+    var s = istZahl(ms) ? Math.floor(ms / 1000) : 0;
+    return Math.floor(s / 60) + ":" + zweistellig(s % 60);
+  }
+
   /* ---------- Spielstand ---------- */
 
   function leererSpielstand() {
@@ -581,7 +700,12 @@
       sprache: null,                 // "de" oder "en"; null = beim Laden nach der Browsersprache wählen
       naechstes: null,               // Kennung des nächsten Tiers (Silhouette im Ergebnis), null = noch nicht gewählt
       memoryStufe: "normal",         // zuletzt gewählte Stufe im Noten-Memory: "normal" oder "schwer"
-      reise: { tag: "", serie: 0 }   // Tägliche Notenreise: letzter geschaffter Tag, Tagesserie
+      reise: { tag: "", serie: 0 },  // Tägliche Notenreise: letzter geschaffter Tag, Tagesserie
+      ton: true,                     // Töne an (Knopf „Ton an oder aus“)
+      flugTempo: 1,                  // Tempofaktor im Notenflug, siehe NOTENFLUG.tempi
+      flugKlaviatur: null,           // Klavier-Lotse im Notenflug: true offen, false zu, null = nach Bildschirmbreite
+      notenGesamt: 0,                // richtig gelesene Noten aller verbuchten Runden (Noten-Pille im Menü)
+      letzterModus: ""               // Kennung des zuletzt verbuchten Modus, "" = noch keiner
     };
   }
 
@@ -766,6 +890,12 @@
     if (roh.reise && typeof roh.reise.tag === "string" && /^\d{4}-\d{2}-\d{2}$/.test(roh.reise.tag) && istZahl(roh.reise.serie)) {
       stand.reise = { tag: roh.reise.tag, serie: Math.floor(roh.reise.serie) };
     }
+    // Felder aus Version 3; ältere Spielstände bekommen die Standardwerte.
+    if (typeof roh.ton === "boolean") stand.ton = roh.ton;
+    stand.flugTempo = flugTempo(roh.flugTempo);
+    if (typeof roh.flugKlaviatur === "boolean") stand.flugKlaviatur = roh.flugKlaviatur;
+    if (istZahl(roh.notenGesamt)) stand.notenGesamt = Math.floor(roh.notenGesamt);
+    if (typeof roh.letzterModus === "string" && /^[a-z0-9-]{1,30}$/.test(roh.letzterModus)) stand.letzterModus = roh.letzterModus;
     return stand;
   }
 
@@ -816,7 +946,8 @@
   /**
    * Verbucht das Ergebnis eines beliebigen Modus im Spielstand:
    * Sterne in die gemeinsame Sammlung, Rekord in die Liste des Modus,
-   * neue Tiere, schwierige Noten. Ändert `stand` nicht, sondern liefert
+   * neue Tiere, schwierige Noten, richtig gelesene Noten (e.richtige) in
+   * `notenGesamt` und den Modus als `letzterModus`. Ändert `stand` nicht, sondern liefert
    * { stand, neueTiere, rekord, tagesreise } mit rekord = { modus, nr, platz }
    * oder null. Bei e.tagesreise = true kommt der Extrastern der Notenreise
    * dazu (höchstens einmal pro Tag), tagesreise = { extrastern, serie }.
@@ -826,6 +957,8 @@
     var neueSterne = istZahl(e.neueSterne) ? Math.floor(e.neueSterne) : 0;
     neu.sterne += neueSterne;
     neu.zaehler += 1;
+    if (istZahl(e.richtige)) neu.notenGesamt += Math.floor(e.richtige);
+    if (/^[a-z0-9-]{1,30}$/.test(modus)) neu.letzterModus = modus;
     var eintrag = {
       gesamt: istZahl(e.gesamt) ? e.gesamt : 0,
       sterne: istZahl(e.rekordSterne) ? e.rekordSterne : neueSterne,
@@ -887,9 +1020,13 @@
     uebungWeiter: uebungWeiter,
     NOTENFLUG: NOTENFLUG,
     flugzeit: flugzeit,
+    flugTempo: flugTempo,
+    naechstesFlugTempo: naechstesFlugTempo,
+    flugTempoStufe: flugTempoStufe,
     neuerFlug: neuerFlug,
     flugAntwort: flugAntwort,
     flugPunkteProNote: flugPunkteProNote,
+    flugTrefferPunkte: flugTrefferPunkte,
     flugSterne: flugSterne,
     MEMORY: MEMORY,
     memoryStufe: memoryStufe,
@@ -900,6 +1037,13 @@
     neueMelodien: neueMelodien,
     melodieSterne: melodieSterne,
     melodiePunkte: melodiePunkte,
+    neueMelodieRunde: neueMelodieRunde,
+    melodieFehlerHier: melodieFehlerHier,
+    melodieTaste: melodieTaste,
+    melodieTipp: melodieTipp,
+    melodieNeustart: melodieNeustart,
+    melodieNaechste: melodieNaechste,
+    formatiereDauer: formatiereDauer,
     leererSpielstand: leererSpielstand,
     bereinigeSpielstand: bereinigeSpielstand,
     bereinigeEinstellungen: bereinigeEinstellungen,

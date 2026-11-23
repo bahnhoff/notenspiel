@@ -220,6 +220,7 @@
     umgebung.beende({
       gesamt: L.memoryPunkte(s.paare, sterne, s.stufe),
       neueSterne: sterne,
+      richtige: s.paare,
       variante: s.stufe === "schwer" ? "schwer" : undefined,
       titel: T.t("memory.ueberschrift", { paare: s.paare, zuege: s.zuege }),
       spruch: T.t("memory.alle") + " " + (sterne === 3 ? T.t("memory.gedaechtnis") : T.t("ende.toll")),

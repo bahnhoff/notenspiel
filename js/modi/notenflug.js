@@ -118,7 +118,7 @@
     $("flug-level-einblendung").hidden = true;
     tasten.zuruecksetzen();
     var note = waehleNote();
-    zustand = { note: note, vergangen: 0, dauer: L.flugzeit(flug.level), offen: true, dx: START_DX,
+    zustand = { note: note, vergangen: 0, dauer: L.flugzeit(flug.level, flug.tempo), offen: true, dx: START_DX,
       level: flug.level, nr: flug.imLevel + 1 };
     zeigeStatus();
     zeichneSystem(note);
@@ -251,6 +251,7 @@
     umgebung.beende({
       gesamt: f.punkte,
       neueSterne: sterne,
+      richtige: f.richtige,
       titel: t("flug.ueberschrift", { n: f.richtige }),
       spruch: f.levelGeschafft >= 3 ? t("flug.wow") : (f.levelGeschafft > 0 ? t("flug.toll") : t("ende.nochmal")),
       stimmung: f.levelGeschafft > 0 ? "froh" : "normal",

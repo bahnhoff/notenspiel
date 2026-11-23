@@ -679,3 +679,13 @@ Jedes Paket ist ein lokaler Commit ohne Zusatzzeilen. Nach jedem Paket: `node --
 ## Entscheidung vom 2026-11-23
 
 Der Benutzer will den Aufbau aller Seiten übernehmen und fehlende Funktionen nachbauen. Die Rückfragen oben werden nicht einzeln gestellt: Es gelten die Standardlösungen. Sie stehen im Abschlussbericht, der Benutzer kann sie danach ändern.
+
+## Umsetzung: Stand und Abweichungen
+
+### Paket 1: Neue Logik (`js/spiel-logik.js`)
+
+- Spielstand: `ton` (Standard `true`), `flugTempo` (1), `flugKlaviatur` (`null` heißt „nach Bildschirmbreite“, erst ein Tipp speichert `true` oder `false`), `notenGesamt` (0), `letzterModus` (`""`).
+- `verbucheErgebnis` zählt `e.richtige` zu `notenGesamt` und setzt `letzterModus`. Notenflug und Noten-Memory geben `richtige` jetzt mit (gefangene Noten, gefundene Paare).
+- Notenflug: `neuerFlug(anzahl, tempo)`; das Flug-Objekt hat `tempo`, `combo` (1 bis 5, für die Pille), `serie` und `besteCombo`. `flugAntwort` liefert zusätzlich `punkte` (Punkte dieser Note) und `combo`. Weitere Funktionen: `flugzeit(level, tempo)`, `flugTrefferPunkte`, `flugTempo` (prüft den Wert), `naechstesFlugTempo`, `flugTempoStufe` (liefert `flug.stufe.gemuetlich` und so weiter, Texte sind schon da). Die Combo zählt ab sofort im Notenflug, das Tempo bleibt bis Paket 7 bei 1.
+- Melodie: Wertungsobjekt `neueMelodieRunde()` mit `melodieTaste`, `melodieTipp`, `melodieNeustart`, `melodieNaechste`, `melodieFehlerHier`. `js/modi/melodie.js` nutzt es schon. Abweichung: Richtige Noten beim ersten Versuch zählen erst am Ende einer Melodie, damit „Neu starten“ nichts doppelt zählt; eine Note mit Fehler oder Tipp zählt auch nach einem Neustart nicht als „beim ersten Versuch“.
+- `formatiereDauer(ms)`.

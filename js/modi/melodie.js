@@ -36,11 +36,7 @@
   var umgebung = null;
   var melodien = null;
   var nr = 0;                 // Nummer der Melodie in der Runde
-  var pos = 0;                // aktuelle Note der Melodie
-  var fehler = 0;             // falsche Tasten in der ganzen Runde
-  var fehlerHier = 0;         // falsche Tasten an der aktuellen Note
-  var notenRichtig = 0;       // Noten, die beim ersten Versuch stimmten
-  var notenGesamt = 0;
+  var wertung = null;         // SpielLogik.neueMelodieRunde: Position, Fehler, Tipps, richtige Noten
   var zustand = "spielen";    // "spielen", "hoeren" (Melodie erklingt), "fertig"
   var klaviatur = null;
   var timer = [];
@@ -66,9 +62,7 @@
     umgebung = u;
     melodien = L.neueMelodien(u.noten, null, u.etappe ? L.MELODIE.melodienProEtappe : 0);
     nr = 0;
-    fehler = 0;
-    notenRichtig = 0;
-    notenGesamt = 0;
+    wertung = L.neueMelodieRunde();
     // Mit Vorzeichen-Noten brauchen ♯ und ♭ vor jeder Note mehr Platz.
     var mitVorzeichen = u.noten.some(function (n) { return n.vorzeichen; });
     var abstand = mitVorzeichen ? 33 : 28;
@@ -96,7 +90,7 @@
 
   function zeigeStatus() {
     $("melodie-aufgabe").textContent = T.t("melodie.nr", { nr: nr + 1, anzahl: melodien.length });
-    H.zeigeSterne($("melodie-sterne"), $("melodie-punkte"), L.melodieSterne(fehler), 3,
+    H.zeigeSterne($("melodie-sterne"), $("melodie-punkte"), L.melodieSterne(wertung.fehler), 3,
       (nr + (zustand === "spielen" ? 0 : 1)) * L.MELODIE.punkteProMelodie);
   }
 
@@ -128,8 +122,8 @@
   function markiere(leuchtet) {
     var noten = $("melodie-notensystem").querySelectorAll(".melodie-note");
     Array.prototype.forEach.call(noten, function (g, i) {
-      g.classList.toggle("ist-aktuell", zustand === "spielen" && i === pos);
-      g.classList.toggle("ist-gespielt", zustand !== "spielen" || i < pos);
+      g.classList.toggle("ist-aktuell", zustand === "spielen" && i === wertung.pos);
+      g.classList.toggle("ist-gespielt", zustand !== "spielen" || i < wertung.pos);
       g.classList.toggle("leuchtet", i === leuchtet);
     });
   }
@@ -142,8 +136,7 @@
   }
 
   function zeigeMelodie() {
-    pos = 0;
-    fehlerHier = 0;
+    L.melodieNaechste(wertung);
     zustand = "spielen";
     klaviatur.zuruecksetzen();
     zeichneSystem();
@@ -174,26 +167,21 @@
   function tippe(tnr) {
     if (!aktiv() || zustand !== "spielen") return;
     var m = melodie();
-    var note = m.noten[pos];
+    var note = m.noten[wertung.pos];
     var ton = klaviatur.tastenTon(tnr, note, umgebung.antwortmodus);
     var richtig = L.istRichtig(note, N.antwortSchluessel(ton, umgebung.antwortmodus));
     leuchteTaste(tnr, richtig, ton);
+    var e = L.melodieTaste(wertung, richtig, m.noten.length);
     if (!richtig) {
-      fehler++;
-      fehlerHier++;
-      $("melodie-text").textContent = fehlerHier >= 2
+      $("melodie-text").textContent = L.melodieFehlerHier(wertung) >= 2
         ? T.t("melodie.falschHinweis", { getippt: ton.anzeige, hinweis: note.hinweis })
         : T.t("melodie.falsch", { getippt: ton.anzeige });
       umgebung.zeigeTier($("melodie-tier"), "oje");
       zeigeStatus();
       return;
     }
-    pos++;
-    notenGesamt++;
-    if (fehlerHier === 0) notenRichtig++;
-    fehlerHier = 0;
     umgebung.zeigeTier($("melodie-tier"), "froh");
-    if (pos < m.noten.length) {
+    if (!e.fertig) {
       $("melodie-text").textContent = T.t("melodie.richtig", { name: note.anzeige });
       markiere();
       return;
@@ -250,13 +238,13 @@
       return;
     }
     var anzahl = melodien.length;
-    var sterne = L.melodieSterne(fehler);
-    var f = fehler;
+    var sterne = L.melodieSterne(wertung.fehler);
+    var f = wertung.fehler;
     melodien = null;
     umgebung.beende({
       gesamt: L.melodiePunkte(anzahl, sterne),
-      richtige: notenRichtig,
-      aufgaben: notenGesamt,
+      richtige: wertung.notenRichtig,
+      aufgaben: wertung.notenGesamt,
       neueSterne: sterne,
       titel: T.t("melodie.ueberschrift", { n: anzahl }),
       spruch: f === 0 ? T.t("melodie.ohneFehler") : (sterne >= 2 ? T.t("ende.toll") : T.t("ende.geschafft")),
