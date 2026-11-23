@@ -1770,6 +1770,58 @@ h1:focus { outline: none; }
 }
 .memory-karte.ist-kein-paar .karte-marke { color: var(--rot); }
 
+/* Abzeichen mit Wort („✓ Gefunden“, „Aufgedeckt“) als kleine Pille oben rechts */
+.memory-karte .karte-marke.hat-wort,
+.memory-karte.ist-gefunden .karte-marke.hat-wort {
+  top: 5px;
+  right: 5px;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  width: auto;
+  height: auto;
+  padding: 2px 7px;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 800;
+  line-height: 1.3;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  z-index: 1;
+}
+.memory-karte.ist-offen .karte-marke.nur-wort { background: #fff1d6; color: #9a5a00; }
+
+/* Unterschrift unter dem Inhalt einer offenen Karte */
+.memory-karte.ist-offen { flex-direction: column; }
+.memory-karte.ist-offen .karte-vorderseite { flex: 1 1 auto; min-height: 0; height: auto; }
+.karte-unterschrift {
+  display: none;
+  flex: 0 0 auto;
+  max-width: 100%;
+  padding-bottom: 2px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-leise);
+}
+.memory-karte.ist-offen .karte-unterschrift:not(:empty) { display: block; }
+.memory-karte.ist-gefunden .karte-unterschrift { color: var(--gruen); }
+
+/* Grüner Punkt vor „1 von 6 Paaren“ */
+.pille-punkt::before {
+  content: "";
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-right: 6px;
+  border-radius: 50%;
+  background: var(--gruen);
+}
+
 /* Schwer: 20 Karten, auf dem Handy 4 Spalten × 5 Reihen (passt ab 340 px Breite) */
 /* Wenige Paare (kleiner Tonumfang): 8 Karten als 2 Reihen zu 4 statt 3, 3, 2 */
 .memory-karten[data-karten="8"] .memory-karte { flex-basis: calc((100% - 24px) / 4); }
@@ -1784,6 +1836,16 @@ h1:focus { outline: none; }
 .memory-schwer .karte-rueckseite { font-size: 1.9rem; }
 .memory-schwer .memory-karte .karte-name { font-size: 1.9rem; }
 .memory-schwer .karte-marke { font-size: 1rem; right: 4px; }
+
+/* Handy: Abzeichen nur als Zeichen, keine Unterschriften; Kopfkarte mit Titel oben, Pillen darunter */
+@media (max-width: 599px) {
+  .karte-marke .marke-wort { display: none; }
+  .memory-karte .karte-marke.nur-wort { display: none; }
+  .memory-karte .karte-marke.hat-wort,
+  .memory-karte.ist-gefunden .karte-marke.hat-wort { padding: 0; width: 1.5rem; height: 1.5rem; justify-content: center; font-size: 0.95rem; }
+  .memory-schwer .memory-karte.ist-gefunden .karte-marke.hat-wort { width: 1.2rem; height: 1.2rem; font-size: 0.8rem; top: 3px; right: 3px; }
+  .memory-karte.ist-offen .karte-unterschrift:not(:empty) { display: none; }
+}
 
 /* Wahl vor dem Spiel: zwei große Knöpfe mit kleinem Bild des Rasters */
 .memory-wahl { text-align: center; }
@@ -2668,4 +2730,14 @@ body > main { flex: 1 0 auto; width: 100%; }
   .knopf-antwort { min-height: 60px; }
   .antwort-silbe { font-size: 0.75rem; }
   .sprech-zeile-text { font-size: 0.92rem; }
+}
+
+/* Noten-Memory auf dem Handy: Zurück und Titel in der ersten Reihe, Pillen mittig darunter */
+@media (max-width: 699px) {
+  .ansicht-memory .runde-kopf.kopfkarte {
+    grid-template-columns: 3rem minmax(0, 1fr) 3rem;
+    grid-template-areas: "zurueck titel ." "status status status";
+    gap: 6px 8px;
+  }
+  .ansicht-memory .kopfkarte .runde-status { justify-content: center; }
 }

@@ -129,7 +129,8 @@
       b.className = "memory-karte";
       b.innerHTML = '<span class="karte-rueckseite" aria-hidden="true">♪</span>' +
         '<span class="karte-vorderseite" aria-hidden="true"></span>' +
-        '<span class="karte-marke" aria-hidden="true"></span>';
+        '<span class="karte-marke" aria-hidden="true"></span>' +
+        '<span class="karte-unterschrift" aria-hidden="true"></span>';
       var vorne = b.querySelector(".karte-vorderseite");
       if (k.art === "note") {
         // Mit Vorzeichen-Noten etwas breiter, damit ♯ und ♭ nicht am Schlüssel kleben.
@@ -155,7 +156,29 @@
     k.knopf.setAttribute("aria-label", text);
     k.knopf.classList.toggle("ist-offen", k.zustand !== "zu");
     k.knopf.classList.toggle("ist-gefunden", k.zustand === "gefunden");
-    k.knopf.querySelector(".karte-marke").textContent = k.zustand === "gefunden" ? "✓" : (k.knopf.classList.contains("ist-kein-paar") ? "✗" : "");
+    // Abzeichen oben rechts: Zeichen und Wort getrennt, auf dem Handy bleibt nur das Zeichen.
+    var zeichen = "", wort = "";
+    if (k.zustand === "gefunden") { zeichen = "✓"; wort = T.t("memory.abzeichenGefunden"); }
+    else if (k.knopf.classList.contains("ist-kein-paar")) zeichen = "✗";
+    else if (k.zustand === "offen") wort = T.t("memory.abzeichenOffen");
+    var marke = k.knopf.querySelector(".karte-marke");
+    marke.innerHTML = "";
+    marke.classList.toggle("hat-wort", !!wort);
+    marke.classList.toggle("nur-wort", !!wort && !zeichen);
+    if (zeichen) marke.appendChild(spanMit("marke-zeichen", zeichen));
+    if (wort) marke.appendChild(spanMit("marke-wort", wort));
+    // Unterschrift unter dem Inhalt: Art der Karte, nach dem Finden der Name der Note.
+    var unter = "";
+    if (k.zustand === "gefunden") unter = T.t("memory.unterschriftNote", { name: k.note.anzeige });
+    else if (k.zustand === "offen") unter = k.art === "note" ? T.t("schluessel." + k.note.schluessel) : T.t("memory.unterschriftName");
+    k.knopf.querySelector(".karte-unterschrift").textContent = unter;
+  }
+
+  function spanMit(klasse, text) {
+    var s = document.createElement("span");
+    s.className = klasse;
+    s.textContent = text;
+    return s;
   }
 
   function deckeZu() {

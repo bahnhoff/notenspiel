@@ -790,3 +790,10 @@ Abweichungen:
 - Namensschild: neue Option `schild` in `Notensystem.zeichne` (dunkles Kästchen rechts am Notenkopf). Es zeigt den gesuchten Namen, solange die Note gesetzt, aber noch nicht geprüft ist; nach „Prüfen“ steht wie bisher der echte Name daneben.
 - Statuszeile `#setzen-status` unter dem Inhalt: „Violinschlüssel · Note d“ und „Treble clef · Note D“; nach dem Prüfen mit dem genauen Namen.
 - Die Vorzeichen-Knöpfe stehen jetzt unter ▼ ▲ Prüfen.
+
+### Paket 12: Noten-Memory
+
+- Abzeichen in `.karte-marke` mit Zeichen und Wort: gefundene Karten „✓ Gefunden“ („✓ Matched“), offene Karten „Aufgedeckt“ („Flipped“), ein falsches Paar weiter nur „✗“ (rot gestrichelt). Auf dem Handy (unter 600 px) bleibt nur das Zeichen, „Aufgedeckt“ entfällt dort ganz.
+- Unterschrift `.karte-unterschrift` nur auf offenen Karten (verdeckte Karten zeigen nichts): Schlüssel der Note oder „Notenname“, nach dem Finden auf beiden Karten „Note c¹“. Auf dem Handy entfällt sie. Sie verrät nichts, was die Karte nicht ohnehin zeigt.
+- Sprechtext nach einem Paar: „Super, du hast c¹ gefunden!“ und „Great job! You found C4!“; die Merkhilfe darüber bleibt.
+- Kopfkarte: grüner Punkt vor der Paare-Pille (`.pille-punkt`). Handy: Zurück und Titel in der ersten Reihe, Pillen mittig darunter (der Entwurf hat kein Handy-Bild; eine eigene Reihe nur für den Pfeil kostet zu viel Höhe).

@@ -338,3 +338,15 @@ test("Spielstand: gelesene Noten und zuletzt gespielter Modus; alte Stände beko
 test("formatiereDauer: Minuten und Sekunden", () => {
   assert.deepEqual([0, 48900, 72000, 600000, -5, NaN].map(L.formatiereDauer), ["0:00", "0:48", "1:12", "10:00", "0:00", "0:00"]);
 });
+
+test("Noten-Memory: Lob nach einem Paar, Abzeichen und Unterschriften auf Deutsch und Englisch", () => {
+  const Texte = require("../js/texte.js");
+  const reihe = () => [Texte.t("memory.paar", { name: "c¹" }), Texte.t("memory.abzeichenGefunden"), Texte.t("memory.abzeichenOffen"), Texte.t("memory.unterschriftName"), Texte.t("memory.unterschriftNote", { name: "e¹" })];
+  assert.deepEqual(reihe(), ["Super, du hast c¹ gefunden!", "Gefunden", "Aufgedeckt", "Notenname", "Note e¹"]);
+  Texte.setzeSprache("en");
+  try {
+    assert.deepEqual(reihe(), ["Great job! You found c¹!", "Matched", "Flipped", "Note name", "Note e¹"]);
+  } finally {
+    Texte.setzeSprache("de");
+  }
+});
