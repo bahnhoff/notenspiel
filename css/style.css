@@ -121,13 +121,40 @@ h1:focus { outline: none; }
   --start-breite: 440px;
 }
 
-/* Sprachumschalter oben rechts, nur auf der Startseite */
-.ansicht-start { position: relative; }
+/* Kopfzeile der Startseite wie im Entwurf: Schriftzug links, Ton und Sprache rechts */
+.start-oben {
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  max-width: 900px;
+  width: 100%;
+  margin: 0 auto -6px;
+}
+.start-marke {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: var(--text);
+}
+.start-marke-symbol {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: #fff1c2;
+  border: 2px solid #f3d27a;
+  line-height: 0;
+}
+.start-marke-symbol .symbol-svg { width: 28px; height: 28px; }
+.start-oben-rechts { display: flex; align-items: center; gap: 10px; }
 
 .sprach-umschalter {
-  position: absolute;
-  top: 0;
-  right: 0;
   display: flex;
   border: 2px solid var(--rand);
   border-radius: 999px;

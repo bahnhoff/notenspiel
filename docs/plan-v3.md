@@ -721,3 +721,8 @@ Abweichungen:
 - Ab 700 px steht der Titel auf allen Spielseiten links neben der Zurück-Pille (wie im Notenflug-Entwurf), nicht mittig.
 - Die Punkte-Pille hat kein Symbol; die Sterne-Pille behält die drei ★-Zeichen.
 - Die Stammfarben sind für ausreichenden Kontrast dunkler als im Entwurf. G hat einen hellgoldenen Hintergrund, weil die gelbe Schrift auf Weiß zu schwach ist.
+
+### Paket 4: Startseite
+
+- Neue Kopfzeile `.start-oben`: links der Schriftzug „Notenzoo“ mit Pfotensymbol in einem gelben Kästchen (wie das Kästchen mit Tierkopf im Entwurf), rechts der Ton-Knopf (`Bausteine.tonKnopf()`, eingesetzt in js/app.js) und der Sprachumschalter. Der Umschalter steht nicht mehr absolut oben rechts.
+- `Bausteine.menue.aktualisiere()` frischt jetzt auch die Ton-Knöpfe auf, damit ihr Aria-Text nach einem Sprachwechsel stimmt.

@@ -850,6 +850,7 @@
     speichereSpielstand();
   });
 
+  $("start-ton").replaceWith(window.Bausteine.tonKnopf()); // Lautsprecher oben rechts auf der Startseite
   window.Symbole.setzeEin(document); // gezeichnete Symbole in Menü- und Ergebnisknöpfen
   wendeSpracheAn();
   baueStartseite();

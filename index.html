@@ -38,10 +38,18 @@
 
     <!-- Startseite -->
     <section id="ansicht-start" class="ansicht ansicht-start" aria-labelledby="titel-start">
-      <!-- Sprachumschalter nur auf der Startseite, damit keine Runde mitten im Spiel die Sprache wechselt -->
-      <div class="sprach-umschalter" id="sprach-umschalter" role="group" aria-label="Sprache" data-text-aria-label="sprache.gruppe">
-        <button type="button" class="sprach-knopf" data-sprache="de" lang="de" aria-label="Deutsch" aria-pressed="true">DE</button>
-        <button type="button" class="sprach-knopf" data-sprache="en" lang="en" aria-label="English" aria-pressed="false">EN</button>
+      <!-- Kopfzeile wie im Entwurf: Schriftzug links, Ton und Sprache rechts -->
+      <div class="start-oben">
+        <span class="start-marke"><span class="start-marke-symbol" data-symbol="pfote" aria-hidden="true"></span><span data-text="meta.titel">Notenzoo</span></span>
+        <div class="start-oben-rechts">
+          <!-- Ton-Knopf (Bausteine.tonKnopf) setzt js/app.js hier ein -->
+          <span id="start-ton"></span>
+          <!-- Sprachumschalter nur auf der Startseite, damit keine Runde mitten im Spiel die Sprache wechselt -->
+          <div class="sprach-umschalter" id="sprach-umschalter" role="group" aria-label="Sprache" data-text-aria-label="sprache.gruppe">
+            <button type="button" class="sprach-knopf" data-sprache="de" lang="de" aria-label="Deutsch" aria-pressed="true">DE</button>
+            <button type="button" class="sprach-knopf" data-sprache="en" lang="en" aria-label="English" aria-pressed="false">EN</button>
+          </div>
+        </div>
       </div>
       <div class="start-tier" id="start-tier"></div>
       <h1 id="titel-start" class="spieltitel" tabindex="-1" data-text="meta.titel">Notenzoo</h1>

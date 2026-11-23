@@ -57,6 +57,7 @@
  *   Bausteine.menue.baue({ stand, navigiere, rundeLaeuft, pausiere, reiseAktiv })
  *   Bausteine.menue.zeige(ansicht)    nach jedem Ansichtswechsel (js/app.js)
  *   Bausteine.menue.aktualisiere()    nach Änderungen an Sternen, Noten, Tier
+ *                                     (frischt auch die Texte der Ton-Knöpfe auf)
  *   Das Menü (#oberes-menue) erscheint auf allen Ansichten außer Startseite
  *   und Ergebnis, die Fußzeile (#fusszeile) überall außer im Notenflug.
  *   `navigiere(ziel)` mit ziel "start", "reise", "tiere" oder "einstellungen"
@@ -242,6 +243,7 @@
   }
 
   function aktualisiere() {
+    tonKnoepfe.forEach(zeigeTon); // Texte der Ton-Knöpfe nach einem Sprachwechsel
     if (!menueOptionen) return;
     var stand = menueOptionen.stand();
     var L = root.SpielLogik;
