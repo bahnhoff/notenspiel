@@ -1940,7 +1940,8 @@ h1:focus { outline: none; }
 
 /* Sprechzeile des Begleiters: bis zu drei Zeilen, die Höhe ist reserviert */
 .hoeren-sprech { display: flex; min-width: 0; }
-.hoeren-sprech .sprech-zeile { flex: 1 1 auto; min-height: 64px; border-radius: 22px; }
+/* Feste Höhe für drei Zeilen: Ein längerer Text darf Karten darunter nicht verschieben */
+.hoeren-sprech .sprech-zeile { flex: 1 1 auto; height: 68px; box-sizing: border-box; overflow: hidden; border-radius: 22px; }
 .hoeren-sprech .sprech-zeile-text {
   white-space: normal; line-height: 1.2; font-size: 0.92rem;
   display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; line-clamp: 3;
@@ -2046,7 +2047,7 @@ h1:focus { outline: none; }
   .hoeren-steuerung { grid-template-columns: auto minmax(0, 1fr); gap: 8px; }
   .knopf-hoeren { grid-column: 1 / -1; font-size: 1.15rem; min-height: 56px; }
   .knopf-bezug { min-height: 56px; padding: 6px 10px; }
-  .hoeren-sprech .sprech-zeile { min-height: 56px; padding-right: 10px; }
+  .hoeren-sprech .sprech-zeile { height: 62px; padding-right: 10px; }
   .hoeren-sprech .sprech-zeile-text { font-size: 0.82rem; }
   .hoeren-optionen { grid-template-columns: minmax(0, 1fr); gap: 8px; }
   .hoer-option { flex-direction: row; justify-content: flex-start; gap: 10px; min-height: 96px; padding: 6px 40px 6px 44px; }

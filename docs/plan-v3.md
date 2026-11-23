@@ -797,3 +797,9 @@ Abweichungen:
 - Unterschrift `.karte-unterschrift` nur auf offenen Karten (verdeckte Karten zeigen nichts): Schlüssel der Note oder „Notenname“, nach dem Finden auf beiden Karten „Note c¹“. Auf dem Handy entfällt sie. Sie verrät nichts, was die Karte nicht ohnehin zeigt.
 - Sprechtext nach einem Paar: „Super, du hast c¹ gefunden!“ und „Great job! You found C4!“; die Merkhilfe darüber bleibt.
 - Kopfkarte: grüner Punkt vor der Paare-Pille (`.pille-punkt`). Handy: Zurück und Titel in der ersten Reihe, Pillen mittig darunter (der Entwurf hat kein Handy-Bild; eine eigene Reihe nur für den Pfeil kostet zu viel Höhe).
+
+### Nachbesserung Hör-Spiel: nichts verrutscht beim Tippen
+
+- Ursache 1: Der Hinweis „Kein Ton?“ (`#hoeren-hinweis`) stand zwischen Steuerzeile und Karten. Er erschien 900 ms nach dem Start, wenn der Ton noch nicht lief (iPhone), und verschwand bei jedem „Nochmal hören“ kurz, um 900 ms später wiederzukommen. Die Karten sprangen dabei jedes Mal um etwa 78 px. Jetzt steht der Hinweis unter den Karten und bleibt stehen, bis der Ton wirklich läuft.
+- Ursache 2: Die Sprechzeile hatte nur eine Mindesthöhe; dreizeilige Texte machten sie 3 bis 5 px höher. Sie hat jetzt eine feste Höhe für drei Zeilen (68 px, Handy 62 px).
+- Prüfskript: `/tmp/notenspiel-e2e/hinweis-verrutschen.js` (AudioContext bleibt „suspended“).

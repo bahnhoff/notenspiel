@@ -127,10 +127,14 @@
       box.hidden = false;
       return;
     }
-    box.hidden = true;
+    // Der Hinweis „Kein Ton?“ bleibt stehen, bis der Ton wirklich läuft. Ihn bei
+    // jedem „Nochmal hören“ erst aus- und nach 900 ms wieder einzublenden, ließ
+    // den Inhalt darunter springen, während das Kind tippt.
     hinweisTimer = setTimeout(function () {
       if (!aktiv()) return;
-      if (!Ton.laeuft()) {
+      if (Ton.laeuft()) {
+        box.hidden = true;
+      } else {
         box.textContent = T.t("hoeren.stumm");
         box.hidden = false;
       }
