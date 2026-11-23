@@ -82,6 +82,13 @@ Ganz oben steht der Hauptknopf **Noten üben** für „Welche Note ist das?“ m
 
 Schrift ist Nunito Sans (SIL Open Font License), lokal als `fonts/nunito-sans-latin.woff2`, damit die Seite keine fremden Server anfragt.
 
+Auch alle übrigen Seiten folgen im Stil den Stitch-Entwürfen (Projekt „Modern Note Learning App“); Aufbau und Abläufe sind geblieben. Gemeinsame Bausteine in `css/style.css`:
+
+- Kopfzeile der Spiele: Zurück-Knopf, darüber klein „AUFGABE 3 VON 10“ und die Überschrift, rechts Sterne in Gold und Punkte als Pille. Ab 700 Pixel steht alles in einer Reihe mit fester Mitte, auf dem Handy die Überschrift unter Zurück und Stand.
+- Notensystem als weiße Karte mit weichem Schatten (`--schatten-weich`), Antworttasten mit fühlbarer Unterkante (`--schatten-taste`), Klaviatur in einer beigen Mulde, ab Tabletbreite in einer weißen Karte.
+- Ergebnis und Ende von „Fehler üben“ als große weiße Karte, Werte als Kacheln, Gesamtpunktzahl golden.
+- Notenflug mit hellem Himmel hinter dem System, Hör-Spiel mit Ziffernschild 1 bis 3 auf Geräten mit Tastatur, Rekorde mit dem Spielsymbol vor jeder Liste.
+
 Spielkacheln, Notenreise und die Knöpfe **Meine Tiere**, **Rekorde**, **Einstellungen**, **Rekord speichern** und **Fehler üben** zeigen gezeichnete Symbole statt Emojis, im Stil der Tiere: warme Farben und dunkelbraune, runde Umrisse. So sehen sie auf jedem Gerät gleich aus. Die Zeichnungen stehen in `js/symbole.js`, je eine pro Kennung des Spiels oder Knopfs.
 
 ## Ergebnis
