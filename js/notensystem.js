@@ -132,6 +132,12 @@
     var RECHTS = optionen.breite || RECHTS_STANDARD;
     var NOTE_X = optionen.noteX || NOTE_X_STANDARD;
 
+    // Fester Ausschnitt für den ganzen Übungssatz, damit das System beim
+    // Notenwechsel nicht springt. `bereich` = [tiefste, höchste Position].
+    var bereich = optionen.bereich || [-3, 11];
+    var oben = Math.min(10, yVon(bereich[1]) - (bereich[1] < 4 ? 38 : 8));
+    var unten = Math.max(94, yVon(bereich[0]) + (bereich[0] >= 4 ? 38 : 8));
+
     // Hilfslinien unter und über dem System für eine Note an Position p und x-Mitte x
     function hilfslinien(p, x) {
       var t = "";
@@ -191,7 +197,8 @@
       if (w.marke) {
         // Fläche über das ganze System samt Hals und Hilfslinien der Note
         var my = yVon(w.position);
-        var y0 = Math.min(yVon(8) - 6, my - 40), y1 = Math.max(yVon(0) + 6, my + 40);
+        // Innerhalb des Ausschnitts, damit der Rahmen oben und unten nicht abgeschnitten wird
+        var y0 = Math.max(oben + 1.5, Math.min(yVon(8) - 6, my - 40)), y1 = Math.min(unten - 1.5, Math.max(yVon(0) + 6, my + 40));
         var x0 = w.x - (w.vorzeichen ? 28 : 13);
         marke = '<rect class="note-marke" x="' + x0 + '" y="' + y0 + '" width="' + (w.x + 13 - x0) + '" height="' + (y1 - y0) + '" rx="6"/>';
       }
@@ -213,11 +220,6 @@
       teile.push("</g>");
     }
 
-    // Fester Ausschnitt für den ganzen Übungssatz, damit das System beim
-    // Notenwechsel nicht springt. `bereich` = [tiefste, höchste Position].
-    var bereich = optionen.bereich || [-3, 11];
-    var oben = Math.min(10, yVon(bereich[1]) - (bereich[1] < 4 ? 38 : 8));
-    var unten = Math.max(94, yVon(bereich[0]) + (bereich[0] >= 4 ? 38 : 8));
     // Platz für den Namen rechts neben der Note, auch für längere wie „fis¹“
     function namensBreite(zeichen) { return zeichen ? NOTE_X + 30 + zeichen * 10 : 0; }
     var breiteGesamt = Math.max(RECHTS + 4, namensBreite(optionen.beschriftung ? String(optionen.beschriftung).length : 0),

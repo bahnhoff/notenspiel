@@ -1729,10 +1729,11 @@ h1:focus { outline: none; }
    Gespielte Noten grün, beim Vorspielen leuchtet die klingende Note gelb auf. */
 .melodie-note .note-marke { fill: transparent; }
 .melodie-note.ist-aktuell { color: var(--akzent-dunkel); }
-.melodie-note.ist-aktuell .note-marke { fill: rgba(232, 105, 43, 0.2); stroke: var(--akzent); stroke-width: 1.4; }
+.melodie-note.ist-aktuell .note-marke { fill: rgba(232, 105, 43, 0.16); stroke: var(--akzent); stroke-width: 1.8; rx: 9px; }
 .melodie-note.ist-gespielt { color: var(--gruen); }
 .melodie-note.leuchtet { color: #9a6400; }
 .melodie-note.leuchtet .note-marke { fill: rgba(245, 179, 0, 0.45); stroke: var(--gelb); stroke-width: 1.4; }
 
 .melodie-knoepfe { display: flex; flex-wrap: wrap; gap: 10px; }
 .melodie-knoepfe .knopf { flex: 1 1 140px; }
+.melodie-knoepfe .knopf-neben { border-radius: 999px; box-shadow: var(--schatten-taste); }
