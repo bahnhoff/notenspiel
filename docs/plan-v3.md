@@ -775,3 +775,11 @@ Abweichungen:
 - Nach der Antwort tragen alle drei Karten den Namen, nicht nur die gewählte und die richtige.
 - Das Spielzeug-Klavier ist mit den vollen Namen beschriftet (c¹, d¹ …), wie im Entwurf mit „C4 D4 …“.
 - „Nochmal hören“ zeigt beim Abspielen eine kleine Puls-Animation am Lautsprecher.
+
+### Paket 10: Melodie
+
+- Die Melodie hat als einziges Spiel keine Kopfkarte mehr, sondern den zweispaltigen Kopfbereich des Entwurfs (`header.melodie-kopf`): links Zurück-Pille „Zoo“ und Etikett „Melodie 1 von 5“, darunter Überschrift und Pillen; rechts Begleiter mit Sprechblase. Die Sprechblase hat Platz für drei Zeilen, damit der Inhalt darunter nicht springt. Sie zeigt weiter alle Rückmeldungen (richtig, falsch, Hinweis zur Lage, Liedname).
+- Notenkarte mit der Zeile „Note 1 von 6“ (`#melodie-stand`), nach dem richtigen Ton 0,9 Sekunden „c¹ – richtig!“, am Ende „Alle 6 Noten geschafft!“.
+- Klavierkarte mit Kopf „Spiel die passende Taste“ und Pille „Oktave: c¹ bis g¹“; die Pille zeigt die tiefste und höchste gewählte Note (nicht die ganze Klaviatur).
+- Aktionszeile: „Melodie anhören“ (jederzeit beim Spielen und am Ende, ersetzt „Nochmal hören“), „Tipp“ und „Neu starten“. Am Ende einer Melodie ersetzt „Weiter“ die Knöpfe „Tipp“ und „Neu starten“. Der Tipp lässt die Zieltaste 1,5 Sekunden gelb mit Namensschild leuchten (Klasse `ist-tipp`); der erste Tipp der Runde erklärt den Preis gleichzeitig mit dem Tipp, nicht davor. Neues Symbol `neustart` in `js/symbole.js`.
+- Die Zahl der Tipps steht noch nicht im Ergebnis; das kommt mit den Werte-Kärtchen in Paket 13.

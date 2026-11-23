@@ -247,6 +247,11 @@
       return form("M14 8 L38 24 L14 40 Z", F.gruen);
     },
 
+    // Melodie: Kreispfeil für „Neu starten“
+    neustart: function () {
+      return linie("M37.5 17 A15 15 0 1 0 39 27", 4.2, F.orangeDunkel) + form("M31 9 L41.5 11 L38.5 21.5 Z", F.orange);
+    },
+
     // Hör-Spiel: tippender Finger oben rechts auf den Antwortkarten
     tippen: function () {
       return form("M20 9 C22.4 9 24 10.8 24 13 L24 23 L32.5 24.5 C36.5 25.2 38.6 27.8 38 31.4 L36.8 38.4 C36.2 41.8 33.6 44 30.2 44 L22.5 44 C20 44 18 43 16.6 41 L10.4 32 C9.2 30.3 9.8 28 11.6 27.2 C13.2 26.5 14.8 27 15.8 28.3 L16 28.6 L16 13 C16 10.8 17.6 9 20 9 Z", F.creme) +

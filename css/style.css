@@ -2265,9 +2265,67 @@ h1:focus { outline: none; }
 .melodie-note.leuchtet { color: #9a6400; }
 .melodie-note.leuchtet .note-marke { fill: rgba(245, 179, 0, 0.45); stroke: var(--gelb); stroke-width: 1.4; }
 
-.melodie-knoepfe { display: flex; flex-wrap: wrap; gap: 10px; }
-.melodie-knoepfe .knopf { flex: 1 1 140px; }
-.melodie-knoepfe .knopf-neben { border-radius: 999px; box-shadow: var(--schatten-taste); }
+/* Aufbau wie im Entwurf: eine Spalte (höchstens 860 px) */
+.melodie-kopf, .melodie-inhalt { max-width: 860px; width: 100%; margin-left: auto; margin-right: auto; box-sizing: border-box; }
+.melodie-kopf { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: center; gap: 12px 20px; margin-bottom: 14px; }
+.melodie-kopf-links { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; min-width: 0; }
+.melodie-kopf-oben { display: flex; align-items: center; gap: 12px; }
+.melodie-kopf .knopf-zurueck { background: #f6efe6; border-color: #eadfce; border-radius: 999px; box-shadow: 0 3px 0 #e2d6c4; }
+.melodie-etikett {
+  display: inline-flex; align-items: center; gap: 4px; margin: 0;
+  padding: 3px 12px 3px 6px; border-radius: 999px; background: #f4ece0;
+  font-size: 0.85rem; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase; color: var(--text-leise);
+}
+.melodie-etikett-symbol { line-height: 0; }
+.melodie-etikett-symbol .symbol-svg { width: 20px; height: 20px; }
+.melodie-kopf .runde-titel-zeile { justify-content: flex-start; }
+.melodie-kopf .frage { margin: 0; font-size: clamp(1.6rem, 5vw, 2.3rem); text-align: left; }
+.melodie-kopf .runde-status { justify-content: flex-start; gap: 8px; }
+.melodie-kopf .sterne-anzeige.pille { font-size: 1.15rem; letter-spacing: 1px; padding: 0 12px; }
+.melodie-kopf .sterne-anzeige .stern-leer { color: #c9b8a2; }
+/* Sprechblase rechts; ihre Höhe ist für drei Zeilen reserviert, damit unten nichts springt */
+.melodie-sprech .sprechblase { font-size: 1.02rem; }
+.melodie-sprech .sprechblase p { min-height: 4.05em; display: flex; align-items: center; }
+
+.melodie-inhalt { display: flex; flex-direction: column; gap: 14px; }
+.melodie-karte {
+  background: var(--karte); border: 2px solid var(--rand-weich); border-radius: 24px;
+  box-shadow: var(--schatten-weich); padding: 8px 12px 10px;
+}
+.melodie-karte .notensystem { border: 0; box-shadow: none; padding: 0; background: transparent; }
+.melodie-stand { margin: 2px 0 0; text-align: center; font-weight: 700; color: var(--text-leise); min-height: 1.4em; }
+.melodie-stand::before { content: ""; display: inline-block; width: 10px; height: 10px; margin-right: 8px; border-radius: 50%; background: var(--akzent); vertical-align: 1px; }
+.melodie-klavier .flug-karte-kopf { justify-content: space-between; }
+.melodie-oktave { margin: 0; padding: 4px 12px; border-radius: 999px; background: #fdeee4; color: var(--akzent-dunkel); font-size: 0.9rem; font-weight: 800; }
+.melodie-klaviatur.klaviatur { margin: 12px 0 0; box-shadow: none; width: auto; }
+
+.melodie-aktionen { display: flex; align-items: center; gap: 10px; }
+.melodie-aktion { min-height: 52px; border-radius: 999px; box-shadow: var(--schatten-taste); font-size: 1.05rem; padding: 6px 18px; }
+.melodie-aktion .knopf-symbol .symbol-svg { width: 1.5em; height: 1.5em; margin: -0.2em 0.2em -0.2em 0; }
+#melodie-anhoeren { margin-right: auto; }
+.melodie-weiter { flex: 1 1 auto; min-height: 52px; }
+
+/* Zieltaste nach „Tipp“: gelb leuchtend mit Namensschild */
+.taste.ist-tipp { background: #fff3c4; box-shadow: inset 0 0 0 4px var(--gold), 0 0 16px rgba(245, 179, 0, 0.6); z-index: 1; }
+.taste.ist-tipp .taste-name { color: #fff; background: var(--akzent-dunkel); border-radius: 999px; padding: 1px 0.4em; font-size: 0.95em; }
+.taste-schwarz-knopf.ist-tipp { background: var(--gold); outline: 3px solid #fff3c4; }
+
+/* Handy: Kopf untereinander (Begleiter als Zeile), Aktionen drei gleich breit */
+@media (max-width: 599px) {
+  .melodie-kopf { grid-template-columns: minmax(0, 1fr); gap: 8px; margin-bottom: 10px; }
+  .melodie-kopf .frage { font-size: 1.6rem; }
+  .melodie-kopf .sterne-anzeige.pille { font-size: 1rem; padding: 0 9px; }
+  .melodie-sprech { gap: 8px; }
+  .melodie-sprech .tier-klein { width: 52px; flex-basis: 52px; }
+  .melodie-sprech .sprechblase { font-size: 0.92rem; padding: 6px 10px; }
+  .melodie-sprech .sprechblase p { min-height: 3.6em; }
+  .melodie-inhalt { gap: 10px; }
+  .melodie-aktionen { gap: 6px; }
+  .melodie-aktion { flex: 1 1 0; min-width: 0; flex-direction: column; gap: 2px; min-height: 56px; padding: 4px 4px; font-size: 0.85rem; line-height: 1.1; white-space: normal; }
+  .melodie-aktion .knopf-symbol .symbol-svg { margin: 0; }
+  #melodie-anhoeren { margin-right: 0; }
+  .melodie-weiter { flex: 2 1 0; }
+}
 
 /* ==========================================================================
    Gemeinsame Bausteine Version 3 (js/bausteine.js, Plan docs/plan-v3.md)

@@ -16,6 +16,14 @@
  * Als Etappe der Notenreise (`umgebung.etappe`) sind es 2 Melodien; als
  * „richtig“ zählt dort jede Note, die beim ersten Versuch getroffen wurde.
  *
+ * Aufbau wie im Entwurf (Plan Version 3): Kopfbereich mit Etikett, Überschrift,
+ * Pillen und Begleiter, Notenkarte mit der Zeile „Note 1 von 6“ (ohne Namen,
+ * erst nach dem richtigen Ton kurz „c¹ – richtig!“), Klavierkarte mit
+ * Tonumfang, Aktionszeile mit „Melodie anhören“ (kostet nichts, Tasten
+ * gesperrt), „Tipp“ (Zieltaste leuchtet 1,5 s mit Namen, zählt wie ein
+ * Fehler, SpielLogik.melodieTipp) und „Neu starten“ (zurück zur ersten Note,
+ * Fehler bleiben, SpielLogik.melodieNeustart).
+ *
  * Ruhige Spielfläche: Das System wird pro Melodie einmal gezeichnet, danach
  * wechseln nur Klassen (aktuell, gespielt, leuchtet). Seine Breite ist für
  * die ganze Runde fest (Platz für 7 Noten), die Klaviatur bleibt stehen.
@@ -32,12 +40,17 @@
   var SCHLAG = 430;           // Millisekunden pro Viertel beim Vorspielen
   var PAUSE_VOR_MELODIE = 450;
   var AUFLEUCHTEN = 380;      // so lange leuchtet eine getippte Taste
+  var TIPP_DAUER = 1500;      // so lange leuchtet die Zieltaste nach „Tipp“
+  var NAME_DAUER = 900;       // so lange steht „c¹ – richtig!“ unter dem System
 
   var umgebung = null;
   var melodien = null;
   var nr = 0;                 // Nummer der Melodie in der Runde
   var wertung = null;         // SpielLogik.neueMelodieRunde: Position, Fehler, Tipps, richtige Noten
   var zustand = "spielen";    // "spielen", "hoeren" (Melodie erklingt), "fertig"
+  var zurueckZu = null;       // Zustand nach „Melodie anhören“
+  var standTimer = null;
+  var tipp = null;            // { nr, timer } der leuchtenden Zieltaste
   var klaviatur = null;
   var timer = [];
   var tastenTimer = {};
@@ -70,6 +83,10 @@
     var letzte = erste + (L.MELODIE.maxLaenge - 1) * abstand;
     layout = { erste: erste, letzte: letzte, abstand: abstand, breite: letzte + 16 };
     klaviatur = window.Klaviatur.baue($("melodie-klaviatur"), u.namen, tippe);
+    // Pille im Kopf der Klavierkarte: tiefste bis höchste gewählte Note
+    var sortiert = u.namen.slice().sort(function (a, b) { return a.halbton - b.halbton; });
+    $("melodie-oktave").textContent = sortiert.length ? T.t("melodie.oktave",
+      { von: sortiert[0].anzeige, bis: sortiert[sortiert.length - 1].anzeige }) : "";
     u.zeigeTier($("melodie-tier"), "normal");
     u.zeigeAnsicht();
     zeigeMelodie();
@@ -80,6 +97,9 @@
     timer = [];
     Object.keys(tastenTimer).forEach(function (k) { clearTimeout(tastenTimer[k]); });
     tastenTimer = {};
+    clearTimeout(standTimer);
+    loescheTipp();
+    zurueckZu = null;
     melodien = null;
     window.Klang.pausiere();
   }
@@ -121,28 +141,58 @@
   /** Klassen der Noten: aktuell (orange hinterlegt), gespielt (grün), leuchtet (beim Vorspielen). */
   function markiere(leuchtet) {
     var noten = $("melodie-notensystem").querySelectorAll(".melodie-note");
+    // Beim Anhören mitten in der Melodie bleibt die aktuelle Note markiert.
+    var laufend = zustand === "spielen" || (zustand === "hoeren" && zurueckZu === "spielen");
     Array.prototype.forEach.call(noten, function (g, i) {
-      g.classList.toggle("ist-aktuell", zustand === "spielen" && i === wertung.pos);
-      g.classList.toggle("ist-gespielt", zustand !== "spielen" || i < wertung.pos);
+      g.classList.toggle("ist-aktuell", laufend && i === wertung.pos);
+      g.classList.toggle("ist-gespielt", !laufend || i < wertung.pos);
       g.classList.toggle("leuchtet", i === leuchtet);
     });
   }
 
-  function zeigeKnoepfe(sichtbar, frei) {
-    $("melodie-weiter").hidden = !sichtbar;
-    $("melodie-nochmal").hidden = !sichtbar;
-    $("melodie-weiter").disabled = !frei;
-    $("melodie-nochmal").disabled = !frei;
+  /** Aktionszeile nach dem Zustand: Tipp und Neu starten nur beim Spielen, Weiter erst am Ende. */
+  function zeigeKnoepfe() {
+    var spielen = zustand === "spielen";
+    $("melodie-weiter").hidden = !(zustand === "fertig" || (zustand === "hoeren" && zurueckZu === "fertig"));
+    $("melodie-weiter").disabled = zustand !== "fertig";
+    $("melodie-anhoeren").disabled = !(spielen || zustand === "fertig");
+    $("melodie-tipp").disabled = !spielen;
+    $("melodie-neustart").disabled = !spielen;
+    $("melodie-tipp").hidden = !$("melodie-weiter").hidden;
+    $("melodie-neustart").hidden = !$("melodie-weiter").hidden;
+  }
+
+  /** Zeile unter dem System: „Note 2 von 6“, ohne Namen. */
+  function zeigeStand(text) {
+    clearTimeout(standTimer);
+    var m = melodie();
+    $("melodie-stand").textContent = text || (zustand === "spielen"
+      ? T.t("melodie.stand", { nr: wertung.pos + 1, n: m.noten.length })
+      : T.t("melodie.standFertig", { n: m.noten.length }));
+  }
+
+  function loescheTipp() {
+    if (!tipp) return;
+    clearTimeout(tipp.timer);
+    var t = klaviatur && klaviatur.tasten[tipp.nr];
+    if (t) {
+      t.el.classList.remove("ist-tipp");
+      t.el.querySelector(".taste-name").textContent = "";
+    }
+    tipp = null;
   }
 
   function zeigeMelodie() {
     L.melodieNaechste(wertung);
     zustand = "spielen";
+    zurueckZu = null;
+    loescheTipp();
     klaviatur.zuruecksetzen();
     zeichneSystem();
     markiere();
     zeigeStatus();
-    zeigeKnoepfe(false, false);
+    zeigeStand();
+    zeigeKnoepfe();
     $("melodie-text").textContent = T.t("melodie.start");
     umgebung.zeigeTier($("melodie-tier"), "normal");
   }
@@ -150,6 +200,7 @@
   /** Getippte Taste kurz grün oder rot, mit ihrem Namen. */
   function leuchteTaste(nr, richtig, ton) {
     var t = klaviatur.tasten[nr];
+    if (tipp && tipp.nr === nr) loescheTipp();
     clearTimeout(tastenTimer[nr]);
     t.el.classList.remove("ist-richtig", "ist-falsch");
     t.el.classList.add(richtig ? "ist-richtig" : "ist-falsch");
@@ -181,9 +232,13 @@
       return;
     }
     umgebung.zeigeTier($("melodie-tier"), "froh");
+    loescheTipp();
     if (!e.fertig) {
       $("melodie-text").textContent = T.t("melodie.richtig", { name: note.anzeige });
       markiere();
+      // Kurz der Name des richtigen Tons, dann wieder „Note 3 von 6“
+      zeigeStand(T.t("melodie.standRichtig", { name: note.anzeige }));
+      standTimer = setTimeout(function () { if (aktiv() && zustand === "spielen") zeigeStand(); }, NAME_DAUER);
       return;
     }
     // Letzte Note: ganze Melodie vorspielen
@@ -191,6 +246,8 @@
     $("melodie-klaviatur").classList.add("gesperrt");
     markiere();
     zeigeStatus();
+    zeigeStand();
+    zeigeKnoepfe();
     $("melodie-text").textContent = T.t("melodie.hoer");
     spaeter(function () { spieleMelodie(nachMelodie); }, PAUSE_VOR_MELODIE);
   }
@@ -213,20 +270,58 @@
     zustand = "fertig";
     var m = melodie();
     $("melodie-text").textContent = m.lied ? T.t("melodie.lied", { lied: T.t("lied." + m.lied) }) : T.t("melodie.eigene");
-    zeigeKnoepfe(true, true);
+    zeigeKnoepfe();
     H.zeigeWeiter($("melodie-weiter"));
   }
 
-  function nochmalHoeren() {
-    if (!aktiv() || zustand !== "fertig") return;
+  /** „Melodie anhören“: jederzeit beim Spielen und am Ende, kostet nichts; die Tasten sind solange gesperrt. */
+  function anhoeren() {
+    if (!aktiv() || (zustand !== "spielen" && zustand !== "fertig")) return;
     window.Klang.bereit(); // aus dem Tipp heraus, damit der Ton sicher startet
+    loescheTipp();
+    zurueckZu = zustand;
     zustand = "hoeren";
-    zeigeKnoepfe(true, false);
+    $("melodie-klaviatur").classList.add("gesperrt");
+    zeigeKnoepfe();
     spieleMelodie(function () {
-      zustand = "fertig";
-      zeigeKnoepfe(true, true);
-      $("melodie-nochmal").focus({ preventScroll: true });
+      zustand = zurueckZu;
+      zurueckZu = null;
+      if (zustand === "spielen") $("melodie-klaviatur").classList.remove("gesperrt");
+      markiere();
+      zeigeKnoepfe();
+      $("melodie-anhoeren").focus({ preventScroll: true });
     });
+  }
+
+  /** „Tipp“: Zieltaste leuchtet mit Namen und klingt; zählt wie ein Fehler. */
+  function zeigeTipp() {
+    if (!aktiv() || zustand !== "spielen") return;
+    var note = melodie().noten[wertung.pos];
+    var passend = klaviatur.tasten.map(function (t, i) { return t.halbton === note.halbton ? i : -1; })
+      .filter(function (i) { return i >= 0; });
+    var tnr = passend.length ? passend[0] : klaviatur.weisseMit(note.buchstabe)[0];
+    if (tnr === undefined) return;
+    var r = L.melodieTipp(wertung);
+    loescheTipp();
+    var t = klaviatur.tasten[tnr];
+    t.el.classList.add("ist-tipp");
+    t.el.querySelector(".taste-name").textContent = note.anzeige;
+    klaviatur.klinge(tnr);
+    tipp = { nr: tnr, timer: setTimeout(loescheTipp, TIPP_DAUER) };
+    $("melodie-text").textContent = r.ersterTipp ? T.t("melodie.tippKostet") : T.t("melodie.tippText", { name: note.anzeige });
+    umgebung.zeigeTier($("melodie-tier"), "normal");
+    zeigeStatus();
+  }
+
+  /** „Neu starten“: zurück zur ersten Note der Melodie, Fehler bleiben gezählt. */
+  function neuStarten() {
+    if (!aktiv() || zustand !== "spielen") return;
+    L.melodieNeustart(wertung);
+    loescheTipp();
+    markiere();
+    zeigeStand();
+    $("melodie-text").textContent = T.t("melodie.vonVorn");
+    umgebung.zeigeTier($("melodie-tier"), "normal");
   }
 
   function weiter() {
@@ -258,7 +353,9 @@
   }
 
   $("melodie-weiter").addEventListener("click", weiter);
-  $("melodie-nochmal").addEventListener("click", nochmalHoeren);
+  $("melodie-anhoeren").addEventListener("click", anhoeren);
+  $("melodie-tipp").addEventListener("click", zeigeTipp);
+  $("melodie-neustart").addEventListener("click", neuStarten);
 
   /* Tastatur: Buchstabe tippen, wenn er auf der Klaviatur eindeutig ist (nur weiße Tasten). */
   document.addEventListener("keydown", function (ev) {

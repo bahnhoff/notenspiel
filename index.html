@@ -425,41 +425,55 @@
 
     <!-- Spiel eine Melodie: Noten der Reihe nach auf der Klaviatur spielen (js/modi/melodie.js) -->
     <section id="ansicht-melodie" class="ansicht ansicht-runde ansicht-klavier ansicht-melodie" aria-labelledby="titel-melodie" hidden>
-      <header class="runde-kopf kopfkarte">
-        <button type="button" class="knopf knopf-klein knopf-zurueck" aria-label="Zurück zur Startseite" data-text-aria-label="zurueck.aria">
-          <span aria-hidden="true">←</span> <span class="knopf-text" data-text="zurueck.zoo">Zoo</span>
-        </button>
-        <div class="runde-titel runde-titel-unten">
-          <p class="aufgabe-nr" id="melodie-aufgabe"></p>
+      <!-- Kopfbereich wie im Entwurf: links Etikett, Überschrift und Pillen, rechts der Begleiter mit Sprechblase -->
+      <header class="melodie-kopf">
+        <div class="melodie-kopf-links">
+          <div class="melodie-kopf-oben">
+            <button type="button" class="knopf knopf-klein knopf-zurueck" aria-label="Zurück zur Startseite" data-text-aria-label="zurueck.aria">
+              <span aria-hidden="true">←</span> <span class="knopf-text" data-text="zurueck.zoo">Zoo</span>
+            </button>
+            <p class="melodie-etikett"><span class="melodie-etikett-symbol" data-symbol="note" aria-hidden="true"></span><span id="melodie-aufgabe"></span></p>
+          </div>
           <div class="runde-titel-zeile">
             <h1 id="titel-melodie" class="frage" tabindex="-1" data-text="melodie.frage">Spiel die Melodie!</h1>
             <span class="runde-symbol" data-symbol="melodie" aria-hidden="true"></span>
           </div>
+          <div class="runde-status">
+            <span class="pille pille-gold sterne-anzeige" id="melodie-sterne" role="img"></span>
+            <span class="pille punkte-anzeige" id="melodie-punkte"></span>
+          </div>
         </div>
-        <div class="runde-status">
-          <span class="pille pille-gold sterne-anzeige" id="melodie-sterne" role="img"></span>
-          <span class="pille punkte-anzeige" id="melodie-punkte"></span>
+        <div class="tier-zeile melodie-sprech">
+          <div class="tier-klein" id="melodie-tier"></div>
+          <div class="sprechblase">
+            <p id="melodie-text" aria-live="polite"></p>
+          </div>
         </div>
       </header>
 
-      <div class="runde-inhalt">
-        <div class="runde-noten">
+      <div class="melodie-inhalt">
+        <div class="melodie-karte">
           <div class="notensystem notensystem-melodie" id="melodie-notensystem"></div>
-          <div class="klaviatur" id="melodie-klaviatur" role="group" aria-label="Klaviatur" data-text-aria-label="klavier.aria"></div>
+          <p class="melodie-stand" id="melodie-stand" aria-live="polite"></p>
         </div>
-        <div class="runde-antworten">
-          <div class="tier-zeile">
-            <div class="tier-klein" id="melodie-tier"></div>
-            <div class="sprechblase">
-              <div aria-live="polite">
-                <p id="melodie-text"></p>
-              </div>
-              <div class="melodie-knoepfe">
-                <button type="button" class="knopf knopf-haupt knopf-weiter" id="melodie-weiter" hidden data-text="runde.weiter">Weiter</button>
-                <button type="button" class="knopf knopf-neben" id="melodie-nochmal" hidden data-text="hoeren.nochmal">Nochmal hören</button>
-              </div>
-            </div>
+        <section class="flug-karte melodie-klavier" aria-labelledby="melodie-klavier-titel">
+          <div class="flug-karte-kopf">
+            <h2 class="flug-karte-titel" id="melodie-klavier-titel"><span class="flug-karte-symbol" data-symbol="klaviertasten" aria-hidden="true"></span> <span data-text="melodie.klavier">Spiel die passende Taste</span></h2>
+            <p class="melodie-oktave" id="melodie-oktave"></p>
           </div>
+          <div class="klaviatur melodie-klaviatur" id="melodie-klaviatur" role="group" aria-label="Klaviatur" data-text-aria-label="klavier.aria"></div>
+        </section>
+        <div class="melodie-aktionen">
+          <button type="button" class="knopf knopf-neben melodie-aktion" id="melodie-anhoeren">
+            <span class="knopf-symbol" data-symbol="lautsprecher" aria-hidden="true"></span> <span data-text="melodie.anhoeren">Melodie anhören</span>
+          </button>
+          <button type="button" class="knopf knopf-haupt knopf-weiter melodie-weiter" id="melodie-weiter" hidden data-text="runde.weiter">Weiter</button>
+          <button type="button" class="knopf knopf-neben melodie-aktion" id="melodie-tipp">
+            <span class="knopf-symbol" data-symbol="gluehbirne" aria-hidden="true"></span> <span data-text="melodie.tipp">Tipp</span>
+          </button>
+          <button type="button" class="knopf knopf-neben melodie-aktion" id="melodie-neustart">
+            <span class="knopf-symbol" data-symbol="neustart" aria-hidden="true"></span> <span data-text="melodie.neustart">Neu starten</span>
+          </button>
         </div>
       </div>
     </section>
