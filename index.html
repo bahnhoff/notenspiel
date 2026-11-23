@@ -56,6 +56,10 @@
         <button type="button" class="knopf knopf-klein knopf-zurueck" aria-label="Zurück zur Startseite" data-text-aria-label="zurueck.aria">
           <span aria-hidden="true">←</span> <span class="knopf-text" data-text="zurueck.startseite">Startseite</span>
         </button>
+        <div class="runde-titel">
+          <p class="aufgabe-nr" id="aufgabe-nr"></p>
+          <h1 id="titel-runde" class="frage" tabindex="-1" data-text="modus.klassisch">Welche Note ist das?</h1>
+        </div>
         <div class="runde-status">
           <span class="sterne-anzeige" id="sterne-anzeige" role="img"></span>
           <span class="punkte-anzeige" id="punkte-anzeige"></span>
@@ -64,8 +68,6 @@
 
       <div class="runde-inhalt">
         <div class="runde-noten">
-          <p class="aufgabe-nr" id="aufgabe-nr"></p>
-          <h1 id="titel-runde" class="frage" tabindex="-1" data-text="modus.klassisch">Welche Note ist das?</h1>
           <div class="notensystem" id="notensystem"></div>
         </div>
 
@@ -96,6 +98,10 @@
         <button type="button" class="knopf knopf-klein knopf-zurueck" aria-label="Zurück zur Startseite" data-text-aria-label="zurueck.aria">
           <span aria-hidden="true">←</span> <span class="knopf-text" data-text="zurueck.startseite">Startseite</span>
         </button>
+        <div class="runde-titel">
+          <p class="aufgabe-nr" id="flug-level"></p>
+          <h1 id="titel-notenflug" class="frage" tabindex="-1" data-text="modus.notenflug">Notenflug</h1>
+        </div>
         <div class="runde-status">
           <span class="sterne-anzeige" id="flug-sterne" role="img"></span>
           <span class="punkte-anzeige" id="flug-punkte"></span>
@@ -104,8 +110,6 @@
 
       <div class="runde-inhalt">
         <div class="runde-noten">
-          <p class="aufgabe-nr" id="flug-level"></p>
-          <h1 id="titel-notenflug" class="frage" tabindex="-1" data-text="modus.notenflug">Notenflug</h1>
           <div class="notensystem notensystem-flug" id="flug-notensystem"></div>
           <!-- Kurze Einblendung beim Levelwechsel, über dem Notensystem -->
           <p class="level-einblendung" id="flug-level-einblendung" role="status" hidden></p>
@@ -136,6 +140,10 @@
         <button type="button" class="knopf knopf-klein knopf-zurueck" aria-label="Zurück zur Startseite" data-text-aria-label="zurueck.aria">
           <span aria-hidden="true">←</span> <span class="knopf-text" data-text="zurueck.startseite">Startseite</span>
         </button>
+        <div class="runde-titel">
+          <p class="aufgabe-nr" id="klavier-aufgabe"></p>
+          <h1 id="titel-klavier" class="frage" tabindex="-1" data-text="klavier.frage">Welche Taste ist das?</h1>
+        </div>
         <div class="runde-status">
           <span class="sterne-anzeige" id="klavier-sterne" role="img"></span>
           <span class="punkte-anzeige" id="klavier-punkte"></span>
@@ -144,8 +152,6 @@
 
       <div class="runde-inhalt">
         <div class="runde-noten">
-          <p class="aufgabe-nr" id="klavier-aufgabe"></p>
-          <h1 id="titel-klavier" class="frage" tabindex="-1" data-text="klavier.frage">Welche Taste ist das?</h1>
           <div class="notensystem" id="klavier-notensystem"></div>
           <div class="klaviatur" id="klaviatur" role="group" aria-label="Klaviatur" data-text-aria-label="klavier.aria"></div>
         </div>
@@ -173,6 +179,10 @@
         <button type="button" class="knopf knopf-klein knopf-zurueck" aria-label="Zurück zur Startseite" data-text-aria-label="zurueck.aria">
           <span aria-hidden="true">←</span> <span class="knopf-text" data-text="zurueck.startseite">Startseite</span>
         </button>
+        <div class="runde-titel">
+          <p class="aufgabe-nr" id="setzen-aufgabe"></p>
+          <h1 id="titel-setzen" class="frage" tabindex="-1"><span data-text="setzen.frage">Setze die Note</span> <span class="setzen-name" id="setzen-name"></span></h1>
+        </div>
         <div class="runde-status">
           <span class="sterne-anzeige" id="setzen-sterne" role="img"></span>
           <span class="punkte-anzeige" id="setzen-punkte"></span>
@@ -181,8 +191,6 @@
 
       <div class="runde-inhalt">
         <div class="runde-noten">
-          <p class="aufgabe-nr" id="setzen-aufgabe"></p>
-          <h1 id="titel-setzen" class="frage" tabindex="-1"><span data-text="setzen.frage">Setze die Note</span> <span class="setzen-name" id="setzen-name"></span></h1>
           <div class="notensystem notensystem-setzen" id="setzen-notensystem" tabindex="0" role="slider"
                aria-label="Notensystem: Tippe auf eine Linie oder einen Zwischenraum" data-text-aria-label="setzen.systemAria" aria-valuemin="-20" aria-valuemax="20" aria-valuenow="0"></div>
         </div>
@@ -220,12 +228,14 @@
         <button type="button" class="knopf knopf-klein knopf-zurueck" aria-label="Zurück zur Startseite" data-text-aria-label="zurueck.aria">
           <span aria-hidden="true">←</span> <span class="knopf-text" data-text="zurueck.startseite">Startseite</span>
         </button>
+        <div class="runde-titel">
+          <h1 id="titel-memory" class="frage" tabindex="-1" data-text="modus.noten-memory">Noten-Memory</h1>
+        </div>
         <div class="runde-status" id="memory-status">
           <span class="punkte-anzeige" id="memory-zuege"></span>
           <span class="punkte-anzeige" id="memory-paare"></span>
         </div>
       </header>
-      <h1 id="titel-memory" class="frage" tabindex="-1" data-text="modus.noten-memory">Noten-Memory</h1>
       <!-- Wahl vor dem Spiel: Normal (6 Paare) oder Schwer (10 Paare), Antippen startet -->
       <div class="memory-wahl" id="memory-wahl" hidden>
         <p class="memory-wahl-frage" data-text="memory.wahlFrage">Wie schwer soll es sein?</p>
@@ -266,6 +276,10 @@
         <button type="button" class="knopf knopf-klein knopf-zurueck" aria-label="Zurück zur Startseite" data-text-aria-label="zurueck.aria">
           <span aria-hidden="true">←</span> <span class="knopf-text" data-text="zurueck.startseite">Startseite</span>
         </button>
+        <div class="runde-titel">
+          <p class="aufgabe-nr" id="hoeren-aufgabe"></p>
+          <h1 id="titel-hoeren" class="frage" tabindex="-1" data-text="hoeren.frage">Welche Note hörst du?</h1>
+        </div>
         <div class="runde-status">
           <span class="sterne-anzeige" id="hoeren-sterne" role="img"></span>
           <span class="punkte-anzeige" id="hoeren-punkte"></span>
@@ -274,8 +288,6 @@
 
       <div class="runde-inhalt">
         <div class="runde-noten">
-          <p class="aufgabe-nr" id="hoeren-aufgabe"></p>
-          <h1 id="titel-hoeren" class="frage" tabindex="-1" data-text="hoeren.frage">Welche Note hörst du?</h1>
           <div class="hoeren-steuerung">
             <button type="button" class="knopf knopf-haupt knopf-hoeren" id="hoeren-nochmal">
               <span class="knopf-symbol" data-symbol="lautsprecher" aria-hidden="true">🔊</span> <span data-text="hoeren.nochmal">Nochmal hören</span>
@@ -311,6 +323,10 @@
         <button type="button" class="knopf knopf-klein knopf-zurueck" aria-label="Zurück zur Startseite" data-text-aria-label="zurueck.aria">
           <span aria-hidden="true">←</span> <span class="knopf-text" data-text="zurueck.startseite">Startseite</span>
         </button>
+        <div class="runde-titel">
+          <p class="aufgabe-nr" id="melodie-aufgabe"></p>
+          <h1 id="titel-melodie" class="frage" tabindex="-1" data-text="melodie.frage">Spiel die Melodie!</h1>
+        </div>
         <div class="runde-status">
           <span class="sterne-anzeige" id="melodie-sterne" role="img"></span>
           <span class="punkte-anzeige" id="melodie-punkte"></span>
@@ -319,8 +335,6 @@
 
       <div class="runde-inhalt">
         <div class="runde-noten">
-          <p class="aufgabe-nr" id="melodie-aufgabe"></p>
-          <h1 id="titel-melodie" class="frage" tabindex="-1" data-text="melodie.frage">Spiel die Melodie!</h1>
           <div class="notensystem notensystem-melodie" id="melodie-notensystem"></div>
           <div class="klaviatur" id="melodie-klaviatur" role="group" aria-label="Klaviatur" data-text-aria-label="klavier.aria"></div>
         </div>
@@ -347,6 +361,10 @@
         <button type="button" class="knopf knopf-klein knopf-zurueck" aria-label="Zurück zur Startseite" data-text-aria-label="zurueck.aria">
           <span aria-hidden="true">←</span> <span class="knopf-text" data-text="zurueck.startseite">Startseite</span>
         </button>
+        <div class="runde-titel" id="ueben-titel">
+          <p class="aufgabe-nr" id="ueben-aufgabe"></p>
+          <h1 id="titel-ueben" class="frage" tabindex="-1"></h1>
+        </div>
         <div class="runde-status">
           <span class="punkte-anzeige ueben-marke" data-text="ueben.titel">Fehler üben</span>
         </div>
@@ -354,8 +372,6 @@
 
       <div class="runde-inhalt" id="ueben-inhalt">
         <div class="runde-noten">
-          <p class="aufgabe-nr" id="ueben-aufgabe"></p>
-          <h1 id="titel-ueben" class="frage" tabindex="-1"></h1>
           <div class="notensystem" id="ueben-notensystem"></div>
           <div class="klaviatur" id="ueben-klaviatur" role="group" aria-label="Klaviatur" data-text-aria-label="klavier.aria" hidden></div>
         </div>

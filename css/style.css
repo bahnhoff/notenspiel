@@ -26,6 +26,12 @@
   --fokus: #1b5fd1;
   --radius: 18px;
   --schatten: 0 3px 0 rgba(61, 43, 31, 0.18);
+  /* Stitch-Stil: Gold für Sterne, weicher Rand, Tasten mit fühlbarer Unterkante, weiche Schatten für Karten */
+  --gold: #f59e0b;
+  --rand-weich: #efe5d6;
+  --schatten-taste: 0 4px 0 #e2d6c4, 0 6px 12px rgba(61, 43, 31, 0.05);
+  --schatten-taste-gedrueckt: 0 1px 0 #e2d6c4;
+  --schatten-weich: 0 3px 0 rgba(61, 43, 31, 0.07), 0 8px 24px rgba(160, 130, 90, 0.13);
   font-family: "Nunito Sans", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   color: var(--text);
   background: var(--hintergrund);
@@ -347,8 +353,9 @@ h1:focus { outline: none; }
   border-radius: var(--radius);
   padding: 10px 14px;
   font-size: 1.1rem;
+  font-weight: 600;
   line-height: 1.35;
-  box-shadow: var(--schatten);
+  box-shadow: 0 4px 15px rgba(200, 178, 148, 0.35);
 }
 
 .sprechblase::before {
@@ -401,13 +408,28 @@ h1:focus { outline: none; }
 
 /* ---------- Spielrunde ---------- */
 
+/* Kopfzeile der Spiele: Zurück, Aufgabe mit Überschrift, Sterne und Punkte.
+   Handy: Zurück und Stand in einer Reihe, Überschrift darunter. Ab 700 px alles
+   in einer Reihe mit fester Mitte, damit wechselnde Texte nichts verschieben. */
 .runde-kopf {
-  display: flex;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-areas: "zurueck status" "titel titel";
   align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  flex-wrap: wrap;
+  gap: 4px 8px;
+  margin-bottom: 10px;
 }
+
+.runde-kopf .knopf-zurueck { grid-area: zurueck; justify-self: start; }
+.runde-titel { grid-area: titel; min-width: 0; text-align: center; }
+.runde-kopf .runde-status { grid-area: status; }
+
+.knopf-zurueck {
+  border-radius: 16px;
+  box-shadow: var(--schatten-taste);
+  font-weight: 800;
+}
+.knopf-zurueck [aria-hidden="true"] { color: var(--text-leise); }
 
 .runde-status {
   display: flex;
@@ -419,30 +441,49 @@ h1:focus { outline: none; }
   font-size: 1rem;
 }
 
-.sterne-anzeige { font-size: 1.7rem; line-height: 1; letter-spacing: 2px; white-space: nowrap; }
+.sterne-anzeige { font-size: 1.6rem; line-height: 1; letter-spacing: 2px; white-space: nowrap; }
 
-.stern-voll { color: var(--gelb); text-shadow: 0 1px 0 #a87800; }
+.stern-voll { color: var(--gold); text-shadow: 0 1px 0 #c27803; }
 .stern-leer { color: #8a7a6c; }
 
 .punkte-anzeige {
   background: var(--karte);
   border: 2px solid var(--rand);
   border-radius: 999px;
-  padding: 4px 12px;
+  padding: 4px 14px;
+  font-weight: 800;
   white-space: nowrap;
+  box-shadow: 0 2px 6px rgba(160, 130, 90, 0.12);
 }
 
+/* „AUFGABE 3 VON 10“: klein, gesperrt, in Großbuchstaben über der Überschrift */
 .aufgabe-nr {
   text-align: center;
-  margin: 6px 0 0;
-  font-weight: 700;
+  margin: 0;
+  font-size: 0.85rem;
+  font-weight: 800;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
   color: var(--text-leise);
 }
+.aufgabe-nr:empty { display: none; }
 
 .frage {
   text-align: center;
-  font-size: clamp(1.5rem, 6vw, 2.2rem);
-  margin: 0 0 8px;
+  font-size: clamp(1.45rem, 6vw, 2.2rem);
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  line-height: 1.15;
+  margin: 0;
+}
+
+@media (min-width: 700px) {
+  .runde-kopf {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 2.4fr) minmax(0, 1fr);
+    grid-template-areas: "zurueck titel status";
+    gap: 12px;
+    margin-bottom: 18px;
+  }
 }
 
 @media (max-width: 419px) {
@@ -451,11 +492,11 @@ h1:focus { outline: none; }
 
 .notensystem {
   background: var(--karte);
-  border: 2px solid var(--rand);
-  border-radius: var(--radius);
-  padding: 4px 6px;
+  border: 2px solid var(--rand-weich);
+  border-radius: 24px;
+  padding: 6px 8px;
   color: #111;
-  box-shadow: var(--schatten);
+  box-shadow: var(--schatten-weich);
 }
 
 .notensystem-svg { display: block; width: 100%; height: auto; max-height: 52vh; }
@@ -508,14 +549,24 @@ h1:focus { outline: none; }
   .antworten-oktaven .knopf-antwort { border-radius: 12px; }
 }
 
+/* Antworttasten: weiß, runde Ecken, fühlbare Unterkante wie im Stitch-Entwurf */
 .knopf-antwort {
   position: relative;
   min-height: 68px;
   padding: 6px 4px;
   font-size: 1.9rem;
+  font-weight: 800;
+  border-radius: 16px;
+  box-shadow: var(--schatten-taste);
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.knopf-antwort:active { transform: translateY(3px); box-shadow: var(--schatten-taste-gedrueckt); }
+
+@media (hover: hover) and (pointer: fine) {
+  .antworten:not(.gesperrt) .knopf-antwort:hover { background: #fffbeb; border-color: #f8d77a; }
 }
 
 /* Marke oben links, damit die hochgestellte Oktavziffer (c¹) frei bleibt */
@@ -548,7 +599,7 @@ h1:focus { outline: none; }
 }
 
 .antworten.gesperrt .knopf-antwort { cursor: default; }
-.antworten.gesperrt .knopf-antwort:active { transform: none; box-shadow: var(--schatten); }
+.antworten.gesperrt .knopf-antwort:active { transform: none; box-shadow: var(--schatten-taste); }
 
 /* Vorzeichen-Noten (fis¹, es²): etwas kleinere Schrift, leicht abgesetzt */
 .knopf-antwort-vorzeichen { background: #f3ecff; }
@@ -1191,7 +1242,6 @@ h1:focus { outline: none; }
 /* ---------- Noten-Memory ---------- */
 
 .ansicht-memory { max-width: 760px; margin: 0 auto; }
-.ansicht-memory .frage { margin: 6px 0 10px; }
 
 .memory-karten {
   display: flex;
@@ -1449,7 +1499,9 @@ h1:focus { outline: none; }
     flex-direction: column;
     min-height: calc(100dvh - 28px);
   }
-  .runde-inhalt { flex: 1 1 auto; grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr); }
+  .runde-inhalt { flex: 1 1 auto; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 28px; }
+  .notensystem { padding: 12px 16px; }
+  .runde-antworten .tasten-zeile { text-align: left; }
   .runde-antworten { margin-top: 0; }
   .notensystem-svg { max-height: 62vh; }
   .ansicht-klavier .notensystem-svg,
@@ -1532,7 +1584,7 @@ h1:focus { outline: none; }
 /* ---------- Buchstabentasten: Tipp und getippter Anfang unter den Antworten ---------- */
 
 /* Nur auf Geräten mit Tastatur sichtbar, feste Höhe: Die Zeile wechselt den Text, ohne dass etwas springt. */
-.tasten-zeile { display: none; margin: -4px 0 0; font-size: 0.95rem; color: var(--text-leise); text-align: center; }
+.tasten-zeile { display: none; margin: -4px 0 0; font-size: 0.95rem; font-weight: 600; color: var(--text-leise); text-align: center; }
 .tasten-zeile.tasten-tipp-an { display: block; min-height: 1.5em; line-height: 1.5; }
 .tasten-zeile.tippt { font-size: 1.15rem; font-weight: 800; color: var(--akzent-dunkel); line-height: 1.3; }
 

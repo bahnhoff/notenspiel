@@ -48,6 +48,7 @@
     knoepfe = H.antwortKnoepfe($("ueben-antworten"), u.antworten, beantworteName);
     klaviatur = window.Klaviatur.baue($("ueben-klaviatur"), u.namen, beantworteTaste);
     $("ueben-inhalt").hidden = false;
+    $("ueben-titel").hidden = false;
     $("ueben-ende").hidden = true;
     u.zeigeTier($("ueben-tier"), "normal");
     u.zeigeAnsicht();
@@ -159,6 +160,7 @@
     clearTimeout(timer);
     $("ansicht-ueben").classList.remove("ist-klavier");
     $("ueben-inhalt").hidden = true;
+    $("ueben-titel").hidden = true;   // Am Ende steht nur die Überschrift „Übung geschafft!“
     $("ueben-ende").hidden = false;
     umgebung.zeigeTier($("ueben-ende-tier"), "froh");
     $("ueben-ende-text").textContent = t("ueben.ende", { namen: namensListe(umgebung.noten.map(function (n) { return n.anzeige; })) });
