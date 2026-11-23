@@ -186,11 +186,11 @@ h1:focus { outline: none; }
 
 .sprach-knopf:focus-visible { outline: 4px solid var(--fokus); outline-offset: -4px; }
 
-/* Startseite: gemalter Violinschlüssel als Schlange (img/violinschlange.webp) statt des Begleiters */
+/* Startseite: gemalter Kater am Flügel (img/kater-klavier.webp) statt des Begleiters */
 .start-tier {
   display: block;
   width: auto;
-  height: min(26vh, 210px);
+  height: min(28vh, 220px);
   animation: wippen 2.4s ease-in-out infinite;
 }
 
@@ -2110,7 +2110,7 @@ h1:focus { outline: none; }
   .knopf-antwort { min-height: 56px; font-size: 1.6rem; }
   .tier-klein { width: 64px; flex-basis: 64px; }
   .ansicht-start { padding-top: 0; gap: 10px; }
-  .start-tier { height: 140px; }
+  .start-tier { height: 150px; }
   .klaviatur { --taste-min: 90px; --taste-max: 120px; }
 }
 
