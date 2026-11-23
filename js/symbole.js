@@ -13,7 +13,8 @@
  * „Nochmal hören“ im Hör-Spiel (dessen Bezugston-Knopf nutzt klaviertasten).
  * Bausteine aus Plan Version 3 (js/bausteine.js): zahnrad (Profilknopf),
  * rakete, pokal, orden, ton-an und ton-aus (Lautsprecher mit und ohne
- * Wellen), stern, note, herz, herz-leer und flamme (Pillen), pfote (Fußzeile).
+ * Wellen), stern, note, herz, herz-leer und flamme (Pillen), pfote (Fußzeile),
+ * gluehbirne, tempo, pause und weiter (Karte „Merkspruch“ im Notenflug).
  * Alle Symbole liegen in einem Feld von 48 × 48 und sind nur Schmuck
  * (aria-hidden), der Text daneben trägt die Bedeutung.
  */
@@ -229,6 +230,22 @@
 
     // Pfote für die Fußzeile
     pfote: function () { return ZEICHNUNGEN.tiere(); },
+
+    // Notenflug: Glühbirne (Merkspruch), Tacho (Tempo), Pause und Weiter
+    gluehbirne: function () {
+      return form("M24 5 C15 5 10 12 10 19 C10 25 14 28 16.5 32 L31.5 32 C34 28 38 25 38 19 C38 12 33 5 24 5 Z", F.gelb) +
+        rechteck(17, 32, 14, 6, 2, F.sand) + linie("M20 43 L28 43", 3) + linie("M20 21 L24 25 L28 21 M24 25 L24 32", 2);
+    },
+    tempo: function () {
+      return form("M6 34 C6 22 14 12 24 12 C34 12 42 22 42 34 Z", F.creme) +
+        linie("M24 34 L33 21", 3.2) + kreis(24, 34, 3.2, BRAUN, true) + linie("M11 27 L14 28 M17 18 L19 20.5 M24 15.5 L24 18.5 M31 18 L29 20.5 M37 27 L34 28", 2);
+    },
+    pause: function () {
+      return rechteck(12, 9, 8, 30, 3, F.orange) + rechteck(28, 9, 8, 30, 3, F.orange);
+    },
+    weiter: function () {
+      return form("M14 8 L38 24 L14 40 Z", F.gruen);
+    },
 
     // Fehler üben: Zielscheibe mit Pfeil
     ueben: function () {

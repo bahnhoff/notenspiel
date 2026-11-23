@@ -196,6 +196,15 @@
       zeigeTier: zeigeTier,
       tier: stand.tier,
       flugTempo: stand.flugTempo,
+      flugKlaviatur: stand.flugKlaviatur,
+      merkeFlug: function (feld, wert) {
+        if (feld === "flugTempo") stand.flugTempo = L.flugTempo(wert);
+        else if (feld === "flugKlaviatur") stand.flugKlaviatur = !!wert;
+        else return;
+        speichereSpielstand();
+      },
+      merksprueche: K.merksprueche || null,
+      bereichText: auswahlText(a),
       merkhilfe: merkhilfe,
       laeuft: function () { return laufendeNr === nr; },
       beende: function (ergebnis) {
@@ -247,7 +256,8 @@
       div.appendChild(dd);
       liste.appendChild(div);
     }
-    (e.zeilen || []).forEach(function (z) { zeile(z[0], String(z[1])); });
+    // Lange Werte (Rechnung im Notenflug) dürfen umbrechen und stehen unter der Bezeichnung
+    (e.zeilen || []).forEach(function (z) { zeile(z[0], String(z[1]), String(z[1]).length > 14 ? "ergebnis-lang" : ""); });
     var reise = v.tagesreise;
     if (reise) {
       zeile(t("ergebnis.extrastern"), reise.extrastern ? "★ 1" : t("ergebnis.schonBekommen"));

@@ -141,12 +141,18 @@
           </div>
         </div>
         <div class="runde-status">
-          <span class="pille pille-gold flug-combo" id="flug-combo" role="img">
-            <span class="pille-symbol" data-symbol="flamme" aria-hidden="true"></span><span class="pille-zahl"></span>
+          <span class="flug-pillen">
+            <span class="pille pille-gold flug-combo" id="flug-combo" role="img">
+              <span class="pille-symbol" data-symbol="flamme" aria-hidden="true"></span><span class="pille-zahl"></span>
+            </span>
+            <span class="pille punkte-anzeige" id="flug-punkte"></span>
           </span>
-          <span class="pille punkte-anzeige" id="flug-punkte"></span>
           <!-- Drei Herzen = drei Leben, ein leeres Herz bleibt als Kontur -->
           <span class="pille pille-rosa flug-herzen" id="flug-herzen" role="img"></span>
+          <!-- Handy: Pause in der Kopfkarte, damit sie ohne Scrollen erreichbar ist -->
+          <button type="button" class="flug-pause-kopf flug-pause-knopf" id="flug-pause-kopf" aria-label="Flug anhalten" data-text-aria-label="flug.pauseAria">
+            <span class="flug-knopf-symbol" data-symbol="pause" aria-hidden="true"></span>
+          </button>
         </div>
       </header>
 
@@ -166,6 +172,11 @@
           <div class="flug-sprech" id="flug-sprech" aria-live="polite"></div>
           <!-- Kurze Einblendung beim Wellenwechsel, über dem Notensystem -->
           <p class="level-einblendung" id="flug-level-einblendung" role="status" hidden></p>
+          <!-- Pause: verdeckt die Bühne samt Note -->
+          <div class="flug-pause-flaeche" id="flug-pause-flaeche" hidden>
+            <p class="flug-pause-titel" data-text="flug.pauseTitel">Pause</p>
+            <button type="button" class="knopf knopf-haupt flug-weiterfliegen" id="flug-weiterfliegen" data-text="flug.weiterfliegen">Weiterfliegen</button>
+          </div>
         </div>
 
         <!-- Hinweiszeile: Tipp zu den Tasten links, Ton an oder aus rechts -->
@@ -189,6 +200,29 @@
             <button type="button" class="knopf knopf-haupt knopf-weiter" id="flug-weiter" hidden data-text="runde.weiter">Weiter</button>
           </div>
         </div>
+
+        <!-- Klavier-Lotse: Klaviatur über den gewählten Bereich, weiße Tasten antworten -->
+        <section class="flug-karte flug-lotse" id="flug-lotse" aria-labelledby="flug-lotse-titel">
+          <div class="flug-karte-kopf">
+            <h2 class="flug-karte-titel" id="flug-lotse-titel"><span class="flug-karte-symbol" data-symbol="klaviertasten" aria-hidden="true"></span><span data-text="flug.lotse">Klavier-Lotse</span></h2>
+            <span class="flug-lotse-bereich" id="flug-lotse-bereich"></span>
+            <button type="button" class="knopf knopf-klein flug-lotse-knopf" id="flug-lotse-knopf" aria-controls="flug-klaviatur" aria-expanded="true"></button>
+          </div>
+          <div class="klaviatur flug-klaviatur" id="flug-klaviatur" role="group" aria-label="Klaviatur zum Antworten" data-text-aria-label="flug.lotseAria"></div>
+        </section>
+
+        <!-- Merkspruch mit Tempo und Pause -->
+        <section class="flug-karte flug-merk" aria-labelledby="flug-merk-titel">
+          <span class="flug-merk-symbol" data-symbol="gluehbirne" aria-hidden="true"></span>
+          <div class="flug-merk-text">
+            <h2 class="flug-merk-titel" id="flug-merk-titel"></h2>
+            <button type="button" class="flug-merk-spruch" id="flug-merk-spruch"></button>
+          </div>
+          <div class="flug-merk-knoepfe">
+            <button type="button" class="knopf flug-merk-knopf" id="flug-tempo"><span class="flug-knopf-symbol" data-symbol="tempo" aria-hidden="true"></span><span id="flug-tempo-text"></span></button>
+            <button type="button" class="knopf flug-merk-knopf flug-pause-knopf" id="flug-pause"><span class="flug-knopf-symbol" data-symbol="pause" aria-hidden="true"></span><span class="flug-pause-text"></span></button>
+          </div>
+        </section>
       </div>
     </section>
 

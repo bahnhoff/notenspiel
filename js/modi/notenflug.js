@@ -14,6 +14,11 @@
  * Nach einer richtigen Antwort macht die Rakete einen Satz, und die nächste
  * Note startet sofort. Nur nach einem Fehler oder „zu spät“ hält das Spiel
  * an (Lösung, Hinweis, Merkhilfe, „Weiter“ unter den Tasten).
+ * Darunter (Paket 7): Rückmeldung als Karte, Klavier-Lotse (Klaviatur.baue,
+ * auf- und zuklappbar, gemerkt in flugKlaviatur), Merkspruch-Karte
+ * (umgebung.merksprueche, Tipp wechselt Linien und Zwischenräume), Tempo-Knopf
+ * (L.naechstesFlugTempo, gilt ab der nächsten Note) und Pause (Knopf, Leertaste,
+ * Escape, verborgener Tab; Fläche #flug-pause-flaeche mit „Weiterfliegen“).
  * Buchstabentasten antworten über Modi.hilfen.tastenEingabe.
  * Regeln und Wertung: js/spiel-logik.js (NOTENFLUG, flugAntwort, flugTrefferPunkte).
  * Nutzt die Ansicht #ansicht-notenflug aus index.html.
@@ -54,6 +59,11 @@
   var tasten = null;          // Buchstabentasten (Modi.hilfen.tastenEingabe)
   var sprech = null;          // Sprechzeile in der Bühne
   var fangMass = null;        // Umrechnung SVG → Bühne für „Fang mich!“: { links, skala }
+  var nutzerPause = false;    // Pause über den Knopf, Leertaste, Escape oder versteckten Tab (mit Fläche)
+  var klaviatur = null;       // Klavier-Lotse (js/klaviatur.js)
+  var lotseAntwort = null;    // { nr, ton } der Lotse-Taste, mit der gerade geantwortet wurde
+  var merkRaeume = false;     // Merkspruch: false Linien, true Zwischenräume
+  var leertasteGefangen = false;
 
   function $(id) { return document.getElementById(id); }
 
@@ -67,11 +77,12 @@
   function starte(u) {
     stoppe();
     umgebung = u;
-    flug = L.neuerFlug(u.noten.length);
+    flug = L.neuerFlug(u.noten.length, u.flugTempo);
+    nutzerPause = false;
     knoepfe = H.antwortKnoepfe($("flug-antworten"), u.antworten, beantworte);
     tasten = H.tastenEingabe({
       antworten: function () { return umgebung.antworten; },
-      offen: function () { return aktiv() && !!zustand && zustand.offen && !angehalten && !$("ansicht-notenflug").hidden; },
+      offen: function () { return aktiv() && !!zustand && zustand.offen && !angehalten && !nutzerPause && !$("ansicht-notenflug").hidden; },
       beiAntwort: beantworte,
       anzeige: $("flug-tasten"),
       tipp: "flug.tastenTipp",
@@ -82,6 +93,10 @@
       $("flug-sprech").appendChild(sprech);
     }
     sage(t("flug.start"));
+    baueLotse(u);
+    zeigeTempo();
+    zeigePause();
+    zeigeMerkspruch(u.noten[0] && u.noten[0].schluessel);
     $("flug-level-einblendung").hidden = true;
     u.zeigeAnsicht();
     zeigeRueckmeldung(false);
@@ -102,8 +117,11 @@
     zustand = null;
     pausiert = false;
     angehalten = false;
+    nutzerPause = false;
     wartetAufWeiter = null;
+    lotseAntwort = null;
     if (tasten) tasten.zuruecksetzen();
+    zeigePause();
   }
 
   function sage(text) {
@@ -294,9 +312,11 @@
       H.markiereAntwort(b);
     });
     sperreKnoepfe(false);
+    setzeLotseZurueck();
+    zeigeMerkspruch(note.schluessel);
     if (nachFehler || zustand.nr === 1) sage(t("flug.schnell"));
     letzteZeit = null;
-    if (!document.hidden && !angehalten) raf = requestAnimationFrame(schritt);
+    if (!document.hidden && !angehalten && !nutzerPause) raf = requestAnimationFrame(schritt);
     else pausiert = true;
   }
 
@@ -326,7 +346,7 @@
   }
 
   function laufWeiter() {
-    if (!pausiert || document.hidden || angehalten) return;
+    if (!pausiert || document.hidden || angehalten || nutzerPause) return;
     pausiert = false;
     if (aktiv() && zustand && zustand.offen) {
       letzteZeit = null;
@@ -334,8 +354,13 @@
     }
   }
 
+  // Versteckter Tab: dieselbe Pause wie über den Knopf, weiter geht es mit „Weiterfliegen“.
   document.addEventListener("visibilitychange", function () {
-    if (document.hidden) halteAn(); else laufWeiter();
+    if (document.hidden) {
+      if (aktiv() && !$("ansicht-notenflug").hidden) setzePause(true); else halteAn();
+    } else {
+      laufWeiter();
+    }
   });
 
   window.addEventListener("resize", function () { if (aktiv()) messeFang(); });
@@ -357,10 +382,162 @@
   }
 
   function beantworte(name) {
-    if (!aktiv() || !zustand || !zustand.offen || angehalten) return; // eine Antwort pro Note
+    if (!aktiv() || !zustand || !zustand.offen || angehalten || nutzerPause) return; // eine Antwort pro Note
     spieleAntwort(name, zustand.note);
+    lotseAntwort = null;
     werte(name);
   }
+
+  /* ---------- Klavier-Lotse ---------- */
+
+  function lotseOffen() {
+    var gemerkt = umgebung ? umgebung.flugKlaviatur : null;
+    if (gemerkt === true || gemerkt === false) return gemerkt;
+    return !!(window.matchMedia && window.matchMedia("(min-width: 768px)").matches);
+  }
+
+  function zeigeLotseOffen(offen) {
+    var knopf = $("flug-lotse-knopf");
+    $("flug-klaviatur").hidden = !offen;
+    $("flug-lotse").classList.toggle("ist-zu", !offen);
+    knopf.setAttribute("aria-expanded", offen ? "true" : "false");
+    knopf.textContent = t(offen ? "flug.lotseVerbergen" : "flug.lotseZeigen");
+  }
+
+  function baueLotse(u) {
+    klaviatur = window.Klaviatur.baue($("flug-klaviatur"), u.namen, lotseTipp);
+    setzeLotseZurueck();
+    // Tonumfang je Schlüssel, zum Beispiel „Violinschlüssel: c¹ bis h¹“
+    $("flug-lotse-bereich").textContent = u.bereichText || "";
+    zeigeLotseOffen(lotseOffen());
+  }
+
+  /** Markierungen entfernen und die weißen Tasten mit ihrem Buchstaben beschriften. */
+  function setzeLotseZurueck() {
+    if (!klaviatur) return;
+    klaviatur.zuruecksetzen();
+    klaviatur.tasten.forEach(function (tt) {
+      if (tt.art === "weiss") tt.el.querySelector(".taste-name").textContent = N.buchstabenAnzeige(tt.buchstabe, 0);
+    });
+  }
+
+  /** Tipp auf eine Lotse-Taste (der Ton klingt schon, siehe js/klaviatur.js). */
+  function lotseTipp(nr) {
+    if (!aktiv() || !zustand || !zustand.offen || angehalten || nutzerPause) return;
+    var taste = klaviatur.tasten[nr];
+    // Schwarze Tasten antworten nur, wenn Noten mit Vorzeichen gewählt sind; sonst klingen sie nur.
+    if (taste.art === "schwarz" && !umgebung.noten.some(function (n) { return n.vorzeichen; })) return;
+    var ton = klaviatur.tastenTon(nr, zustand.note, umgebung.antwortmodus);
+    lotseAntwort = { nr: nr, ton: ton };
+    werte(N.antwortSchluessel(ton, umgebung.antwortmodus));
+  }
+
+  /** Nach der Antwort: getippte Lotse-Taste markieren, nach einem Fehler leuchtet die richtige Taste. */
+  function zeigeLotseAntwort(richtig, note) {
+    if (!klaviatur) return;
+    if (lotseAntwort) {
+      klaviatur.zeigeAntwort(lotseAntwort.nr, { richtig: richtig, note: note }, lotseAntwort.ton);
+      return;
+    }
+    if (richtig) return;
+    $("flug-klaviatur").classList.add("gesperrt");
+    klaviatur.tasten.forEach(function (tt) {
+      if (tt.halbton !== note.halbton) return;
+      tt.el.classList.add("ist-loesung");
+      tt.el.querySelector(".taste-marke").textContent = "✓";
+      tt.el.querySelector(".taste-name").textContent = note.anzeige;
+    });
+  }
+
+  $("flug-lotse-knopf").addEventListener("click", function () {
+    var offen = $("flug-klaviatur").hidden;
+    zeigeLotseOffen(offen);
+    if (umgebung) { umgebung.flugKlaviatur = offen; umgebung.merkeFlug("flugKlaviatur", offen); }
+  });
+
+  /* ---------- Merkspruch, Tempo und Pause ---------- */
+
+  function zeigeMerkspruch(schluessel) {
+    schluessel = schluessel === "bass" ? "bass" : "violin";
+    $("flug-merk-titel").textContent = t("flug.merk.titel." + schluessel);
+    var alle = (umgebung && umgebung.merksprueche) || {};
+    var art = merkRaeume ? "raeume" : "linien";
+    var eintrag = alle[schluessel] && alle[schluessel][art];
+    var text = eintrag ? (eintrag[T.sprache()] || eintrag.de || "") : "";
+    var knopf = $("flug-merk-spruch");
+    knopf.innerHTML = "";
+    knopf.appendChild(document.createTextNode(t(merkRaeume ? "flug.merk.raeume" : "flug.merk.linien") + ": "));
+    // *E*s → fettes E: die Anfangsbuchstaben ergeben die Noten
+    text.split(/(\*[^*]+\*)/).forEach(function (teil) {
+      if (!teil) return;
+      if (teil.charAt(0) === "*" && teil.length > 2) {
+        var b = document.createElement("strong");
+        b.textContent = teil.slice(1, -1);
+        knopf.appendChild(b);
+      } else {
+        knopf.appendChild(document.createTextNode(teil));
+      }
+    });
+    knopf.setAttribute("aria-label", knopf.textContent + ". " + t("flug.merk.tippen"));
+    knopf.title = t("flug.merk.tippen");
+  }
+
+  $("flug-merk-spruch").addEventListener("click", function () {
+    merkRaeume = !merkRaeume;
+    zeigeMerkspruch(zustand ? zustand.note.schluessel : (umgebung && umgebung.noten[0] && umgebung.noten[0].schluessel));
+  });
+
+  /** Tempofaktor als Text: deutsch „0,75“ und „1,0“, englisch „0.75“ und „1.0“. */
+  function tempoText(tempo) {
+    var s = tempo % 1 === 0 ? tempo.toFixed(1) : String(tempo);
+    return T.sprache() === "en" ? s : s.replace(".", ",");
+  }
+
+  function zeigeTempo() {
+    var tempo = flug ? flug.tempo : 1;
+    $("flug-tempo-text").textContent = tempoText(tempo) + "x";
+    $("flug-tempo").setAttribute("aria-label", t("flug.tempoAria", { wert: tempoText(tempo) }));
+  }
+
+  // Tempo: 0,5x → 0,75x → 1,0x → 1,25x; gilt ab der nächsten Note
+  $("flug-tempo").addEventListener("click", function () {
+    if (!flug) return;
+    flug.tempo = L.naechstesFlugTempo(flug.tempo);
+    if (umgebung) { umgebung.flugTempo = flug.tempo; umgebung.merkeFlug("flugTempo", flug.tempo); }
+    zeigeTempo();
+  });
+
+  function zeigePause() {
+    $("flug-pause-flaeche").hidden = !nutzerPause;
+    $("flug-buehne").classList.toggle("ist-pause", nutzerPause);
+    Array.prototype.forEach.call(document.querySelectorAll(".flug-pause-knopf"), function (k) {
+      k.querySelector(".flug-knopf-symbol").innerHTML = window.Symbole.zeichne(nutzerPause ? "weiter" : "pause");
+      var text = k.querySelector(".flug-pause-text");
+      if (text) text.textContent = t(nutzerPause ? "flug.weiter" : "flug.pause");
+      k.setAttribute("aria-label", t(nutzerPause ? "flug.weiterAria" : "flug.pauseAria"));
+      k.setAttribute("aria-pressed", nutzerPause ? "true" : "false");
+    });
+  }
+
+  /** Pause an oder aus. Pausen kosten nichts und zählen nicht. */
+  function setzePause(an) {
+    if (!aktiv()) return;
+    an = !!an;
+    if (an === nutzerPause) return;
+    nutzerPause = an;
+    zeigePause();
+    if (an) {
+      halteAn();
+      $("flug-weiterfliegen").focus({ preventScroll: true });
+    } else {
+      laufWeiter();
+    }
+  }
+
+  Array.prototype.forEach.call(document.querySelectorAll(".flug-pause-knopf"), function (k) {
+    k.addEventListener("click", function () { setzePause(!nutzerPause); });
+  });
+  $("flug-weiterfliegen").addEventListener("click", function () { setzePause(false); });
 
   /** Wertet die aktuelle Note aus. `name` = getippter Name oder null bei „zu spät“. */
   function werte(name) {
@@ -378,6 +555,8 @@
       if (b.dataset.name === note.antwort) H.markiereAntwort(b, richtig ? "ist-richtig" : "ist-loesung", true);
       else if (b.dataset.name === name) H.markiereAntwort(b, "ist-falsch", false);
     });
+    zeigeLotseAntwort(richtig, note);
+    lotseAntwort = null;
 
     var danach = e.beendet ? beende : (e.levelGeschafft ? zeigeLevel : naechsteNote);
 
@@ -455,8 +634,9 @@
       zeilen: [
         [t("flug.erreicht"), String(f.level)],
         [t("flug.geschaffte"), String(f.levelGeschafft)],
-        // Rechnung zur erreichten Welle, zum Beispiel „3 Noten × Welle 2 = 6“
-        [t("flug.proNote"), t("flug.rechnung", { noten: f.notenAnzahl, level: f.level, punkte: L.flugPunkteProNote(f) })]
+        // Rechnung zur erreichten Welle, zum Beispiel „3 Noten × Welle 2 × Tempo 0,75 = 5, dazu die Combo“
+        [t("flug.proNote"), t("flug.rechnung", { noten: f.notenAnzahl, level: f.level, tempo: tempoText(f.tempo),
+          punkte: Math.max(1, Math.round(L.flugPunkteProNote(f) * f.tempo)) })]
       ]
     });
   }
@@ -464,8 +644,21 @@
   $("flug-weiter").addEventListener("click", weiterNachFehler);
 
   /* Tastatur: Buchstabe (mit Shift ♯ oder ♭, im genauen Modus mit Oktavziffer), siehe Modi.hilfen.tastenEingabe. */
+  // Leertaste oder Escape schalten die Pause um (nicht, solange eine Rückfrage offen ist).
   document.addEventListener("keydown", function (ev) {
-    if (tasten && aktiv() && !$("ansicht-notenflug").hidden) tasten.taste(ev);
+    if (!aktiv() || $("ansicht-notenflug").hidden) return;
+    if ((ev.key === " " || ev.key === "Escape") && !ev.altKey && !ev.ctrlKey && !ev.metaKey) {
+      if (document.querySelector("dialog[open]")) return;
+      ev.preventDefault();
+      leertasteGefangen = ev.key === " ";
+      if (!ev.repeat) setzePause(!nutzerPause);
+      return;
+    }
+    if (tasten) tasten.taste(ev);
+  });
+  // Die Leertaste soll keinen fokussierten Knopf auslösen, wenn sie die Pause umschaltet.
+  document.addEventListener("keyup", function (ev) {
+    if (ev.key === " " && leertasteGefangen) { ev.preventDefault(); leertasteGefangen = false; }
   });
 
   window.Modi.registriere({

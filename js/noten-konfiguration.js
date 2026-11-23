@@ -42,6 +42,11 @@
  *    Verfügbare Merktiere: chamaeleon, delfin, elefant, frosch, fuchs,
  *    giraffe, affe, hase, fisch, katze, baer, alligator.
  *
+ * 2a. MERKSPRÜCHE (Karte „Merkspruch“ im Notenflug)
+ *    Je Schlüssel ein Spruch für die Linien und einer für die Zwischenräume,
+ *    auf Deutsch (`de`) und Englisch (`en`). Buchstaben zwischen Sternchen
+ *    erscheinen fett, zum Beispiel "*E*s *g*eht": Sie ergeben die Noten.
+ *
  * 3. STANDARD-EINSTELLUNGEN
  *    Gelten beim ersten Start. Danach merkt sich das Spiel die Auswahl aus
  *    der Ansicht „Einstellungen“.
@@ -98,6 +103,17 @@ window.NOTEN_KONFIGURATION = {
 
   merktierAbEnglisch: {
     f: { ab: "f2", tier: "fuchs" }
+  },
+
+  merksprueche: {
+    violin: {
+      linien: { de: "*E*s *g*eht *h*urtig *d*urch *F*leiß", en: "*E*very *G*ood *B*oy *D*oes *F*ine" },
+      raeume: { de: "*F*ünf *A*ffen *c*hillen *e*infach", en: "*F*-*A*-*C*-*E* spells FACE" }
+    },
+    bass: {
+      linien: { de: "*G*eh, *h*ol *d*och *f*rische *Ä*pfel", en: "*G*ood *B*oys *D*o *F*ine *A*lways" },
+      raeume: { de: "*A*lle *C*lowns *e*ssen *g*ern", en: "*A*ll *C*ows *E*at *G*rass" }
+    }
   },
 
   standardEinstellungen: {

@@ -691,6 +691,8 @@ h1:focus { outline: none; }
 
 .ergebnis-liste dt { color: var(--text-leise); font-weight: 600; min-width: 0; hyphens: auto; -webkit-hyphens: auto; }
 .ergebnis-liste dd { margin: 0; font-weight: 800; text-align: right; white-space: nowrap; }
+.ergebnis-liste > .ergebnis-lang { flex-direction: column; align-items: flex-start; gap: 2px; }
+.ergebnis-liste > .ergebnis-lang dd { white-space: normal; text-align: left; }
 .ergebnis-liste > .ergebnis-gesamt { background: #fff8e1; border-color: #f8d77a; }
 .ergebnis-gesamt { font-size: clamp(1.05rem, 5vw, 1.35rem); }
 .ergebnis-gesamt dt { color: var(--text); font-weight: 800; }
@@ -1292,16 +1294,163 @@ h1:focus { outline: none; }
   .ansicht-notenflug .antworten-einfach .antwort-reihe { grid-template-columns: repeat(var(--tasten-alle, 7), minmax(0, 1fr)); }
 }
 
+/* Rückmeldung nach einem Fehler als Karte direkt unter den Tasten */
+.flug-rueckmeldung {
+  background: var(--karte);
+  border: 2px solid var(--rand-weich);
+  border-radius: 24px;
+  padding: 8px 12px;
+  box-shadow: var(--schatten-weich);
+}
+.flug-rueckmeldung .sprechblase { border: 0; box-shadow: none; padding: 4px 4px 4px 8px; }
+.flug-rueckmeldung .sprechblase::before, .flug-rueckmeldung .sprechblase::after { display: none; }
+
+/* Karten unter den Tasten: Klavier-Lotse und Merkspruch */
+.flug-karte {
+  background: var(--karte);
+  border: 2px solid var(--rand-weich);
+  border-radius: 24px;
+  padding: 12px 16px 14px;
+  box-shadow: var(--schatten-weich);
+}
+.flug-karte-kopf { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 12px; }
+.flug-karte-titel { display: flex; align-items: center; gap: 8px; margin: 0; font-size: 1.2rem; font-weight: 800; }
+.flug-karte-symbol { line-height: 0; }
+.flug-karte-symbol .symbol-svg { width: 26px; height: 26px; }
+.flug-lotse-bereich { flex: 1 1 auto; text-align: right; color: var(--text-leise); font-size: 0.9rem; font-weight: 700; }
+.flug-lotse-knopf { min-height: 44px; border-radius: 999px; font-size: 0.95rem; }
+.flug-lotse.ist-zu { padding-bottom: 12px; }
+.flug-klaviatur.klaviatur { --taste-min: 72px; --taste-max: 112px; margin: 12px 0 0; box-shadow: none; width: auto; }
+.flug-klaviatur .taste { font-size: clamp(0.7rem, calc(100cqw / var(--tasten) * 0.36), 1.05rem); }
+
+.flug-merk {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #fff8e6;
+  border-color: #f6dc93;
+  box-shadow: 0 4px 0 #f2c94c, var(--schatten-weich);
+}
+.flug-merk-symbol {
+  flex: 0 0 44px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 0;
+}
+.flug-merk-symbol .symbol-svg { width: 28px; height: 28px; }
+.flug-merk-text { flex: 1 1 auto; min-width: 0; }
+.flug-merk-titel { margin: 0; font-size: 1.15rem; font-weight: 800; color: #7a4f00; }
+.flug-merk-spruch {
+  display: block;
+  min-height: 44px;
+  margin: 0;
+  padding: 2px 0;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+}
+.flug-merk-spruch strong { font-weight: 800; color: var(--akzent-dunkel); }
+.flug-merk-spruch:focus-visible { outline: 4px solid var(--fokus); outline-offset: 2px; border-radius: 8px; }
+.flug-merk-knoepfe { display: flex; gap: 8px; flex: 0 0 auto; }
+.flug-merk-knopf {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 48px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 1rem;
+  box-shadow: var(--schatten-taste);
+  white-space: nowrap;
+}
+.flug-knopf-symbol { line-height: 0; }
+.flug-knopf-symbol .symbol-svg { width: 22px; height: 22px; }
+
+/* Pause-Taste in der Kopfkarte (nur Handy) */
+.flug-pause-kopf {
+  display: none;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 2px solid var(--rand-weich);
+  background: var(--karte);
+  box-shadow: var(--schatten-taste);
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.flug-pause-kopf:focus-visible { outline: 4px solid var(--fokus); outline-offset: 3px; }
+.flug-pillen { display: inline-flex; gap: 8px; align-items: center; }
+
+/* Pause: Fläche über der ganzen Bühne, die Note ist verdeckt */
+.flug-pause-flaeche {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  border-radius: inherit;
+  background: rgba(255, 250, 240, 0.94);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+}
+.flug-pause-flaeche[hidden] { display: none; }
+.flug-pause-titel { margin: 0; font-size: 2rem; font-weight: 800; }
+.flug-weiterfliegen { min-width: 220px; border-radius: 999px; }
+
 @media (prefers-reduced-motion: reduce) {
   .flug-rakete-innen.satz, .flug-rakete-innen.wackeln, .flug-combo.huepft { animation: none; }
 }
 
+/* Handy: Kopfkarte mit Zurück, Herzen und Pause oben, Titel, darunter Combo und Punkte;
+   Bühne flach, Merkspruch nur mit Tempo (Pause steht in der Kopfkarte) */
 @media (max-width: 599px) {
-  .flug-buehne { padding: 8px 8px 8px; border-radius: 22px; }
+  .ansicht-notenflug .runde-kopf.kopfkarte {
+    grid-template-columns: auto minmax(0, 1fr) auto auto;
+    grid-template-areas: "zurueck . herzen pause" "titel titel titel titel" "pillen pillen pillen pillen";
+    gap: 4px 8px;
+  }
+  .ansicht-notenflug .runde-status { display: contents; }
+  .ansicht-notenflug .flug-herzen { grid-area: herzen; }
+  .ansicht-notenflug .flug-pause-kopf { grid-area: pause; display: inline-flex; }
+  .ansicht-notenflug .flug-pillen { grid-area: pillen; justify-content: center; margin-top: 2px; }
+  .ansicht-notenflug .flug-merk-knopf.flug-pause-knopf { display: none; }
+
+  .flug-buehne { padding: 8px 8px 8px; border-radius: 22px; gap: 2px; }
+  .notensystem-flug .notensystem-svg { max-height: 104px; }
   .flug-schild { font-size: 0.8rem; min-height: 30px; padding: 3px 10px 3px 7px; }
   /* Schlüssel-Schild nur als Schlüsselsymbol */
   .flug-bahn-text { display: none; }
   .flug-schild-bahn { padding: 3px 9px; }
+  .flug-fang-zeile { height: 22px; margin-top: -4px; }
+  .flug-fang { font-size: 0.78rem; padding: 1px 8px; }
+  .flug-zeit { margin-bottom: 10px; }
+  .flug-inhalt { gap: 8px; }
+  .ansicht-notenflug .knopf-antwort { min-height: 58px; }
+
+  .flug-karte { padding: 10px 12px 12px; border-radius: 20px; }
+  .flug-karte-titel { font-size: 1.05rem; }
+  .flug-lotse-bereich { flex-basis: 100%; order: 3; text-align: left; font-size: 0.85rem; }
+  .flug-lotse-knopf { margin-left: auto; }
+  .flug-merk { align-items: flex-start; gap: 10px; }
+  .flug-merk-symbol { flex-basis: 36px; width: 36px; height: 36px; }
+  .flug-merk-titel { font-size: 1rem; }
+  .flug-merk-spruch { font-size: 0.95rem; }
+  .flug-merk-knopf { padding: 6px 10px; }
 }
 
 /* ---------- Klaviertasten ---------- */

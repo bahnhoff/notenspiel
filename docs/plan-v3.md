@@ -742,3 +742,13 @@ Abweichungen:
 - Die Rückmeldung nach einem Fehler (Tier, Merkhilfe, „Weiter“) ist während des Flugs ausgeblendet und erscheint nur nach einem Fehler unter den Tasten.
 - Der Ton-Knopf „Ton an“ steht rechts in der Hinweiszeile. `Modi.hilfen.tastenEingabe` kennt dafür die Optionen `tipp` und `tippTouch`.
 - Nach einer richtigen Antwort dauert der Übergang 300 ms (Funkeln und Raketensatz) statt 150 ms.
+
+### Paket 7: Notenflug, Teil Karten
+
+- Klavier-Lotse, Merkspruch, Tempo und Pause wie im Entwurf. Der Lotse ist ab 768 px offen, sonst zugeklappt; die Wahl bleibt in `flugKlaviatur`. Schwarze Tasten antworten nur, wenn Noten mit Vorzeichen gewählt sind. Die Bereichsangabe im Lotsen nutzt den vorhandenen Auswahltext.
+- Die Merksprüche stehen in `js/noten-konfiguration.js` (`merksprueche`, deutsch und englisch, je Schlüssel Linien und Zwischenräume). Ein Tipp schaltet zwischen Linien und Zwischenräumen um; die Überschrift folgt dem Schlüssel der fliegenden Note.
+- Ein neues Tempo gilt ab der nächsten Note. Die Pause beginnt auch zwischen zwei Noten und startet von selbst, wenn der Tab verborgen wird. Leertaste oder Escape schalten die Pause um.
+- `umgebung` bekommt die Felder `flugKlaviatur`, `merkeFlug(feld, wert)`, `merksprueche` und `bereichText`.
+- Die Rückmeldung nach einem Fehler ist eine Karte unter den Tasten.
+- Auf dem Handy steht der Pause-Knopf in der Kopfkarte statt bei Merkspruch und Tempo. Die Bühne ist etwa 245 px hoch statt 200 px, und das Notensystem ist höchstens 104 px hoch.
+- Die Ergebnisseite zeigt die Rechnung „Noten × Welle × Tempo“; lange Werte brechen um (Klasse `ergebnis-lang`), damit 360 px nicht seitlich scrollen. Das eigene Ergebnisfenster folgt in Paket 13.

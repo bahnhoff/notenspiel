@@ -75,6 +75,10 @@
  *   zeigeTier(el, stimmung)   zeichnet das gewählte Begleittier ("normal", "froh", "oje")
  *   tier                      Kennung des Begleittiers (für Bausteine.sprechZeile, Tiere.kopf)
  *   flugTempo                 gemerkter Tempofaktor des Notenflugs (stand.flugTempo)
+ *   flugKlaviatur             Klavier-Lotse offen (true), zu (false), null = nach Bildschirmbreite
+ *   merkeFlug(feld, wert)     speichert "flugTempo" oder "flugKlaviatur" im Spielstand
+ *   merksprueche              Merksprüche aus js/noten-konfiguration.js (Notenflug)
+ *   bereichText               Tonumfang je Schlüssel, zum Beispiel „Violinschlüssel: c¹ bis h¹“
  *   merkhilfe(note)           { tier, name, text, zusatz } oder null, wenn Merktiere aus sind.
  *                             zusatz (optional): „nur einen Halbton höher“ bei Vorzeichen-Noten
  *   laeuft()                  false, sobald die Runde verworfen oder beendet ist
