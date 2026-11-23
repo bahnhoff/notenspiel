@@ -186,7 +186,6 @@
     // Eine laufende Runde wird ohne Ergebniseintrag verworfen.
     stoppeModus();
     offenerRekord = null;
-    zeigeTier($("start-tier"), "normal");
     $("hinweis-speicher").hidden = speicherVerfuegbar;
     var a = auswahl();
     var reicht = auswahlReicht(a);

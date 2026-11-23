@@ -83,8 +83,8 @@
       farben: { fell: "#d9d4ce", hell: "#ffffff", innen: "#f4a9b8" },
       hinten: function (f) { return kreis(86, 100, 8, f.hell, true); },
       vorKopf: function (f) {
-        return oval(44, 20, 9, 24, f.fell, true, -10) + oval(76, 20, 9, 24, f.fell, true, 10) +
-          oval(44, 22, 4, 16, f.innen, false, -10) + oval(76, 22, 4, 16, f.innen, false, 10);
+        return oval(44, 24, 9, 22, f.fell, true, -10) + oval(76, 24, 9, 22, f.fell, true, 10) +
+          oval(44, 26, 4, 14.5, f.innen, false, -10) + oval(76, 26, 4, 14.5, f.innen, false, 10);
       },
       kopf: schnauze,
       nase: function () { return oval(60, 64, 4.5, 3.2, "#e7788b"); },
@@ -621,7 +621,7 @@
 
   /** Nur der Kopf (Ausschnitt der ganzen Zeichnung), für runde Knöpfe und die Sprechblase „Zeile“. */
   function kopf(art, stimmung, beschriftung) {
-    return zeichne(art, stimmung, beschriftung).replace('viewBox="0 0 120 120"', 'viewBox="16 8 88 88"').replace('class="tier-svg', 'class="tier-svg tier-kopf');
+    return zeichne(art, stimmung, beschriftung).replace('viewBox="0 0 120 120"', 'viewBox="16 2 88 88"').replace('class="tier-svg', 'class="tier-svg tier-kopf');
   }
 
   root.Tiere = { zeichne: zeichne, kopf: kopf, name: name, hat: function (art) { return !!ARTEN[art]; } };
