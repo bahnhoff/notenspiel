@@ -118,7 +118,7 @@
       li.querySelector(".reise-name").textContent = (i + 1) + ". " + modus.name;
       li.querySelector(".reise-stand").textContent = e
         ? T.t("reise.stand", { richtige: e.richtige, aufgaben: e.aufgaben })
-        : T.t(i === n ? "reise.dran" : "reise.offen");
+        : T.t(i === n ? "reise.dran" : i === n + 1 ? "reise.naechste" : "reise.spaeter");
       liste.appendChild(li);
     });
     var los = $("reise-los");
