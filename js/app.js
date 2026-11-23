@@ -26,6 +26,7 @@
   var rekordModus = null;    // Modus des offenen Rekords (Text der Namensabfrage)
   var uebungsNoten = [];     // Noten für „Fehler üben“ aus der letzten Runde
   var ansichtJetzt = "";     // Name der sichtbaren Ansicht
+  var ergebnisModusId = "";  // Spiel des offenen Ergebnisfensters (Knopf „Rekorde“)
 
   function $(id) { return document.getElementById(id); }
 
@@ -130,16 +131,50 @@
 
   /* ---------- Ansichten ---------- */
 
+  /**
+   * Zeigt eine Ansicht. Das Ergebnis ist ein Fenster: Die Ansicht dahinter
+   * bleibt sichtbar, aber abgedunkelt und gesperrt (inert), damit Tippen und
+   * Tab nur im Fenster wirken.
+   */
   function zeigeAnsicht(name) {
+    var fenster = name === "ergebnis";
     Array.prototype.forEach.call(document.querySelectorAll("section.ansicht"), function (s) {
-      s.hidden = s.id !== "ansicht-" + name;
+      var dieses = s.id === "ansicht-" + name;
+      if (fenster && !dieses) {
+        if (!s.hidden) { s.inert = true; s.classList.add("hinter-fenster"); }
+        return;
+      }
+      s.hidden = !dieses;
+      s.inert = false;
+      s.classList.remove("hinter-fenster");
     });
+    ["oberes-menue", "fusszeile"].forEach(function (id) { if ($(id)) $(id).inert = fenster; });
+    document.body.classList.toggle("fenster-offen", fenster);
     ansichtJetzt = name;
     window.Bausteine.menue.zeige(name);
-    window.scrollTo(0, 0);
+    if (fenster) $("ansicht-ergebnis").scrollTop = 0;
+    else window.scrollTo(0, 0);
     var titel = $("titel-" + name) || document.querySelector("#ansicht-" + name + " h1");
     if (titel) titel.focus({ preventScroll: true });
   }
+
+  /* ---------- Spielzeit fürs Ergebnisfenster ---------- */
+
+  // Läuft ab dem Start einer Runde (Memory: ab dem Spielfeld, umgebung.starteUhr).
+  // Versteckter Tab und die Rückfrage „Runde beenden?“ zählen nicht.
+  var uhr = { summe: 0, seit: 0, laeuft: false };
+  function jetzt() { return window.performance && performance.now ? performance.now() : Date.now(); }
+  function starteUhr() {
+    uhr.summe = 0;
+    uhr.seit = jetzt();
+    uhr.laeuft = !document.hidden;
+  }
+  function haltUhr(an) {
+    if (an && uhr.laeuft) { uhr.summe += jetzt() - uhr.seit; uhr.laeuft = false; }
+    else if (!an && !uhr.laeuft && laufendeNr !== -1 && !document.hidden) { uhr.seit = jetzt(); uhr.laeuft = true; }
+  }
+  function uhrStand() { return Math.round(uhr.summe + (uhr.laeuft ? jetzt() - uhr.seit : 0)); }
+  document.addEventListener("visibilitychange", function () { haltUhr(document.hidden); });
 
   function stoppeModus() {
     laufendeNr = -1;
@@ -177,6 +212,7 @@
     if (!auswahlReicht(a)) return;
     var nr = ++startNr;
     laufendeNr = nr;
+    starteUhr();
     modus.starte({
       noten: a.noten,
       antworten: a.antworten,
@@ -207,8 +243,11 @@
       bereichText: auswahlText(a),
       merkhilfe: merkhilfe,
       laeuft: function () { return laufendeNr === nr; },
+      starteUhr: function () { if (laufendeNr === nr) starteUhr(); },
       beende: function (ergebnis) {
         if (laufendeNr !== nr) return false; // jede Runde nur einmal verbuchen
+        ergebnis = ergebnis || {};
+        if (ergebnis.dauer === undefined) ergebnis.dauer = uhrStand();
         laufendeNr = -1;
         verbuche(modus, ergebnis || {});
         return true;
@@ -241,36 +280,103 @@
 
   /* ---------- Ergebnis ---------- */
 
+  /** Text eines Werte-Kärtchens: „9 von 10“, „0:48“, „x5“, „+120“, „ja“. */
+  function kaertchenWert(k) {
+    if (k.von !== undefined) return t("ergebnis.von", { a: k.wert, b: k.von });
+    if (k.id === "zeit") return L.formatiereDauer(k.wert);
+    if (k.id === "combo") return t("ergebnis.combo", { n: k.wert });
+    if (k.id === "punkte") return t("ergebnis.plus", { n: k.wert });
+    if (k.id === "extrastern") return t(k.wert ? "ergebnis.ja" : "ergebnis.nein");
+    return String(k.wert);
+  }
+
+  // Gezeichnetes Symbol je Werte-Kärtchen (js/symbole.js)
+  var KAERTCHEN_SYMBOL = {
+    zeit: "uhr", zuege: "neustart", paare: "noten-memory", punkte: "stern", richtig: "haken",
+    fehler: "kreuz", wellen: "rakete", gefangen: "note", combo: "flamme", melodien: "melodie",
+    tipps: "gluehbirne", etappen: "notenreise", serie: "flamme", extrastern: "stern",
+    geuebt: "ueben", aufgaben: "klassisch"
+  };
+
+  /**
+   * Füllt das Ergebnisfenster (Entwurf Memory-Siegerfenster) und öffnet es über
+   * der Spielansicht. `f`: { modusId, etikett, titel, unterzeile, sterne (null =
+   * keine Sternreihe), tier, stimmung, spruch, kaertchen, details }.
+   */
+  function fuelleFenster(f) {
+    ergebnisModusId = f.modusId || "";
+    var symbol = window.Symbole.zeichne(f.modusId || "");
+    $("ergebnis-etikett-symbol").innerHTML = symbol;
+    $("ergebnis-etikett-symbol").hidden = !symbol;
+    $("ergebnis-etikett-text").textContent = f.etikett || "";
+    $("titel-ergebnis").textContent = f.titel;
+    $("ergebnis-unterzeile").textContent = f.unterzeile || "";
+    $("ergebnis-unterzeile").hidden = !f.unterzeile;
+
+    // Drei Sternkästchen, das mittlere größer; volle Sterne für die neuen Sterne der Runde
+    var reihe = $("ergebnis-sterne");
+    var pille = $("ergebnis-sterne-pille");
+    reihe.innerHTML = "";
+    reihe.hidden = pille.hidden = f.sterne === null || f.sterne === undefined;
+    if (!reihe.hidden) {
+      for (var i = 0; i < 3; i++) {
+        var k = element("span", "ergebnis-stern" + (i < f.sterne ? " ist-voll" : ""));
+        k.innerHTML = i < f.sterne ? window.Symbole.zeichne("stern") : "";
+        reihe.appendChild(k);
+      }
+      pille.textContent = f.sterne > 0 ? "★".repeat(Math.min(3, f.sterne)) + " " + t("ergebnis.sterneVerdient", { n: f.sterne }) : t("ergebnis.keinStern");
+      pille.classList.toggle("ist-leer", f.sterne === 0);
+    }
+
+    zeigeTier($("ergebnis-tier"), f.stimmung || "froh");
+    $("ergebnis-sagt").textContent = t("begleiter.sagt", { name: tierName(stand.tier) });
+    $("ergebnis-spruch").textContent = f.spruch || "";
+
+    var werte = $("ergebnis-werte");
+    werte.innerHTML = "";
+    (f.kaertchen || []).forEach(function (k) {
+      var div = element("div", "ergebnis-wert ergebnis-wert-" + k.id);
+      var sym = element("span", "ergebnis-wert-symbol");
+      sym.setAttribute("aria-hidden", "true");
+      sym.innerHTML = window.Symbole.zeichne(KAERTCHEN_SYMBOL[k.id] || "stern");
+      div.appendChild(sym);
+      div.appendChild(element("dt", "", t("wert." + k.id)));
+      div.appendChild(element("dd", "", kaertchenWert(k)));
+      werte.appendChild(div);
+    });
+    werte.hidden = !werte.children.length;
+
+    // Rechnung und Einzelheiten der Punkte klein unter den Kärtchen
+    var details = $("ergebnis-details");
+    details.innerHTML = "";
+    (f.details || []).forEach(function (z) {
+      var div = element("div");
+      div.appendChild(element("dt", "", z[0]));
+      div.appendChild(element("dd", "", String(z[1])));
+      details.appendChild(div);
+    });
+    details.hidden = !details.children.length;
+  }
+
   function zeigeErgebnis(modus, e, v) {
-    $("titel-ergebnis").textContent = e.titel || t("ende.geschafft");
-    zeigeTier($("ergebnis-tier"), e.stimmung || "froh");
-    $("ergebnis-spruch").textContent = e.spruch || t("ende.toll");
-
-    var liste = $("ergebnis-liste");
-    liste.innerHTML = "";
-    function zeile(bezeichnung, wert, klasse) {
-      var div = element("div", klasse);
-      div.appendChild(element("dt", "", bezeichnung));
-      var dd = element("dd");
-      if (typeof wert === "string") dd.textContent = wert; else dd.appendChild(wert);
-      div.appendChild(dd);
-      liste.appendChild(div);
-    }
-    // Lange Werte (Rechnung im Notenflug) dürfen umbrechen und stehen unter der Bezeichnung
-    (e.zeilen || []).forEach(function (z) { zeile(z[0], String(z[1]), String(z[1]).length > 14 ? "ergebnis-lang" : ""); });
     var reise = v.tagesreise;
-    if (reise) {
-      zeile(t("ergebnis.extrastern"), reise.extrastern ? "★ 1" : t("ergebnis.schonBekommen"));
-      zeile(t("ergebnis.serie"), t("tage", { n: reise.serie }));
-    }
-    zeile(t("ergebnis.gesamt"), H.punkteText(e.gesamt || 0), "ergebnis-gesamt");
-    var sterne = element("span");
     var anzahl = (e.neueSterne || 0) + (reise && reise.extrastern ? 1 : 0);
-    if (anzahl > 0) sterne.innerHTML = '<span class="sterne-reihe" aria-hidden="true">' + H.sternSymbole(anzahl, anzahl) + "</span> ";
-    sterne.appendChild(document.createTextNode(String(anzahl)));
-    zeile(t("ergebnis.neueSterne"), sterne);
+    var titel = e.art === "flug" ? t("ergebnis.flugVorbei")
+      : (e.art === "reise" ? t("ergebnis.reiseGeschafft") : t("ergebnis.geschafft"));
+    fuelleFenster({
+      modusId: modus.id,
+      etikett: modus.name,
+      titel: titel,
+      // Bei drei Sternen ein Lob je Spiel („Memory-Meister!“), sonst die Kernzahl der Runde
+      unterzeile: (e.neueSterne || 0) >= 3 ? t("meister." + modus.id) : e.titel,
+      sterne: anzahl,
+      stimmung: e.stimmung,
+      spruch: e.spruch || t("ende.toll"),
+      kaertchen: L.ergebnisKaertchen(e, reise),
+      details: e.zeilen
+    });
 
-    zeigeTierFortschritt();
+    zeigeTierFortschritt(anzahl);
 
     var box = $("neues-tier");
     var neuesTier = v.neueTiere.length ? v.neueTiere[v.neueTiere.length - 1] : null;
@@ -285,12 +391,10 @@
       box.innerHTML = "";
     }
 
-    // „Fehler üben“ nur bei Modi, die es anbieten, und mindestens einem Fehler
+    // „Fehler üben“ nur bei Modi, die es anbieten, und mindestens einem Fehler:
+    // zweite große Taste unter „Nochmal spielen“.
     uebungsNoten = modus.fehlerUeben ? L.uebungsNoten(e.verlauf) : [];
     $("knopf-ueben").hidden = uebungsNoten.length === 0;
-    // Mit „Fehler üben“ ist das der Hauptknopf, „Noch eine Runde“ tritt zurück.
-    $("knopf-nochmal").classList.toggle("knopf-haupt", uebungsNoten.length === 0);
-    $("knopf-nochmal").classList.toggle("knopf-neben", uebungsNoten.length > 0);
 
     // Top-5-Rekord: erst ein Knopf „Rekord speichern“, die Namensabfrage öffnet sich beim Antippen.
     $("rekord-name").hidden = true;
@@ -303,15 +407,31 @@
     zeigeAnsicht("ergebnis");
   }
 
-  /** „2 von 5 Sternen bis zum nächsten Tier“ mit grauer Silhouette des vorgemerkten Tiers. */
-  function zeigeTierFortschritt() {
+  /**
+   * Fortschrittskarte: „Sterne gesamt: 21“ mit „+3 neu“, rechts die Silhouette
+   * des nächsten Tiers ohne Namen, darunter Balken und „Noch 2 Sterne …“.
+   */
+  function zeigeTierFortschritt(neu) {
     var box = $("tier-fortschritt");
     var n = L.naechstesTier(stand);
-    if (!n) { box.hidden = true; return; }
+    $("tier-fortschritt-gesamt").textContent = t("ergebnis.sterneGesamt", { n: stand.sterne });
+    $("tier-fortschritt-neu").textContent = t("ergebnis.neu", { n: neu });
+    $("tier-fortschritt-neu").hidden = !(neu > 0);
+    var balken = $("tier-fortschritt-balken");
+    if (!n) {
+      $("tier-fortschritt-naechstes").parentNode.hidden = true;
+      window.Bausteine.setzeFortschritt(balken, 1, 1, t("tiere.alle"));
+      $("tier-fortschritt-text").textContent = t("tiere.alle");
+      box.hidden = false;
+      return;
+    }
+    $("tier-fortschritt-naechstes").parentNode.hidden = false;
+    $("tier-fortschritt-naechstes").textContent = t("ergebnis.naechstes") + " ???";
     $("tier-fortschritt-bild").innerHTML = n.id ? window.Tiere.zeichne(n.id, "normal", t("ergebnis.geheim"), true) : "";
     $("tier-fortschritt-bild").hidden = !n.id;
-    $("tier-fortschritt-sterne").innerHTML = H.sternSymbole(n.gesammelt, n.schritt);
-    $("tier-fortschritt-text").textContent = t("ergebnis.naechstesTier", { gesammelt: n.gesammelt, schritt: n.schritt });
+    var text = t("ergebnis.nochSterne", { sterne: sterneText(n.fehlend) });
+    window.Bausteine.setzeFortschritt(balken, n.gesammelt, n.schritt, text);
+    $("tier-fortschritt-text").textContent = text;
     box.hidden = false;
   }
 
@@ -822,6 +942,18 @@
   $("knopf-rekorde").addEventListener("click", zeigeRekorde);
   $("knopf-einstellungen").addEventListener("click", zeigeEinstellungen);
   $("knopf-ergebnis-start").addEventListener("click", zurStartseite);
+  // „Rekorde“ im Ergebnisfenster: Rekordseite mit dem Abschnitt des gespielten Spiels im Blick
+  $("knopf-ergebnis-rekorde").addEventListener("click", function () {
+    var id = ergebnisModusId;
+    stoppeModus();
+    zeigeRekorde();
+    var ziel = id && $("rekorde-" + id);
+    if (ziel) {
+      ziel.scrollIntoView({ block: "start" });
+      // Platz für das feste obere Menü lassen
+      window.scrollBy(0, -(parseInt(getComputedStyle(document.documentElement).getPropertyValue("--menue-hoehe"), 10) || 0) - 12);
+    }
+  });
   $("knopf-ueben").addEventListener("click", starteUebung);
   Array.prototype.forEach.call(document.querySelectorAll(".knopf-zurueck"), function (b) {
     b.addEventListener("click", zurStartseite);
@@ -853,7 +985,10 @@
       return laufendeNr !== -1 || (ansichtJetzt === "ueben" && $("ueben-ende").hidden);
     },
     reiseAktiv: function () { return laufendeNr !== -1 && !!aktiverModus && aktiverModus.id === "notenreise"; },
-    pausiere: function (an) { if (laufendeNr !== -1 && aktiverModus && aktiverModus.pausiere) aktiverModus.pausiere(an); }
+    pausiere: function (an) {
+      haltUhr(an);
+      if (laufendeNr !== -1 && aktiverModus && aktiverModus.pausiere) aktiverModus.pausiere(an);
+    }
   });
 
   window.Klang.setzeAn(stand.ton);

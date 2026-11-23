@@ -350,3 +350,15 @@ test("Noten-Memory: Lob nach einem Paar, Abzeichen und Unterschriften auf Deutsc
     Texte.setzeSprache("de");
   }
 });
+
+test("Ergebnisfenster: Werte-Kärtchen je Spiel, fehlende Werte entfallen", () => {
+  const ids = (k) => k.map((x) => x.id + "=" + x.wert + (x.von !== undefined ? "/" + x.von : ""));
+  assert.deepEqual(ids(L.ergebnisKaertchen({ richtige: 9, aufgaben: 10, dauer: 72000, gesamt: 120 })),
+    ["richtig=9/10", "fehler=1", "zeit=72000", "punkte=120"]);
+  assert.deepEqual(ids(L.ergebnisKaertchen({ art: "melodie", melodien: 5, fehler: 2, tipps: 1, gesamt: 80 })),
+    ["melodien=5", "fehler=2", "tipps=1", "punkte=80"]);
+  assert.deepEqual(ids(L.ergebnisKaertchen({ art: "flug", wellen: 2, richtige: 23, gesamt: 480 })),
+    ["wellen=2", "gefangen=23", "punkte=480"]);
+  assert.deepEqual(ids(L.ergebnisKaertchen({ art: "reise", etappen: 3, etappenGesamt: 3, richtige: 13, aufgaben: 15 }, { serie: 4, extrastern: false })),
+    ["etappen=3/3", "richtig=13/15", "serie=4", "extrastern=0"]);
+});

@@ -14,7 +14,8 @@
  * Bausteine aus Plan Version 3 (js/bausteine.js): zahnrad (Profilknopf),
  * rakete, pokal, orden, ton-an und ton-aus (Lautsprecher mit und ohne
  * Wellen), stern, note, herz, herz-leer und flamme (Pillen), pfote (Fußzeile),
- * gluehbirne, tempo, pause und weiter (Karte „Merkspruch“ im Notenflug).
+ * gluehbirne, tempo, pause und weiter (Karte „Merkspruch“ im Notenflug),
+ * uhr, haken und kreuz (Werte-Kärtchen im Ergebnisfenster).
  * Alle Symbole liegen in einem Feld von 48 × 48 und sind nur Schmuck
  * (aria-hidden), der Text daneben trägt die Bedeutung.
  */
@@ -256,6 +257,18 @@
     tippen: function () {
       return form("M20 9 C22.4 9 24 10.8 24 13 L24 23 L32.5 24.5 C36.5 25.2 38.6 27.8 38 31.4 L36.8 38.4 C36.2 41.8 33.6 44 30.2 44 L22.5 44 C20 44 18 43 16.6 41 L10.4 32 C9.2 30.3 9.8 28 11.6 27.2 C13.2 26.5 14.8 27 15.8 28.3 L16 28.6 L16 13 C16 10.8 17.6 9 20 9 Z", F.creme) +
         linie("M11.5 9.5 C12.5 6 15.5 3.8 19.5 3.6 M28.5 9.5 C27.6 6.6 25.6 4.6 22.8 3.9", 2);
+    },
+
+    // Ergebnisfenster: Uhr (Zeit), Haken (richtig), Kreuz (Fehler)
+    uhr: function () {
+      return kreis(24, 26, 17, F.creme) + linie("M24 26 L24 16 M24 26 L31 30", 3.2) +
+        rechteck(20, 4, 8, 5, 2, F.orange) + kreis(24, 26, 2.4, BRAUN, true);
+    },
+    haken: function () {
+      return kreis(24, 24, 18, F.gruen) + linie("M15 24.5 L21.5 31 L33 18", 4);
+    },
+    kreuz: function () {
+      return kreis(24, 24, 18, F.rot) + linie("M17 17 L31 31 M31 17 L17 31", 4);
     },
 
     // Fehler üben: Zielscheibe mit Pfeil

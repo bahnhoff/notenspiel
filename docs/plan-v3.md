@@ -803,3 +803,15 @@ Abweichungen:
 - Ursache 1: Der Hinweis „Kein Ton?“ (`#hoeren-hinweis`) stand zwischen Steuerzeile und Karten. Er erschien 900 ms nach dem Start, wenn der Ton noch nicht lief (iPhone), und verschwand bei jedem „Nochmal hören“ kurz, um 900 ms später wiederzukommen. Die Karten sprangen dabei jedes Mal um etwa 78 px. Jetzt steht der Hinweis unter den Karten und bleibt stehen, bis der Ton wirklich läuft.
 - Ursache 2: Die Sprechzeile hatte nur eine Mindesthöhe; dreizeilige Texte machten sie 3 bis 5 px höher. Sie hat jetzt eine feste Höhe für drei Zeilen (68 px, Handy 62 px).
 - Prüfskript: `/tmp/notenspiel-e2e/hinweis-verrutschen.js` (AudioContext bleibt „suspended“).
+
+### Paket 13: Ergebnisfenster
+
+- `#ansicht-ergebnis` steht jetzt außerhalb von `<main>` und ist ein festes Fenster (`role="dialog"`, `aria-modal`). `zeigeAnsicht("ergebnis")` lässt die Spielansicht sichtbar, macht sie unscharf und `inert` (auch Menü und Fußzeile); so bleibt der Fokus im Fenster. Escape schließt nicht.
+- Werte-Kärtchen: neue Logikfunktion `ergebnisKaertchen(e, tagesreise)` mit Test. Die Modi geben `art` ("memory", "flug", "melodie", "reise") und ihre Felder mit (`zuege`, `paareGesamt`, `wellen`, `besteCombo`, `melodien`, `fehler`, `tipps`, `etappen`, `etappenGesamt`). In der Melodie zeigt „Fehler“ nur falsche Tasten, „Tipps“ die Tipps; für die Sterne zählen weiter beide.
+- Spielzeit: Die App misst sie selbst (`starteUhr`, `uhrStand` in js/app.js) ab dem Start der Runde; Noten-Memory startet sie über `umgebung.starteUhr()` erst mit dem Spielfeld. Versteckter Tab und die Rückfrage „Runde beenden?“ zählen nicht. Die Zeit erscheint bei Welche Note ist das?, Klaviertasten, Note setzen, Hör-Spiel und Memory.
+- Abweichungen: Das grüne Etikett oben zeigt den Namen des Spiels mit Symbol (im Entwurf „Übung geschafft!“, doppelt zur Überschrift). Die Überschrift ist „Runde geschafft!“, im Notenflug „Flug beendet!“, in der Notenreise „Reise geschafft!“. Die Unterzeile ist bei drei Sternen das Lob des Spiels („Memory-Meister!“), sonst die Kernzahl der Runde („9 von 10 richtig“).
+- Die bisherigen Detailzeilen (Punkte dafür, Bonus, Rechnung im Notenflug, Etappen der Reise) stehen klein unter den Kärtchen.
+- „Nochmal spielen“ haftet am unteren Rand des Fensters (`position: sticky`), damit die Taste auf dem Handy ohne Scrollen sichtbar ist; mit „Fehler üben“ bleibt „Nochmal spielen“ die Haupttaste.
+- „Rekorde“ öffnet die Rekordseite und rollt zum Abschnitt des gespielten Spiels.
+- Die Notenreise gibt jetzt `richtige` mit; ihre richtigen Antworten zählen damit für die gelesenen Noten.
+- Memory-Spruch wie im Entwurf: „Hurra! Du hast alle 6 Paare in nur 14 Zügen gefunden!“ (drei Sterne), sonst ohne „Hurra“ und „nur“.

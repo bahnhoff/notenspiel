@@ -633,11 +633,13 @@
       gesamt: f.punkte,
       neueSterne: sterne,
       richtige: f.richtige,
+      art: "flug",
+      wellen: f.level,
+      besteCombo: f.besteCombo,
       titel: t("flug.ueberschrift", { n: f.richtige }),
       spruch: f.levelGeschafft >= 3 ? t("flug.wow") : (f.levelGeschafft > 0 ? t("flug.toll") : t("ende.nochmal")),
       stimmung: f.levelGeschafft > 0 ? "froh" : "normal",
       zeilen: [
-        [t("flug.erreicht"), String(f.level)],
         [t("flug.geschaffte"), String(f.levelGeschafft)],
         // Rechnung zur erreichten Welle, zum Beispiel „3 Noten × Welle 2 × Tempo 0,75 = 5, dazu die Combo“
         [t("flug.proNote"), t("flug.rechnung", { noten: f.notenAnzahl, level: f.level, tempo: tempoText(f.tempo),

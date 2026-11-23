@@ -94,6 +94,8 @@
     });
     spiel = { stufe: stufe, karten: H.mische(karten), offen: [], paare: auswahl.length, gefunden: 0, zuege: 0, fertig: false };
     $("memory-wahl").hidden = true;
+    // Die Spielzeit fürs Ergebnisfenster beginnt mit dem Spielfeld, nicht mit der Stufenwahl.
+    if (umgebung.starteUhr) umgebung.starteUhr();
     $("memory-spiel").hidden = false;
     $("memory-status").hidden = false;
     baueKarten();
@@ -244,13 +246,15 @@
       gesamt: L.memoryPunkte(s.paare, sterne, s.stufe),
       neueSterne: sterne,
       richtige: s.paare,
+      art: "memory",
+      zuege: s.zuege,
+      paareGesamt: s.paare,
       variante: s.stufe === "schwer" ? "schwer" : undefined,
       titel: T.t("memory.ueberschrift", { paare: s.paare, zuege: s.zuege }),
-      spruch: T.t("memory.alle") + " " + (sterne === 3 ? T.t("memory.gedaechtnis") : T.t("ende.toll")),
+      spruch: T.t(sterne === 3 ? "memory.spruch3" : "memory.spruch", { paare: s.paare, zuege: s.zuege }),
       stimmung: "froh",
       zeilen: [
         [T.t("memory.zeileStufe"), T.t("memory." + s.stufe)],
-        [T.t("memory.zeileZuege"), String(s.zuege)],
         [T.t("memory.zeilePunkte", { n: s.paare }), String(s.paare * regel.punkteProPaar)],
         [T.t("ende.bonus"), String(sterne * regel.punkteProStern) + " (" + H.sterneText(sterne) + " × " + regel.punkteProStern + ")"]
       ]

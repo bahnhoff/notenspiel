@@ -341,11 +341,15 @@
       richtige: wertung.notenRichtig,
       aufgaben: wertung.notenGesamt,
       neueSterne: sterne,
+      art: "melodie",
+      melodien: anzahl,
+      // Für die Kärtchen getrennt: falsche Tasten und Tipps (für die Sterne zählen beide als Fehler)
+      fehler: Math.max(0, f - wertung.tipps),
+      tipps: wertung.tipps,
       titel: T.t("melodie.ueberschrift", { n: anzahl }),
       spruch: f === 0 ? T.t("melodie.ohneFehler") : (sterne >= 2 ? T.t("ende.toll") : T.t("ende.geschafft")),
       stimmung: "froh",
       zeilen: [
-        [T.t("melodie.zeileFehler"), String(f)],
         [T.t("melodie.zeilePunkte", { n: anzahl }), String(anzahl * L.MELODIE.punkteProMelodie)],
         [T.t("ende.bonus"), (sterne * L.MELODIE.punkteProStern) + " (" + H.sterneText(sterne) + " × " + L.MELODIE.punkteProStern + ")"]
       ]

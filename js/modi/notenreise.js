@@ -163,7 +163,7 @@
   }
 
   function beendeReise() {
-    var gesamt = 0, sterne = 0, richtige = 0, aufgaben = 0;
+    var gesamt = 0, sterne = 0, richtige = 0, aufgaben = 0, gespielt = 0;
     var gefragt = [], neu = [], verlauf = [];
     function merke(liste, ids) {
       (ids || []).forEach(function (id) { if (liste.indexOf(id) === -1) liste.push(id); });
@@ -172,6 +172,7 @@
       var e = ergebnisse[i];
       if (!e) return [modus.name, T.t("reise.nichtGespielt")];
       gesamt += e.gesamt;
+      gespielt += 1;
       sterne += e.sterne;
       richtige += e.richtige;
       aufgaben += e.aufgaben;
@@ -182,6 +183,11 @@
     umgebung.beende({
       gesamt: gesamt,
       neueSterne: Math.round(sterne / etappen.length),
+      art: "reise",
+      etappen: gespielt,
+      etappenGesamt: etappen.length,
+      richtige: richtige,
+      aufgaben: aufgaben,
       titel: T.t("ende.richtigVon", { richtige: richtige, aufgaben: aufgaben }),
       spruch: T.t("reise.geschafft") + " " + T.t("reise.bisMorgen"),
       stimmung: "froh",

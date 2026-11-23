@@ -684,6 +684,48 @@
     return Math.floor(s / 60) + ":" + zweistellig(s % 60);
   }
 
+  /* ---------- Ergebnisfenster ---------- */
+
+  /**
+   * Die bis zu vier Werte-Kärtchen des Ergebnisfensters je Art des Ergebnisses
+   * (e.art: "memory", "flug", "melodie", "reise", "ueben", sonst klassisch).
+   * Liefert [{ id, wert, von }]; `von` nur bei „9 von 10“. Fehlt ein Wert im
+   * Ergebnis, entfällt sein Kärtchen. `reise` ist das Feld tagesreise aus
+   * verbucheErgebnis ({ extrastern, serie }) oder null.
+   */
+  function ergebnisKaertchen(e, reise) {
+    var k = [];
+    function dazu(id, wert, von) {
+      if (!istZahl(wert)) return;
+      var x = { id: id, wert: wert };
+      if (istZahl(von)) x.von = von;
+      k.push(x);
+    }
+    var fehler = istZahl(e.fehler) ? e.fehler
+      : (istZahl(e.aufgaben) && istZahl(e.richtige) ? e.aufgaben - e.richtige : undefined);
+    switch (e.art) {
+      case "memory":
+        dazu("zeit", e.dauer); dazu("zuege", e.zuege); dazu("paare", e.richtige, e.paareGesamt); dazu("punkte", e.gesamt);
+        break;
+      case "flug":
+        dazu("wellen", e.wellen); dazu("gefangen", e.richtige); dazu("combo", e.besteCombo); dazu("punkte", e.gesamt);
+        break;
+      case "melodie":
+        dazu("melodien", e.melodien); dazu("fehler", e.fehler); dazu("tipps", e.tipps); dazu("punkte", e.gesamt);
+        break;
+      case "reise":
+        dazu("etappen", e.etappen, e.etappenGesamt); dazu("richtig", e.richtige, e.aufgaben);
+        if (reise) { dazu("serie", reise.serie); dazu("extrastern", reise.extrastern ? 1 : 0); }
+        break;
+      case "ueben":
+        dazu("geuebt", e.geuebt); dazu("aufgaben", e.aufgaben);
+        break;
+      default:
+        dazu("richtig", e.richtige, e.aufgaben); dazu("fehler", fehler); dazu("zeit", e.dauer); dazu("punkte", e.gesamt);
+    }
+    return k.slice(0, 4);
+  }
+
   /* ---------- Spielstand ---------- */
 
   function leererSpielstand() {
@@ -1044,6 +1086,7 @@
     melodieNeustart: melodieNeustart,
     melodieNaechste: melodieNaechste,
     formatiereDauer: formatiereDauer,
+    ergebnisKaertchen: ergebnisKaertchen,
     leererSpielstand: leererSpielstand,
     bereinigeSpielstand: bereinigeSpielstand,
     bereinigeEinstellungen: bereinigeEinstellungen,
