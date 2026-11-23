@@ -1403,8 +1403,14 @@ h1:focus { outline: none; }
   margin-bottom: 10px;
 }
 
-.knopf-hoeren { font-size: 1.3rem; min-height: 60px; }
-.knopf-bezug { font-size: 1.1rem; min-height: 60px; }
+/* „Nochmal hören“ als Pille, Bezugston als runde Karte daneben (Stitch) */
+.knopf-hoeren { font-size: 1.3rem; min-height: 60px; border-radius: 999px; }
+.knopf-bezug { font-size: 1.1rem; min-height: 60px; border-radius: 20px; box-shadow: var(--schatten-taste); }
+
+@media (max-width: 400px) {
+  .knopf-hoeren { font-size: 1.15rem; padding: 8px 10px; }
+  .knopf-bezug { padding: 8px 10px; }
+}
 
 .hoeren-hinweis {
   margin: 0 0 10px;
@@ -1419,6 +1425,7 @@ h1:focus { outline: none; }
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 8px;
+  counter-reset: hoer-option;
 }
 
 .hoer-option {
@@ -1431,6 +1438,34 @@ h1:focus { outline: none; }
   min-height: 96px;
   padding: 4px;
   color: #111;
+}
+
+.hoer-option {
+  border-color: var(--rand-weich);
+  border-radius: 22px;
+  box-shadow: var(--schatten-taste);
+  counter-increment: hoer-option;
+}
+.hoer-option:active { transform: translateY(3px); box-shadow: var(--schatten-taste-gedrueckt); }
+
+/* Mit Tastatur: Ziffer 1, 2, 3 im runden Schild oben links, passend zu den Zifferntasten */
+@media (hover: hover) and (pointer: fine) {
+  .hoer-option::before {
+    content: counter(hoer-option);
+    position: absolute;
+    top: 6px;
+    left: 6px;
+    display: grid;
+    place-items: center;
+    width: 1.6rem;
+    height: 1.6rem;
+    border-radius: 50%;
+    background: #f4ece0;
+    color: var(--text-leise);
+    font-size: 0.9rem;
+    font-weight: 800;
+  }
+  .hoeren-optionen:not(.gesperrt) .hoer-option:hover { background: #fffbeb; border-color: #f8d77a; }
 }
 
 .hoer-option .notensystem-svg { width: 100%; max-height: 30vh; }
@@ -1446,7 +1481,7 @@ h1:focus { outline: none; }
 .hoer-option.ist-richtig, .hoer-option.ist-loesung, .hoer-option.ist-falsch { padding: 2px; }
 .hoeren-optionen.gesperrt .hoer-option { cursor: default; }
 .hoeren-optionen.gesperrt .hoer-option:not(.ist-richtig):not(.ist-falsch):not(.ist-loesung) { opacity: 0.55; }
-.hoeren-optionen.gesperrt .hoer-option:active { transform: none; box-shadow: var(--schatten); }
+.hoeren-optionen.gesperrt .hoer-option:active { transform: none; box-shadow: var(--schatten-taste); }
 
 /* ---------- Fehler üben ---------- */
 
