@@ -1078,6 +1078,25 @@ h1:focus { outline: none; }
   container-type: inline-size;
   width: 100%;
   margin: 14px 0 0;
+  /* Beige Mulde um die Tasten wie im Stitch-Entwurf */
+  padding: 5px 5px 7px;
+  background: #e9e0d2;
+  border-radius: 16px;
+  box-shadow: var(--schatten-weich);
+}
+
+/* Schmale Handys: Mulde etwas breiter, damit sieben weiße Tasten je 48 px breit bleiben */
+@media (max-width: 400px) {
+  .klaviatur { width: auto; margin-left: -6px; margin-right: -6px; padding: 4px 3px 6px; border-radius: 14px; }
+}
+
+/* Ab Tabletbreite liegt die Mulde in einer weißen Karte (Ring per Schatten, ohne Einfluss auf die Tastenmaße) */
+@media (min-width: 700px) {
+  .klaviatur {
+    width: auto;
+    margin: 26px 12px 12px;
+    box-shadow: 0 0 0 12px var(--karte), 0 0 0 14px var(--rand-weich), 0 10px 30px 12px rgba(160, 130, 90, 0.14);
+  }
 }
 
 .klavier-reihe {
@@ -1102,11 +1121,10 @@ h1:focus { outline: none; }
   font-size: clamp(0.7rem, calc(100cqw / var(--tasten) * 0.42), 1.2rem);
   color: var(--text);
   background: #fff;
-  border: 2px solid #4a3a2e;
-  border-left-width: 1px;
-  border-right-width: 1px;
+  border: 0;
+  border-right: 2px solid #e9e0d2;
   border-radius: 0 0 10px 10px;
-  box-shadow: inset 0 -6px 0 #eadfce;
+  box-shadow: inset 0 -6px 0 #efe6d8;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1118,7 +1136,8 @@ h1:focus { outline: none; }
   -webkit-user-select: none;
 }
 
-.taste:active { background: #fff3df; box-shadow: inset 0 -2px 0 #eadfce; }
+.taste:last-child { border-right: 0; }
+.taste:active { background: #fff3df; box-shadow: inset 0 -2px 0 #efe6d8; }
 .taste:focus-visible { outline: 4px solid var(--fokus); outline-offset: -4px; z-index: 3; }
 
 /*
@@ -1136,7 +1155,8 @@ h1:focus { outline: none; }
   transform: translateX(-50%);
   background: #2a1d14;
   border: 2px solid #2a1d14;
-  border-radius: 0 0 6px 6px;
+  border-radius: 0 0 8px 8px;
+  box-shadow: inset 0 -6px 0 #4a3a2e;
 }
 .taste-schwarz-knopf {
   padding: 0 0 8px;
@@ -1175,9 +1195,10 @@ h1:focus { outline: none; }
 .taste-schwarz-knopf.ist-loesung { background: var(--gruen); border: 3px solid #fff; outline: 3px solid var(--gruen); }
 .taste-schwarz-knopf.ist-loesung { outline-style: dashed; }
 .taste-schwarz-knopf.ist-falsch { background: var(--rot); border: 3px dashed #fff; }
+.taste-schwarz-knopf.ist-richtig, .taste-schwarz-knopf.ist-loesung, .taste-schwarz-knopf.ist-falsch { box-shadow: none; }
 .klaviatur.gesperrt .taste-schwarz-knopf { cursor: default; }
 
-.taste-mitte { background: #fff8d6; }
+.taste-mitte { background: #fff8d6; box-shadow: inset 0 0 0 2px #f8d77a, inset 0 -6px 0 #f3e3b0; }
 .taste-mitte-zeichen {
   font-size: max(0.65rem, 0.75em);
   font-weight: 800;
